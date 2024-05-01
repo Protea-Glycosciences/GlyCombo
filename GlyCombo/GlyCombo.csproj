@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>GlyCombo_Logo_Final.ico</ApplicationIcon>
+    <Company>Protea Glycosciences Pty Ltd</Company>
+    <Product>GlyCombo</Product>
+    <Authors>Christopher Ashwood, Maia I Kelly</Authors>
+    <Copyright>Copyright 2024 Protea Glycosciences Pty Ltd</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Final Logo.png" />
+    <None Remove="GlyCombo_Logo_Final.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="GlyCombo_Logo_Final.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="4.6.0" />
+    <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Final Logo.png" />
+    <Resource Include="GlyCombo_Logo_Final.png" />
+  </ItemGroup>
+
+</Project>
