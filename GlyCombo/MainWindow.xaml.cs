@@ -385,6 +385,7 @@ namespace glycombo
             Sum_up(numbers, targets);
             solutionProcess = "";
             solutions = "";
+            solutionMultiples = "";
             // Pop-up to let the user know the search has finished
             watch.Stop();
             ElapsedMSec = watch.ElapsedMilliseconds;
@@ -600,7 +601,7 @@ namespace glycombo
                         chemicalFormulaeC += (dHexCount * 6);
                         chemicalFormulaeH += (dHexCount * 10);
                         chemicalFormulaeO += (dHexCount * 4);
-                        solutionsUpdate = solutionsUpdate + "dHex(" + Convert.ToString(dHexCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(dHex)" + Convert.ToString(dHexCount) + " ";
                     }
                     HexACount = Regex.Matches(solutions, "HexA ").Count;
                     if (HexACount > 0)
@@ -608,7 +609,7 @@ namespace glycombo
                         chemicalFormulaeC += (HexACount * 6);
                         chemicalFormulaeH += (HexACount * 8);
                         chemicalFormulaeO += (HexACount * 6);
-                        solutionsUpdate = solutionsUpdate + "HexA(" + Convert.ToString(HexACount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(HexA)" + Convert.ToString(HexACount) + " ";
                     }
                     HexNCount = Regex.Matches(solutions, "HexN ").Count;
                     if (HexNCount > 0)
@@ -617,7 +618,7 @@ namespace glycombo
                         chemicalFormulaeH += (HexNCount * 11);
                         chemicalFormulaeO += (HexNCount * 4);
                         chemicalFormulaeN += (HexNCount);
-                        solutionsUpdate = solutionsUpdate + "HexN(" + Convert.ToString(HexNCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(HexN)" + Convert.ToString(HexNCount) + " ";
                     }
                     PentCount = Regex.Matches(solutions, "Pent ").Count;
                     if (PentCount > 0)
@@ -625,7 +626,7 @@ namespace glycombo
                         chemicalFormulaeC += (PentCount * 5);
                         chemicalFormulaeH += (PentCount * 8);
                         chemicalFormulaeO += (PentCount * 4);
-                        solutionsUpdate = solutionsUpdate + "Pent(" + Convert.ToString(PentCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(Pent)" + Convert.ToString(PentCount) + " ";
                     }
                     KDNCount = Regex.Matches(solutions, "KDN ").Count;
                     if (KDNCount > 0)
@@ -633,7 +634,7 @@ namespace glycombo
                         chemicalFormulaeC += (KDNCount * 9);
                         chemicalFormulaeH += (KDNCount * 14);
                         chemicalFormulaeO += (KDNCount * 8);
-                        solutionsUpdate = solutionsUpdate + "KDN(" + Convert.ToString(KDNCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(KDN)" + Convert.ToString(KDNCount) + " ";
                     }
                     hexCount = Regex.Matches(solutions, "Hex ").Count - Regex.Matches(solutions, "dHex ").Count;
                     if (hexCount > 0)
@@ -641,7 +642,7 @@ namespace glycombo
                         chemicalFormulaeC += (hexCount * 6);
                         chemicalFormulaeH += (hexCount * 10);
                         chemicalFormulaeO += (hexCount * 5);
-                        solutionsUpdate = solutionsUpdate + "Hex(" + Convert.ToString(hexCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(Hex)" + Convert.ToString(hexCount) + " ";
                     }
                     neuAcCount = Regex.Matches(solutions, "Neu5Ac").Count;
                     if (neuAcCount > 0)
@@ -650,7 +651,7 @@ namespace glycombo
                         chemicalFormulaeH += (neuAcCount * 17);
                         chemicalFormulaeN += (neuAcCount);
                         chemicalFormulaeO += (neuAcCount * 8);
-                        solutionsUpdate = solutionsUpdate + "Neu5Ac(" + Convert.ToString(neuAcCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(NeuAc)" + Convert.ToString(neuAcCount) + " ";
                     }
                     neuGcCount = Regex.Matches(solutions, "Neu5Gc ").Count;
                     if (neuGcCount > 0)
@@ -659,7 +660,7 @@ namespace glycombo
                         chemicalFormulaeH += (neuGcCount * 17);
                         chemicalFormulaeN += (neuGcCount);
                         chemicalFormulaeO += (neuGcCount * 9);
-                        solutionsUpdate = solutionsUpdate + "Neu5Gc(" + Convert.ToString(neuGcCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(NeuGc)" + Convert.ToString(neuGcCount) + " ";
                     }
                     hexNAcCount = Regex.Matches(solutions, "HexNAc ").Count - Regex.Matches(solutions, "dHexNAc ").Count;
                     if (hexNAcCount > 0)
@@ -668,7 +669,7 @@ namespace glycombo
                         chemicalFormulaeH += (hexNAcCount * 13);
                         chemicalFormulaeN += (hexNAcCount);
                         chemicalFormulaeO += (hexNAcCount * 5);
-                        solutionsUpdate = solutionsUpdate + "HexNAc(" + Convert.ToString(hexNAcCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(HexNAc)" + Convert.ToString(hexNAcCount) + " ";
                     }
                     phosCount = Regex.Matches(solutions, "Phos ").Count;
                     if (phosCount > 0)
@@ -676,7 +677,7 @@ namespace glycombo
                         chemicalFormulaeH += (phosCount);
                         chemicalFormulaeO += (phosCount * 3);
                         chemicalFormulaeP += (phosCount);
-                        solutionsUpdate = solutionsUpdate + "Phos(" + Convert.ToString(phosCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(Phos)" + Convert.ToString(phosCount) + " ";
                     }
                     dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
                     if (dhexnacCount > 0)
@@ -685,7 +686,7 @@ namespace glycombo
                         chemicalFormulaeH += (dhexnacCount * 13);
                         chemicalFormulaeN += (dhexnacCount);
                         chemicalFormulaeO += (dhexnacCount * 4);
-                        solutionsUpdate = solutionsUpdate + "dHexNAc(" + Convert.ToString(dhexnacCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
                     }
                     if (reduced == false)
                     {
@@ -708,7 +709,7 @@ namespace glycombo
                         chemicalFormulaeC += (dHexCount * 8);
                         chemicalFormulaeH += (dHexCount * 14);
                         chemicalFormulaeO += (dHexCount * 4);
-                        solutionsUpdate = solutionsUpdate + "dHex(" + Convert.ToString(dHexCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(dHex)" + Convert.ToString(dHexCount) + " ";
                     }
                     HexACount = Regex.Matches(solutions, "HexA ").Count;
                     if (HexACount > 0)
@@ -716,7 +717,7 @@ namespace glycombo
                         chemicalFormulaeC += (HexACount * 9);
                         chemicalFormulaeH += (HexACount * 14);
                         chemicalFormulaeO += (HexACount * 6);
-                        solutionsUpdate = solutionsUpdate + "HexA(" + Convert.ToString(HexACount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(HexA)" + Convert.ToString(HexACount) + " ";
                     }
                     HexNCount = Regex.Matches(solutions, "HexN ").Count;
                     if (HexNCount > 0)
@@ -725,7 +726,7 @@ namespace glycombo
                         chemicalFormulaeH += (HexNCount * 19);
                         chemicalFormulaeO += (HexNCount * 4);
                         chemicalFormulaeN += (HexNCount);
-                        solutionsUpdate = solutionsUpdate + "HexN(" + Convert.ToString(HexNCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(HexN)" + Convert.ToString(HexNCount) + " ";
                     }
                     PentCount = Regex.Matches(solutions, "Pent ").Count;
                     if (PentCount > 0)
@@ -733,7 +734,7 @@ namespace glycombo
                         chemicalFormulaeC += (PentCount * 7);
                         chemicalFormulaeH += (PentCount * 12);
                         chemicalFormulaeO += (PentCount * 4);
-                        solutionsUpdate = solutionsUpdate + "Pent(" + Convert.ToString(PentCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(Pent)" + Convert.ToString(PentCount) + " ";
                     }
                     KDNCount = Regex.Matches(solutions, "KDN ").Count;
                     if (KDNCount > 0)
@@ -741,7 +742,7 @@ namespace glycombo
                         chemicalFormulaeC += (KDNCount * 14);
                         chemicalFormulaeH += (KDNCount * 24);
                         chemicalFormulaeO += (KDNCount * 8);
-                        solutionsUpdate = solutionsUpdate + "KDN(" + Convert.ToString(KDNCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(KDN)" + Convert.ToString(KDNCount) + " ";
                     }
                     hexCount = Regex.Matches(solutions, "Hex ").Count - Regex.Matches(solutions, "dHex ").Count;
                     if (hexCount > 0)
@@ -749,7 +750,7 @@ namespace glycombo
                         chemicalFormulaeC += (hexCount * 9);
                         chemicalFormulaeH += (hexCount * 16);
                         chemicalFormulaeO += (hexCount * 5);
-                        solutionsUpdate = solutionsUpdate + "Hex(" + Convert.ToString(hexCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(Hex)" + Convert.ToString(hexCount) + " ";
                     }
                     neuAcCount = Regex.Matches(solutions, "Neu5Ac ").Count;
                     if (neuAcCount > 0)
@@ -758,7 +759,7 @@ namespace glycombo
                         chemicalFormulaeH += (neuAcCount * 27);
                         chemicalFormulaeN += (neuAcCount);
                         chemicalFormulaeO += (neuAcCount * 8);
-                        solutionsUpdate = solutionsUpdate + "Neu5Ac(" + Convert.ToString(neuAcCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(NeuAc)" + Convert.ToString(neuAcCount) + " ";
                     }
                     neuGcCount = Regex.Matches(solutions, "Neu5Gc ").Count;
                     if (neuGcCount > 0)
@@ -767,7 +768,7 @@ namespace glycombo
                         chemicalFormulaeH += (neuGcCount * 29);
                         chemicalFormulaeN += (neuGcCount);
                         chemicalFormulaeO += (neuGcCount * 9);
-                        solutionsUpdate = solutionsUpdate + "Neu5Gc(" + Convert.ToString(neuGcCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(NeuGc)" + Convert.ToString(neuGcCount) + " ";
                     }
                     hexNAcCount = Regex.Matches(solutions, "HexNAc ").Count - Regex.Matches(solutions, "dHexNAc ").Count;
                     if (hexNAcCount > 0)
@@ -776,7 +777,7 @@ namespace glycombo
                         chemicalFormulaeH += (hexNAcCount * 19);
                         chemicalFormulaeN += (hexNAcCount);
                         chemicalFormulaeO += (hexNAcCount * 5);
-                        solutionsUpdate = solutionsUpdate + "HexNAc(" + Convert.ToString(hexNAcCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(HexNAc)" + Convert.ToString(hexNAcCount) + " ";
                     }
                     phosCount = Regex.Matches(solutions, "Phos ").Count;
                     if (phosCount > 0)
@@ -785,7 +786,7 @@ namespace glycombo
                         chemicalFormulaeH += (phosCount * 3);
                         chemicalFormulaeO += (phosCount * 3);
                         chemicalFormulaeP += (phosCount);
-                        solutionsUpdate = solutionsUpdate + "Phos(" + Convert.ToString(phosCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(Phos)" + Convert.ToString(phosCount) + " ";
                     }
                     dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
                     if (dhexnacCount > 0)
@@ -794,7 +795,7 @@ namespace glycombo
                         chemicalFormulaeH += (dhexnacCount * 17);
                         chemicalFormulaeN += (dhexnacCount);
                         chemicalFormulaeO += (dhexnacCount * 4);
-                        solutionsUpdate = solutionsUpdate + "dHexNAc(" + Convert.ToString(dhexnacCount) + ") ";
+                        solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
                     }
                     if (reduced == false)
                     {
@@ -816,7 +817,7 @@ namespace glycombo
                 {
                     chemicalFormulaeO += (sulfCount * 3);
                     chemicalFormulaeS += (sulfCount);
-                    solutionsUpdate = solutionsUpdate + "Sulf(" + Convert.ToString(sulfCount) + ") ";
+                    solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
                 }
 
                 // Preparation to export a chemical formulae in a format compatible with Skyline
