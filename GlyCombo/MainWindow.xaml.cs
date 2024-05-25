@@ -30,6 +30,7 @@ namespace glycombo
         private string solutionProcess;
         private string solutions;
         private string solutionMultiples = "";
+        private int targetsToAdd;
         private int iterations;
         private decimal targetLow;
         private decimal targetHigh;
@@ -78,12 +79,18 @@ namespace glycombo
         private string polarity;
         private string[] chargeLine;
         private int charge;
+        private string[] RTLine;
+        private decimal retentionTime;
         private string neutralPrecursorListmzml;
         private string targetString;
         private string scanNumber;
         private string[] scanLine;
-        List<int> scans = [];
+        private decimal TIC;
+        private string[] TICLine;
+        List<decimal> scans = [];
         List<int> charges = [];
+        List<decimal> retentionTimes = [];
+        List<decimal> TICs = [];
         List<int> targetIndex = [];
         // Parameter report variables
         private bool monoHex = false;
@@ -149,6 +156,7 @@ namespace glycombo
                 // Problem: Bruker and Thermo mzmls have all lines in different positions
                 // Thermo order: Spectrum index (including scan#), then "ms level" value="2", then "negative", then "selected ion m/z", then "charge state"
                 // Bruker order: Spectrum index (including scan#), then "negative scan", then "ms level" value ="2", then "charge state", then "selected ion m/z"
+                // Sciex doesn't use scan #, so we've adapted cycle and experiment number to make (X.Y) representation instead
                 // Code modified to perform this per spectrum, rather than trying to hard code by line positions
 
                 // find lines containing positive or negative mode
@@ -159,6 +167,36 @@ namespace glycombo
                 if (line.Contains("MS:1000130"))
                 {
                     polarity = "positive";
+                }
+
+                // find lines containing retention time, to minute time scale
+                if (line.Contains("MS:1000016"))
+                {
+                    // Bruker records retention time by the second
+                    if (line.Contains("unitName=\"second\""))
+                    {
+                        // split the line containing this by "
+                        RTLine = line.Split("\"");
+                        // After the 7th ", that's where the charge can be found, so convert it from string array into int
+                        retentionTime = decimal.Parse(RTLine[7]) / 60;
+                    }
+                    else
+                    // whereas Thermo/Sciex records RT by the minute
+                    {
+                        // split the line containing this by "
+                        RTLine = line.Split("\"");
+                        // After the 7th ", that's where the charge can be found, so convert it from string array into int
+                        retentionTime = decimal.Parse(RTLine[7]);
+                    }
+                }
+
+                // find lines containing total ion chromatogram intensity for that scan, only supported by Thermo and Sciex
+                if (line.Contains("MS:1000285"))
+                {
+                    // split the line containing this by "
+                    TICLine = line.Split("\"");
+                    // After the 7th ", that's where the charge can be found, so convert it from string array into int
+                    TIC = decimal.Parse(TICLine[7], System.Globalization.NumberStyles.AllowExponent | System.Globalization.NumberStyles.AllowDecimalPoint);
                 }
 
                 // find lines containing the precursor
@@ -189,11 +227,23 @@ namespace glycombo
                     {
                         scanNumber = scanLine[3].Replace("controllerType=0 controllerNumber=1 scan=", "");
                     }
-                    // And this is for other vendors
+                    // And this is for Bruker
                     else
                     {
                         scanNumber = scanLine[3].Replace("scan=","");
                     }
+                }
+                // Sciex specific scan number interpretation
+                if (line.Contains(" cycle=")
+                    && line.Contains(" experiment=")
+                    && line.Contains("defaultArrayLength"))
+                {
+                    //split the line containing cycle and experiment number by =
+                    scanLine = line.Split("=");
+                    // Cycle # is after the 5th "="
+                    string cycleScan = scanLine[5].Replace(" experiment", ".");
+                    string experimentScan = scanLine[6].Replace("\" defaultArrayLength", "");
+                    scanNumber = cycleScan + experimentScan;
                 }
                 if (line.Contains("</spectrum>"))
                 {
@@ -213,14 +263,20 @@ namespace glycombo
                                 break;
                         }
                         // Put the scan value into a list of scan numbers that feature MS2.
-                        scans.Add(int.Parse(scanNumber));
+                        scans.Add(decimal.Parse(scanNumber));
                         // Adds charge to a list for the end report
                         charges.Add(charge);
+                        // Add RT to a list for the end report
+                        retentionTimes.Add(retentionTime);
+                        // Add TIC to a list for the end report
+                        TICs.Add(TIC);
                     }
                     precursor = 0;
                     charge = 0;
                     scanNumber = "";
                     polarity = "";
+                    retentionTime = 0;
+                    TIC = 0;
                 }
             }
             new Thread(() => { MessageBox.Show("mzML loaded with " + scans.Count + " MS2 scans."); }).Start();
@@ -232,6 +288,7 @@ namespace glycombo
         // Execution of the combinatorial analysis
         private void Button1_Click(object sender, RoutedEventArgs e)
         {
+            solutionMultiples = "";
             resetbutton.IsEnabled = IsEnabled;
             var watch = Stopwatch.StartNew();
             // Define the components in the combinatorial analysis, native and permethylated
@@ -352,6 +409,18 @@ namespace glycombo
             List<decimal> targets = targetStrings.ConvertAll(decimal.Parse);
             ProgressBarGlyCombo.Maximum = targets.Count;
 
+
+            // For enabling off-by-one errors. Thermo is pretty good at correcting the selected ion m/z when it picks an isotopic distribution, but might be useful for others
+            if (OffByOne.IsChecked == true)
+            {
+                // For each target in the list, remove one hydrogen to account for the C13 isotope being picked instead of monoisotopic (negative mode only)
+                targetsToAdd = targets.Count;
+                for (int o = 0; o < targetsToAdd; o++)
+                {
+                    targets.Add(targets[o] - (decimal)1.00727);
+                }
+            }
+
             // Early processing of target list, breaking it down so that the reducing ends are removed
             if (Native.IsChecked == true)
             {
@@ -383,13 +452,12 @@ namespace glycombo
             }
             iterations = 0;
             Sum_up(numbers, targets);
-            solutionProcess = "";
             solutions = "";
-            solutionMultiples = "";
             // Pop-up to let the user know the search has finished
             watch.Stop();
             ElapsedMSec = watch.ElapsedMilliseconds;
-            new Thread(() => { MessageBox.Show("GlyCombo has finished running." + Environment.NewLine + ((solutionMultiples.Length - solutionMultiples.Replace(Environment.NewLine, "").Length) / 2) + " monosaccharide combinations identified over " + iterations + " iterations." + Environment.NewLine + "Total search time: " + ElapsedMSec/1000 + " seconds."); }).Start();
+            new Thread(() => { MessageBox.Show("GlyCombo has finished running." + Environment.NewLine + ((solutionMultiples.Length - solutionMultiples.Replace(Environment.NewLine, string.Empty).Length)/2) + " monosaccharide combinations identified over " + iterations + " iterations." + Environment.NewLine + "Total search time: " + ElapsedMSec/1000 + " seconds."); }).Start();
+            solutionProcess = "";
         }
 
         // Process to match glycan compositions by sum_up_recursive
@@ -441,8 +509,8 @@ namespace glycombo
             string skylineSolutionMultiples = "";
             if (TextRadioButton.IsChecked == false)
             {
-                solutionHeader = "Composition,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge";
-                skylineSolutionHeader = "Molecule List Name,Molecule Name,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge";
+                solutionHeader = "Composition,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC";
+                skylineSolutionHeader = "Molecule List Name,Molecule Name,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC";
                 // Process the SolutionMultiples string in a way that generates an output compatible with Skyline with no user intervention
                 skylineSolutionMultiplesPreTrim = (solutionMultiples.Insert(0, Environment.NewLine)).Replace(Environment.NewLine, Environment.NewLine + "GlyCombo,");
                 skylineSolutionMultiples = skylineSolutionMultiplesPreTrim.Substring(0, skylineSolutionMultiplesPreTrim.Length - 10);
@@ -861,15 +929,43 @@ namespace glycombo
                 targetIndex.Add(i);
                 if (TextRadioButton.IsChecked == false)
                 {
-                    // mzml input therefore output
-                    string scanNumberForOutput = Convert.ToString(scans.ElementAt(i));
-                    string chargeForOutput = Convert.ToString(charges.ElementAt(i));
+                    string scanNumberForOutput = "";
+                    string chargeForOutput = "";
+                    string retentionTimeForOutput = "";
+                    string TICForOutput = "";
+
+                    // mzml input therefore output needs to be include scan #, charge, RT and TIC values.
+                    // OffByOne error essentially doubles the target list, need to ensure that we can assign metadata to the +1 targets (otherwise it tries to call metadata from a limited list)
+                    if (OffByOne.IsChecked == true)
+                    {
+                        if (i < targetsToAdd)
+                        {
+                            scanNumberForOutput = Convert.ToString(scans.ElementAt(i));
+                            chargeForOutput = Convert.ToString(charges.ElementAt(i));
+                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i));
+                            TICForOutput = Convert.ToString(TICs.ElementAt(i));
+                        }
+                        else
+                        {
+                            scanNumberForOutput = Convert.ToString(scans.ElementAt(i-targetsToAdd));
+                            chargeForOutput = Convert.ToString(charges.ElementAt(i-targetsToAdd));
+                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i-targetsToAdd));
+                            TICForOutput = Convert.ToString(TICs.ElementAt(i-targetsToAdd));
+                        }
+                    }
+                    else
+                    {
+                        scanNumberForOutput = Convert.ToString(scans.ElementAt(i));
+                        chargeForOutput = Convert.ToString(charges.ElementAt(i));
+                        retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i));
+                        TICForOutput = Convert.ToString(TICs.ElementAt(i));
+                    }
                     // Adding of each string component to output
-                    solutionProcess += solutionsUpdate + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + theoreticalMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + observedMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chemicalFormula + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + error + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + scanNumberForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chargeForOutput + Environment.NewLine;
+                    solutionProcess += solutionsUpdate + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + theoreticalMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + observedMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chemicalFormula + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + error + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + scanNumberForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chargeForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + retentionTimeForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + TICForOutput + Environment.NewLine;
                 }
                 else
                 {
-                    // just text input, so no charge state or scan number info
+                    // just text input, so no charge state, scan number, RT, or TIC info
                     solutionProcess += solutionsUpdate + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + theoreticalMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + observedMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chemicalFormula + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + error + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + Environment.NewLine;
                 }
 
