@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:glycombo"
         mc:Ignorable="d"
-        Title="GlyCombo 0.1 - Protea Glycosciences" Height="600" Width="800" Icon="/GlyCombo_Logo_Final.png">
+        Title="GlyCombo 0.2 - Protea Glycosciences" Height="600" Width="800" Icon="/GlyCombo_Logo_Final.png">
 
 
     <Grid Margin="5">
@@ -129,14 +129,14 @@
         </ui:LayoutPanel>
 
         <ui:ToggleSwitch x:Name="Neu5ActoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,150,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="ToggleSwitch9_Toggled" Width="50"/>
-        <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,155,0,0" Height="20" VerticalAlignment="Top">N-acetyl-neuraminic acid (Neu5Ac)</Label>
+        <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,155,0,0" Height="20" VerticalAlignment="Top">N-acetyl-neuraminic acid (NeuAc)</Label>
         <ui:LayoutPanel x:Name="container9" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,150,0,0" Visibility="Collapsed">
             <TextBox x:Name="Neu5AcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20"></TextBox>
             <TextBox x:Name="Neu5AcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20"></TextBox>
         </ui:LayoutPanel>
 
         <ui:ToggleSwitch x:Name="Neu5GctoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,190,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="ToggleSwitch10_Toggled" Width="50"/>
-        <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,195,0,0" Height="20" VerticalAlignment="Top">N-glycolyl-neuraminic acid (Neu5Gc)</Label>
+        <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,195,0,0" Height="20" VerticalAlignment="Top">N-glycolyl-neuraminic acid (NeuGc)</Label>
         <ui:LayoutPanel x:Name="container10" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,190,0,0" Visibility="Collapsed">
             <TextBox x:Name="Neu5GcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20"></TextBox>
             <TextBox x:Name="Neu5GcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20"></TextBox>
