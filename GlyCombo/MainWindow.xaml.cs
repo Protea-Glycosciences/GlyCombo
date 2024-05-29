@@ -87,12 +87,15 @@ namespace glycombo
         private string[] scanLine;
         private decimal TIC;
         private string[] TICLine;
+        List<decimal> numbers = [];
         List<decimal> scans = [];
         List<int> charges = [];
         List<decimal> retentionTimes = [];
         List<decimal> TICs = [];
         List<string> files = [];
         List<int> targetIndex = [];
+        List<decimal> targets = [];
+        List<string> targetStrings = [];
         // Parameter report variables
         private bool monoHex = false;
         private bool monoHexA = false;
@@ -123,6 +126,12 @@ namespace glycombo
         private string filePath;
         private string inputParameters;
         private float ElapsedMSec;
+        // For multiple tasks, enabling progress bar
+        private bool DaChecked;
+        private bool TextChecked;
+        private bool nativeChecked;
+        private bool offByOneChecked;
+        private bool freeChecked;
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
@@ -131,19 +140,39 @@ namespace glycombo
         }
 
         public MainWindow() => InitializeComponent();
-        private void UploadButton_Click(object sender, RoutedEventArgs e)
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
+            // Taking user to the Github website for support
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+        }
 
-            polarity = "";
-            List<decimal> precursors = [];
 
+        private async void UploadButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ProgressBarMZML.Visibility = Visibility.Visible;
+                // Running the mzML formatting in a different thread so we can give a status update
+                await Task.Run(() => mzMLProcess());
+            }
+            finally
+            {
+                ProgressBarMZML.Visibility = Visibility.Collapsed;
+                // Let the user now start the processing. Without this step, the user may crash the program by starting the processing before the mzml info is extracted
+                submitbutton.IsEnabled = IsEnabled;
+            }
+        }
+
+        private void mzMLProcess()
+        {
             // Ask the user which mzml file they want to analyse
             OpenFileDialog openFileDialog = new()
             {
                 Filter = "mzML files (mzML)|*.mzML",
                 // Allows the user to select more than one mzML for conversion
                 Multiselect = true
-             };
+            };
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -155,8 +184,9 @@ namespace glycombo
             {
                 return;
             }
-
-            foreach (String file in openFileDialog.FileNames)
+            polarity = "";
+            List<decimal> precursors = [];
+                foreach (String file in openFileDialog.FileNames)
             {
                 // Going to process each file one at a time using this section of the code.
                 // Read each line from the given file
@@ -297,178 +327,231 @@ namespace glycombo
                 string fileNameOutput = file.Substring(file.LastIndexOf('\\') + 1);
                 new Thread(() => { MessageBox.Show(fileNameOutput + " loaded with " + scans.Count + " MS2 scans."); }).Start();
             }
-
-
-            // Let the user now start the processing. Without this step, the user may crash the program by starting the processing before the mzml info is extracted
-            submitbutton.IsEnabled = IsEnabled;
         }
 
 
         // Execution of the combinatorial analysis
-        private void Button1_Click(object sender, RoutedEventArgs e)
+        private async void Button1_Click(object sender, RoutedEventArgs e)
         {
-            solutionMultiples = "";
-            resetbutton.IsEnabled = IsEnabled;
+            try
+            {
+                solutionMultiples = "";
+                resetbutton.IsEnabled = IsEnabled;
+                ProgressBarSubmit.Visibility = Visibility.Visible;
+                // Define the components in the combinatorial analysis, native and permethylated
+                if (Native.IsChecked == true)
+                {
+                    derivatisation = "Native";
+                    // Native
+                    dhex = 146.057908m; // permethylated mass = 174.089210 chemical formula = C8H14O4
+                    hex = 162.052823m; // permethylated mass = 204.099775 chemical formula = C9H16O5
+                    hexnac = 203.079372m; // permethylated mass = 245.126324 chemical formula = C11H19NO5
+                    hexn = 161.068808m; // permethylated mass = 217.131409 chemical formula = C10H19NO4
+                    hexa = 176.032088m; // permethylated mass = 218.079040 chemical formula = C9H14O6
+                    dhexnac = 187.084458m; // permethylated mass = 215.115759 chemical formula = C10H17N1O4
+                    pent = 132.042258m; // permethylated mass = 160.073560 chemical formula = C7H12O4
+                    kdn = 250.068867m; // permethylated mass = 320.147120 chemical formula = C14H24O8
+                    neuac = 291.095416m; // permethylated mass = 361.173669 chemical formula = C16H27NO8
+                    neugc = 307.090331m; // permethylated mass = 391.184234 chemical formula = C17H29NO9
+                    phos = 79.966331m; // permethylated mass = 93.981983 chemical formula = CH3O3P
+                }
+                else
+                {
+                    derivatisation = "Permethylated";
+                    // Permethylated
+                    dhex = 174.089210m; // permethylated mass =  chemical formula = C8H14O4
+                    hex = 204.099775m; // permethylated mass =  chemical formula = C9H16O5
+                    hexnac = 245.126324m; // permethylated mass =  chemical formula = C11H19NO5
+                    hexn = 217.131409m; // permethylated mass =  chemical formula = C10H19NO4
+                    hexa = 218.079040m; // permethylated mass =  chemical formula = C9H14O6
+                    dhexnac = 215.115759m; // permethylated mass =  chemical formula = C10H17N1O4
+                    pent = 160.073560m; // permethylated mass =  chemical formula = C7H12O4
+                    kdn = 320.147120m; // permethylated mass =  chemical formula = C14H24O8
+                    neuac = 361.173669m; // permethylated mass =  chemical formula = C16H27NO8
+                    neugc = 391.184234m; // permethylated mass =  chemical formula = C17H29NO9
+                    phos = 93.981983m; // permethylated mass =  chemical formula = CH3O3P
+                }
+                decimal sulf = 79.956815m; // Nothing changes with permethylation
+
+                // Add the components to combinatorial analysis based on which monosaccharides the user chooses to include
+                if (HextoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(hex);
+                    monoHex = true;
+                }
+
+                if (HexAtoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(hexa);
+                    monoHexA = true;
+                }
+                if (dHextoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(dhex);
+                    monodHex = true;
+                }
+                if (HexNActoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(hexnac);
+                    monoHexNAc = true;
+                }
+                if (HexNtoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(hexn);
+                    monoHexN = true;
+                }
+                if (dHexNActoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(dhexnac);
+                    monodHexNAc = true;
+                }
+                if (PenttoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(pent);
+                    monoPent = true;
+                }
+                if (KDNtoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(kdn);
+                    monoKDN = true;
+                }
+                if (Neu5ActoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(neuac);
+                    monoNeu5Ac = true;
+                }
+                if (Neu5GctoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(neugc);
+                    monoNeu5Gc = true;
+                }
+                if (PhostoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(phos);
+                    monoPhos = true;
+                }
+                if (SulftoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(sulf);
+                    monoSulf = true;
+                }
+
+                // Process for multiple targets conditionally based on text box or mzml input
+                if (TextRadioButton.IsChecked == true)
+                {
+                    targetString = InputMasses.Text;
+                    inputParameters = "Mass List: " + targetString.Replace("\r\n", ",");
+                }
+                else
+                {
+                    targetString = neutralPrecursorListmzml;
+                    inputParameters = "mzML: " + filePath;
+                }
+
+                // Turn that input into a list of masses
+                targetStrings = new(
+                    targetString.Split(new string[] { "\n" },
+                    StringSplitOptions.RemoveEmptyEntries));
+                targets = targetStrings.ConvertAll(decimal.Parse);
+
+
+                // For enabling off-by-one errors. Thermo is pretty good at correcting the selected ion m/z when it picks an isotopic distribution, but might be useful for others
+                if (OffByOne.IsChecked == true)
+                {
+                    offByOneChecked = true;
+                    // For each target in the list, remove one hydrogen to account for the C13 isotope being picked instead of monoisotopic (negative mode only)
+                    targetsToAdd = targets.Count;
+                    for (int o = 0; o < targetsToAdd; o++)
+                    {
+                        targets.Add(targets[o] - (decimal)1.00727);
+                    }
+                }
+
+                // Early processing of target list, breaking it down so that the reducing ends are removed
+                if (Native.IsChecked == true)
+                {
+                    nativeChecked = true;
+                    //native
+                    if (Free.IsChecked == true)
+                    {
+                        freeChecked = true;
+                        reduced = false;
+                        targets = targets.Select(z => z - 18.010555m).ToList();
+                    }
+                    else
+                    {
+                        freeChecked = false;
+                        reduced = true;
+                        targets = targets.Select(z => z - 20.026195m).ToList();
+                    }
+                }
+                else
+                {
+                    // permethylated
+                    if (Free.IsChecked == true)
+                    {
+                        freeChecked = true;
+                        reduced = false;
+                        targets = targets.Select(z => z - 46.041855m).ToList();
+                    }
+                    else
+                    {
+                        freeChecked = false;
+                        reduced = true;
+                        targets = targets.Select(z => z - 62.073145m).ToList();
+                    }
+                }
+
+                // Define the upper and lower error tolerances for search
+                if (DaChecked == true)
+                {
+                    DaChecked = true;
+                    errorTol = Convert.ToDecimal(DaError.Text);
+                }
+                else
+                {
+                    DaChecked = false;
+                    errorTol = Convert.ToDecimal(ppmError.Text);
+                }
+
+                // Limiting combinatorial steps by user input
+                HexMin_int = int.Parse(HexMin.Text);
+                HexMax_int = int.Parse(HexMax.Text);
+                HexNAcMin_int = int.Parse(HexNAcMin.Text);
+                HexNAcMax_int = int.Parse(HexNAcMax.Text);
+                dHexMin_int = int.Parse(dHexMin.Text);
+                dHexMax_int = int.Parse(dHexMax.Text);
+                HexAMin_int = int.Parse(HexAMin.Text);
+                HexAMax_int = int.Parse(HexAMax.Text);
+                HexNMin_int = int.Parse(HexNMin.Text);
+                HexNMax_int = int.Parse(HexNMax.Text);
+                PentMin_int = int.Parse(PentMin.Text);
+                PentMax_int = int.Parse(PentMax.Text);
+                KDNMin_int = int.Parse(KDNMin.Text);
+                KDNMax_int = int.Parse(KDNMax.Text);
+                Neu5AcMin_int = int.Parse(Neu5AcMin.Text);
+                Neu5AcMax_int = int.Parse(Neu5AcMax.Text);
+                Neu5GcMin_int = int.Parse(Neu5GcMin.Text);
+                Neu5GcMax_int = int.Parse(Neu5GcMax.Text);
+                PhosMin_int = int.Parse(PhosMin.Text);
+                PhosMax_int = int.Parse(PhosMax.Text);
+                SulfMin_int = int.Parse(SulfMin.Text);
+                SulfMax_int = int.Parse(SulfMax.Text);
+                dHexNAcMin_int = int.Parse(dHexNAcMin.Text);
+                dHexNAcMax_int = int.Parse(dHexNAcMax.Text);
+
+                // Running the mzML formatting in a different thread so we can give a status update
+                await Task.Run(() => glyComboProcess());
+            }
+            finally
+            {
+                ProgressBarSubmit.Visibility = Visibility.Collapsed;
+            }
+        }
+        
+        private void glyComboProcess()
+        {
             var watch = Stopwatch.StartNew();
-            // Define the components in the combinatorial analysis, native and permethylated
-            if (Native.IsChecked == true)
-            {
-                derivatisation = "Native";
-                // Native
-                dhex = 146.057908m; // permethylated mass = 174.089210 chemical formula = C8H14O4
-                hex = 162.052823m; // permethylated mass = 204.099775 chemical formula = C9H16O5
-                hexnac = 203.079372m; // permethylated mass = 245.126324 chemical formula = C11H19NO5
-                hexn = 161.068808m; // permethylated mass = 217.131409 chemical formula = C10H19NO4
-                hexa = 176.032088m; // permethylated mass = 218.079040 chemical formula = C9H14O6
-                dhexnac = 187.084458m; // permethylated mass = 215.115759 chemical formula = C10H17N1O4
-                pent = 132.042258m; // permethylated mass = 160.073560 chemical formula = C7H12O4
-                kdn = 250.068867m; // permethylated mass = 320.147120 chemical formula = C14H24O8
-                neuac = 291.095416m; // permethylated mass = 361.173669 chemical formula = C16H27NO8
-                neugc = 307.090331m; // permethylated mass = 391.184234 chemical formula = C17H29NO9
-                phos = 79.966331m; // permethylated mass = 93.981983 chemical formula = CH3O3P
-            }
-            else
-            {
-                derivatisation = "Permethylated";
-                // Permethylated
-                dhex = 174.089210m; // permethylated mass =  chemical formula = C8H14O4
-                hex = 204.099775m; // permethylated mass =  chemical formula = C9H16O5
-                hexnac = 245.126324m; // permethylated mass =  chemical formula = C11H19NO5
-                hexn = 217.131409m; // permethylated mass =  chemical formula = C10H19NO4
-                hexa = 218.079040m; // permethylated mass =  chemical formula = C9H14O6
-                dhexnac = 215.115759m; // permethylated mass =  chemical formula = C10H17N1O4
-                pent = 160.073560m; // permethylated mass =  chemical formula = C7H12O4
-                kdn = 320.147120m; // permethylated mass =  chemical formula = C14H24O8
-                neuac = 361.173669m; // permethylated mass =  chemical formula = C16H27NO8
-                neugc = 391.184234m; // permethylated mass =  chemical formula = C17H29NO9
-                phos = 93.981983m; // permethylated mass =  chemical formula = CH3O3P
-            }
-            decimal sulf = 79.956815m; // Nothing changes with permethylation
-
-            // Add the components to combinatorial analysis based on which monosaccharides the user chooses to include
-            List<decimal> numbers = [];
-            if (HextoggleSwitch.IsOn == true)
-            {
-                numbers.Add(hex);
-                monoHex = true;
-            }
-
-            if (HexAtoggleSwitch.IsOn == true)
-            {
-                numbers.Add(hexa);
-                monoHexA = true;
-            }
-            if (dHextoggleSwitch.IsOn == true)
-            {
-                numbers.Add(dhex);
-                monodHex = true;
-            }
-            if (HexNActoggleSwitch.IsOn == true)
-            {
-                numbers.Add(hexnac);
-                monoHexNAc = true;
-            }
-            if (HexNtoggleSwitch.IsOn == true)
-            {
-                numbers.Add(hexn);
-                monoHexN = true;
-            }
-            if (dHexNActoggleSwitch.IsOn == true)
-            {
-                numbers.Add(dhexnac);
-                monodHexNAc = true;
-            }
-            if (PenttoggleSwitch.IsOn == true)
-            {
-                numbers.Add(pent);
-                monoPent = true;
-            }
-            if (KDNtoggleSwitch.IsOn == true)
-            {
-                numbers.Add(kdn);
-                monoKDN = true;
-            }
-            if (Neu5ActoggleSwitch.IsOn == true)
-            {
-                numbers.Add(neuac);
-                monoNeu5Ac = true;
-            }
-            if (Neu5GctoggleSwitch.IsOn == true)
-            {
-                numbers.Add(neugc);
-                monoNeu5Gc = true;
-            }
-            if (PhostoggleSwitch.IsOn == true)
-            {
-                numbers.Add(phos);
-                monoPhos = true;
-            }
-            if (SulftoggleSwitch.IsOn == true)
-            {
-                numbers.Add(sulf);
-                monoSulf = true;
-            }
-
-            // Process for multiple targets conditionally based on text box or mzml input
-            if (TextRadioButton.IsChecked == true)
-            {
-                targetString = InputMasses.Text;
-                inputParameters = "Mass List: " + targetString.Replace("\r\n", ",");
-            }
-            else
-            {
-                targetString = neutralPrecursorListmzml;
-                inputParameters = "mzML: " + filePath;
-            }
-
-            // Turn that input into a list of masses
-            List<string> targetStrings = new(
-                targetString.Split(new string[] { "\n" },
-                StringSplitOptions.RemoveEmptyEntries));
-            List<decimal> targets = targetStrings.ConvertAll(decimal.Parse);
-            ProgressBarGlyCombo.Maximum = targets.Count;
-
-
-            // For enabling off-by-one errors. Thermo is pretty good at correcting the selected ion m/z when it picks an isotopic distribution, but might be useful for others
-            if (OffByOne.IsChecked == true)
-            {
-                // For each target in the list, remove one hydrogen to account for the C13 isotope being picked instead of monoisotopic (negative mode only)
-                targetsToAdd = targets.Count;
-                for (int o = 0; o < targetsToAdd; o++)
-                {
-                    targets.Add(targets[o] - (decimal)1.00727);
-                }
-            }
-
-            // Early processing of target list, breaking it down so that the reducing ends are removed
-            if (Native.IsChecked == true)
-            {
-                //native
-                if (Free.IsChecked == true)
-                {
-                    reduced = false;
-                    targets = targets.Select(z => z - 18.010555m).ToList();
-                }
-                else
-                {
-                    reduced = true;
-                    targets = targets.Select(z => z - 20.026195m).ToList();
-                }
-            }
-            else
-            {
-                // permethylated
-                if (Free.IsChecked == true)
-                {
-                    reduced = false;
-                    targets = targets.Select(z => z - 46.041855m).ToList();
-                }
-                else
-                {
-                    reduced = true;
-                    targets = targets.Select(z => z - 62.073145m).ToList();
-                }
-            }
             iterations = 0;
             Sum_up(numbers, targets);
             solutions = "";
@@ -502,22 +585,19 @@ namespace glycombo
             {
                 bool targetFound = false;
                 // Define the upper and lower error tolerances for search
-                if (Da.IsChecked == true)
+                if (DaChecked == true)
                 {
                     errorType = "Da";
-                    errorTol = Convert.ToDecimal(DaError.Text);
                     targetLow = targets[i] - errorTol;
                     targetHigh = targets[i] + errorTol;
                 }
                 else
                 {
                     errorType = "ppm";
-                    errorTol = Convert.ToDecimal(ppmError.Text);
                     targetLow = targets[i] - (targets[i] * (errorTol / 1000000));
                     targetHigh = targets[i] + (targets[i] * (errorTol / 1000000));
                 }
                 decimal target = targets[i];
-                ProgressBarGlyCombo.Value = i;
                 Sum_up_recursive(numbers, target, [], targetFound, i);
             };
 
@@ -526,7 +606,7 @@ namespace glycombo
             string skylineSolutionHeader = "";
             string skylineSolutionMultiplesPreTrim = "";
             string skylineSolutionMultiples = "";
-            if (TextRadioButton.IsChecked == false)
+            if (TextChecked == false)
             {
                 solutionHeader = "Composition,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC,File Name";
                 skylineSolutionHeader = "Molecule List Name,Molecule Name,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC,Note";
@@ -646,7 +726,7 @@ namespace glycombo
                 solutions = string.Join("", partial.ToArray());
 
                 // This replaces all the masses with their respective monosaccharide identities
-                if (Native.IsChecked == true)
+                if (nativeChecked == true)
                 {
                     // Native
                     solutions = solutions.Replace("146.057908", "dHex ").Replace("162.052823", "Hex ").Replace("291.095416", "Neu5Ac ").Replace("307.090331", "Neu5Gc ").Replace("203.079372", "HexNAc ").Replace("79.966331", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("161.068808", "HexN ").Replace("176.032088", "HexA ").Replace("187.084458", "dHexNAc ").Replace("132.042258", "Pent ").Replace("250.068867", "KDN ");
@@ -679,7 +759,7 @@ namespace glycombo
                 int dhexnacCount;
 
                 // Native processing
-                if (Native.IsChecked == true)
+                if (nativeChecked == true)
                 {
                     // Chemical formulae for native
                     dHexCount = Regex.Matches(solutions, "dHex ").Count;
@@ -912,7 +992,7 @@ namespace glycombo
                 chemicalFormula = chemicalFormula.Replace("N0", "").Replace("P0", "").Replace("S0", "");
 
                 // Reducing end status, native or permethylated
-                if (Native.IsChecked == true)
+                if (nativeChecked == true)
                 {
                     // Native
                     if (reduced == false)
@@ -946,7 +1026,7 @@ namespace glycombo
 
                 // Calculation of scan number and charge state to be represented later
                 targetIndex.Add(i);
-                if (TextRadioButton.IsChecked == false)
+                if (TextChecked == false)
                 {
                     string scanNumberForOutput = "";
                     string chargeForOutput = "";
@@ -956,7 +1036,7 @@ namespace glycombo
 
                     // mzml input therefore output needs to be include scan #, charge, RT and TIC values.
                     // OffByOne error essentially doubles the target list, need to ensure that we can assign metadata to the +1 targets (otherwise it tries to call metadata from a limited list)
-                    if (OffByOne.IsChecked == true)
+                    if (offByOneChecked == true)
                     {
                         if (i < targetsToAdd)
                         {
@@ -995,30 +1075,7 @@ namespace glycombo
 
                 // Method to remove all compositions outside of user-set bounds
                 int outOfBounds = 0;
-                HexMin_int = int.Parse(HexMin.Text);
-                HexMax_int = int.Parse(HexMax.Text);
-                HexNAcMin_int = int.Parse(HexNAcMin.Text);
-                HexNAcMax_int = int.Parse(HexNAcMax.Text);
-                dHexMin_int = int.Parse(dHexMin.Text);
-                dHexMax_int = int.Parse(dHexMax.Text);
-                HexAMin_int = int.Parse(HexAMin.Text);
-                HexAMax_int = int.Parse(HexAMax.Text);
-                HexNMin_int = int.Parse(HexNMin.Text);
-                HexNMax_int = int.Parse(HexNMax.Text);
-                PentMin_int = int.Parse(PentMin.Text);
-                PentMax_int = int.Parse(PentMax.Text);
-                KDNMin_int = int.Parse(KDNMin.Text);
-                KDNMax_int = int.Parse(KDNMax.Text);
-                Neu5AcMin_int = int.Parse(Neu5AcMin.Text);
-                Neu5AcMax_int = int.Parse(Neu5AcMax.Text);
-                Neu5GcMin_int = int.Parse(Neu5GcMin.Text);
-                Neu5GcMax_int = int.Parse(Neu5GcMax.Text);
-                PhosMin_int = int.Parse(PhosMin.Text);
-                PhosMax_int = int.Parse(PhosMax.Text);
-                SulfMin_int = int.Parse(SulfMin.Text);
-                SulfMax_int = int.Parse(SulfMax.Text);
-                dHexNAcMin_int = int.Parse(dHexNAcMin.Text);
-                dHexNAcMax_int = int.Parse(dHexNAcMax.Text);
+
 
                 if (hexCount < HexMin_int
                     || hexCount > HexMax_int)
@@ -1322,7 +1379,12 @@ namespace glycombo
             iterations = 0;
             InputMasses.Text = "";
             filePath = "";
-            ProgressBarGlyCombo.Value = 0;
+            offByOneChecked = false;
+            nativeChecked = false;
+            freeChecked = false;
+            DaChecked = false;
+            TextChecked = false;
+            submitbutton.IsEnabled = false;
         }
 
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
