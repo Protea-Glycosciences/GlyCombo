@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -11,6 +11,8 @@
     <Product>GlyCombo</Product>
     <Authors>Christopher Ashwood, Maia I Kelly</Authors>
     <Copyright>Copyright 2024 Protea Glycosciences Pty Ltd</Copyright>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <SignAssembly>False</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
