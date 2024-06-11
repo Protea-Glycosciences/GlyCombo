@@ -1,5 +1,7 @@
 # GlyCombo
 ![GitHub License](https://img.shields.io/github/license/Protea-Glycosciences/GlyCombo)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Protea-Glycosciences/GlyCombo/total)
+![GitHub Release](https://img.shields.io/github/v/release/Protea-Glycosciences/GlyCombo)
 
 GlyCombo is an open source software for combinatorial glycan composition determination to identify glycans in MS acquisitions of glycan-containing samples in text or mzML formats.
 This application enables rapid extraction of precursor *m/z* values from mzML files, a vendor-neutral format that ensures cross-platform compatibility.
