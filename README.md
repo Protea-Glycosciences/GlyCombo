@@ -3,11 +3,11 @@
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Protea-Glycosciences/GlyCombo/total)
 ![GitHub Release](https://img.shields.io/github/v/release/Protea-Glycosciences/GlyCombo)
 
-![Static Badge](https://img.shields.io/badge/Download_GlyCombo_Installer-Automatic_Updating-058743?link=https%3A%2F%2Fgithub.com%2FProtea-Glycosciences%2FGlyCombo%2Freleases%2Flatest%2FGlyCombo_setup.exe)
+[![Static Badge](https://img.shields.io/badge/Download_GlyCombo_Installer-Automatic_Updating-058743)](https://github.com/Protea-Glycosciences/GlyCombo/releases/latest/download/GlyCombo_setup.exe)
 
 If your IT security rules prevent the installation of GlyCombo with the above link, please ding the portable executable below. This installation does not check for automatic updates.
 
-![Static Badge](https://img.shields.io/badge/Download_GlyCombo_Installer-Portable-red?link=https%3A%2F%2Fgithub.com%2FProtea-Glycosciences%2FGlyCombo%2Freleases%2Flatest%2FGlyCombo_Portable.exe)
+[![Static Badge](https://img.shields.io/badge/Download_GlyCombo_Installer-Portable-red)](https://github.com/Protea-Glycosciences/GlyCombo/releases/latest/download/GlyCombo_Portable.exe)
 
 
 GlyCombo is an open source software for combinatorial glycan composition determination to identify glycans in MS acquisitions of glycan-containing samples in text or mzML formats.
