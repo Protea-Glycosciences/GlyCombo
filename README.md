@@ -5,7 +5,7 @@
 
 [![Static Badge](https://img.shields.io/badge/Download_GlyCombo_Installer-Automatic_Updating-058743)](https://github.com/Protea-Glycosciences/GlyCombo/releases/latest/download/GlyCombo_setup.exe)
 
-If your IT security rules prevent the installation of GlyCombo with the above link, please ding the portable executable below. This installation does not check for automatic updates.
+If your IT security rules prevent the installation of GlyCombo with the above link, please download the portable executable below. This installation does not check for automatic updates so is not recommended.
 
 [![Static Badge](https://img.shields.io/badge/Download_GlyCombo_Installer-Portable-red)](https://github.com/Protea-Glycosciences/GlyCombo/releases/latest/download/GlyCombo_Portable.exe)
 
