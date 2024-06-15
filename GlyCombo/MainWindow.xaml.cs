@@ -18,6 +18,8 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System;
 using System.Configuration;
+using Windows.Media.Capture;
+using System.Collections.Generic;
 
 namespace glycombo
 {
@@ -34,7 +36,7 @@ namespace glycombo
         private int iterations;
         private decimal targetLow;
         private decimal targetHigh;
-        private bool reduced;
+        private string reducedEnd;
         private decimal observedMass;
         private decimal theoreticalMass;
         private decimal error;
@@ -49,6 +51,15 @@ namespace glycombo
         private decimal neuac;
         private decimal neugc;
         private decimal phos;
+        private decimal lneuac;
+        private decimal eeneuac;
+        private decimal dneuac;
+        private decimal amneuac;
+        private decimal acetyl;
+        private decimal lneugc;
+        private decimal eeneugc;
+        private decimal dneugc;
+        private decimal amneugc;
         private int HexMin_int;
         private int HexMax_int;
         private int HexNAcMin_int;
@@ -73,6 +84,24 @@ namespace glycombo
         private int SulfMax_int;
         private int dHexNAcMin_int;
         private int dHexNAcMax_int;
+        private int lNeuAcMin_int;
+        private int lNeuAcMax_int;
+        private int eeNeuAcMin_int;
+        private int eeNeuAcMax_int;
+        private int dNeuAcMin_int;
+        private int dNeuAcMax_int;
+        private int amNeuAcMin_int;
+        private int amNeuAcMax_int;
+        private int acetylMin_int;
+        private int acetylMax_int;
+        private int lNeuGcMin_int;
+        private int lNeuGcMax_int;
+        private int eeNeuGcMin_int;
+        private int eeNeuGcMax_int;
+        private int dNeuGcMin_int;
+        private int dNeuGcMax_int;
+        private int amNeuGcMin_int;
+        private int amNeuGcMax_int;
         private decimal precursor;
         private string line;
         private string[] precursorLine;
@@ -109,6 +138,15 @@ namespace glycombo
         private bool monoNeu5Gc = false;
         private bool monoPhos = false;
         private bool monoSulf = false;
+        private bool monolNeuAc = false;
+        private bool monoeeNeuAc = false;
+        private bool monodNeuAc = false;
+        private bool monoamNeuAc = false;
+        private bool monoAcetyl = false;
+        private bool monolNeuGc = false;
+        private bool monoeeNeuGc = false;
+        private bool monodNeuGc = false;
+        private bool monoamNeuGc = false;
         private string errorType;
         private string derivatisation;
         private string param_monoHex;
@@ -123,6 +161,15 @@ namespace glycombo
         private string param_monoNeu5Gc;
         private string param_monoSulf;
         private string param_monoPhos;
+        private string param_monolNeuAc;
+        private string param_monoeeNeuAc;
+        private string param_monodNeuAc;
+        private string param_monoamNeuAc;
+        private string param_monoAcetyl;
+        private string param_monolNeuGc;
+        private string param_monoeeNeuGc;
+        private string param_monodNeuGc;
+        private string param_monoamNeuGc;
         private string filePath;
         private string inputParameters;
         private float ElapsedMSec;
@@ -131,7 +178,6 @@ namespace glycombo
         private bool TextChecked;
         private bool nativeChecked;
         private bool offByOneChecked;
-        private bool freeChecked;
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
@@ -160,12 +206,17 @@ namespace glycombo
             {
                 ProgressBarMZML.Visibility = Visibility.Collapsed;
                 // Let the user now start the processing. Without this step, the user may crash the program by starting the processing before the mzml info is extracted
-                submitbutton.IsEnabled = IsEnabled;
+                if (scans.Any())
+                {
+                    submitbutton.IsEnabled = IsEnabled;
+                }
             }
         }
 
         private void mzMLProcess()
         {
+            List<string> fileNames = [];
+            List<int> fileScans = [];
             // Ask the user which mzml file they want to analyse
             OpenFileDialog openFileDialog = new()
             {
@@ -325,10 +376,19 @@ namespace glycombo
                     }
                 }
                 string fileNameOutput = file.Substring(file.LastIndexOf('\\') + 1);
-                new Thread(() => { MessageBox.Show(fileNameOutput + " loaded with " + scans.Count + " MS2 scans."); }).Start();
+            }
+            if (!scans.Any())
+            {
+                MessageBox.Show("No MS2 found in the given mzML file. Please confirm the selected file has MS2 scans, or select a different file.");
+            }
+            else
+            {
+                // Provide list of all filenames provided in the openFileDialog, without the directory name
+                string allFiles = string.Join(", ", openFileDialog.FileNames.Select(System.IO.Path.GetFileName));
+                // Provide number of scans for each filename
+                MessageBox.Show("Files " + allFiles + " have completed uploading with a total number of " + scans.Count + " MS2 scans identified.");
             }
         }
-
 
         // Execution of the combinatorial analysis
         private async void Button1_Click(object sender, RoutedEventArgs e)
@@ -354,6 +414,15 @@ namespace glycombo
                     neuac = 291.095416m; // permethylated mass = 361.173669 chemical formula = C16H27NO8
                     neugc = 307.090331m; // permethylated mass = 391.184234 chemical formula = C17H29NO9
                     phos = 79.966331m; // permethylated mass = 93.981983 chemical formula = CH3O3P
+                    lneuac = 273.0848518m;
+                    eeneuac = 319.1267166m;
+                    dneuac = 318.1427011m;
+                    amneuac = 290.1114009m;
+                    acetyl = 42.010565m;
+                    lneugc = 289.0797664m;
+                    eeneugc = 335.1216313m;
+                    dneugc = 306.1063155m;
+                    amneugc = 334.1376157m;
                 }
                 else
                 {
@@ -435,6 +504,52 @@ namespace glycombo
                     numbers.Add(sulf);
                     monoSulf = true;
                 }
+                if (lNeuActoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(lneuac);
+                    monolNeuAc = true;
+                }
+                if (eNeuActoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(eeneuac);
+                    monoeeNeuAc = true;
+                }
+                if (dNeuActoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(dneuac);
+                    monodNeuAc = true;
+                }
+                if (amNeuActoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(amneuac);
+                    monoamNeuAc = true;
+                }
+                if (AcetyltoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(acetyl);
+                    monoAcetyl = true;
+                }
+                if (lNeuGctoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(lneugc);
+                    monolNeuGc = true;
+                }
+                if (eNeuGctoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(eeneugc);
+                    monoeeNeuGc = true;
+                }
+                if (dNeuGctoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(dneugc);
+                    monodNeuGc = true;
+                }
+                if (amNeuGctoggleSwitch.IsOn == true)
+                {
+                    numbers.Add(amneugc);
+                    monoamNeuGc = true;
+                }
+
 
                 // Process for multiple targets conditionally based on text box or mzml input
                 if (TextRadioButton.IsChecked == true)
@@ -471,34 +586,58 @@ namespace glycombo
                 if (Native.IsChecked == true)
                 {
                     nativeChecked = true;
-                    //native
-                    if (Free.IsChecked == true)
+                    switch (reducingEndBox.SelectedIndex)
                     {
-                        freeChecked = true;
-                        reduced = false;
-                        targets = targets.Select(z => z - 18.010555m).ToList();
-                    }
-                    else
-                    {
-                        freeChecked = false;
-                        reduced = true;
-                        targets = targets.Select(z => z - 20.026195m).ToList();
+                        case 0:
+                            reducedEnd = "Free";
+                            targets = targets.Select(z => z - 18.010555m).ToList();
+                            break;
+                        case 1:
+                            reducedEnd = "Reduced";
+                            targets = targets.Select(z => z - 20.026195m).ToList();
+                            break;
+                        case 2:
+                            reducedEnd = "InstantPC";
+                            targets = targets.Select(z => z - (18.010555m + 261.14773m)).ToList();
+                            break;
+                        case 3:
+                            reducedEnd = "Rapifluor-MS";
+                            targets = targets.Select(z => z - (18.010555m + 311.17461m)).ToList();
+                            break;
+                        case 4:
+                            reducedEnd = "2AA";
+                            targets = targets.Select(z => z - (18.010555m + 121.052774m)).ToList();
+                            break;
+                        case 5:
+                            reducedEnd = "2AB";
+                            targets = targets.Select(z => z - (18.010555m + 120.068758m)).ToList();
+                            break;
+                        case 6:
+                            reducedEnd = "Procainamide";
+                            targets = targets.Select(z => z - (18.010555m + 219.173557m)).ToList();
+                            break;
+                        case 7:
+                            reducedEnd = "girP";
+                            targets = targets.Select(z => z - (18.010555m + 134.07182m)).ToList();
+                            break;
+                        default:
+                            break;
                     }
                 }
                 else
                 {
-                    // permethylated
-                    if (Free.IsChecked == true)
+                    switch (reducingEndBox.SelectedIndex)
                     {
-                        freeChecked = true;
-                        reduced = false;
-                        targets = targets.Select(z => z - 46.041855m).ToList();
-                    }
-                    else
-                    {
-                        freeChecked = false;
-                        reduced = true;
-                        targets = targets.Select(z => z - 62.073145m).ToList();
+                        case 0:
+                            reducedEnd = "Free";
+                            targets = targets.Select(z => z - 18.010555m).ToList();
+                            break;
+                        case 1:
+                            reducedEnd = "Reduced";
+                            targets = targets.Select(z => z - 20.026195m).ToList();
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -539,6 +678,24 @@ namespace glycombo
                 SulfMax_int = int.Parse(SulfMax.Text);
                 dHexNAcMin_int = int.Parse(dHexNAcMin.Text);
                 dHexNAcMax_int = int.Parse(dHexNAcMax.Text);
+                lNeuAcMin_int = int.Parse(lNeuAcMin.Text);
+                lNeuAcMax_int = int.Parse(lNeuAcMax.Text);
+                eeNeuAcMin_int = int.Parse(eeNeuAcMin.Text);
+                eeNeuAcMax_int = int.Parse(eeNeuAcMax.Text);
+                dNeuAcMin_int = int.Parse(dNeuAcMin.Text);
+                dNeuAcMax_int = int.Parse(dNeuAcMax.Text);
+                amNeuAcMin_int = int.Parse(amNeuAcMin.Text);
+                amNeuAcMax_int = int.Parse(amNeuAcMax.Text);
+                acetylMin_int = int.Parse(AcetylMin.Text);
+                acetylMax_int = int.Parse(AcetylMax.Text);
+                lNeuGcMin_int = int.Parse(lNeuGcMin.Text);
+                lNeuGcMax_int = int.Parse(lNeuGcMax.Text);
+                eeNeuGcMin_int = int.Parse(eeNeuGcMin.Text);
+                eeNeuGcMax_int = int.Parse(eeNeuGcMax.Text);
+                dNeuGcMin_int = int.Parse(dNeuGcMin.Text);
+                dNeuGcMax_int = int.Parse(dNeuGcMax.Text);
+                amNeuGcMin_int = int.Parse(amNeuGcMin.Text);
+                amNeuGcMax_int = int.Parse(amNeuGcMax.Text);
 
                 // Running the mzML formatting in a different thread so we can give a status update
                 await Task.Run(() => glyComboProcess());
@@ -671,6 +828,42 @@ namespace glycombo
             {
                 param_monoSulf = Environment.NewLine + "Sulf (" + SulfMin_int.ToString() + "-" + SulfMax_int.ToString() + ")";
             }
+            if (monolNeuAc == true)
+            {
+                param_monolNeuAc = Environment.NewLine + "lNeuAc (" + lNeuAcMin_int.ToString() + "-" + lNeuAcMax_int.ToString() + ")";
+            }
+            if (monoeeNeuAc == true)
+            {
+                param_monoeeNeuAc = Environment.NewLine + "eNeuAc (" + eeNeuAcMin_int.ToString() + "-" + eeNeuAcMax_int.ToString() + ")";
+            }
+            if (monodNeuAc == true)
+            {
+                param_monodNeuAc = Environment.NewLine + "dNeuAc (" + dNeuAcMin_int.ToString() + "-" + dNeuAcMax_int.ToString() + ")";
+            }
+            if (monoamNeuAc == true)
+            {
+                param_monoamNeuAc = Environment.NewLine + "amNeuAc (" + amNeuAcMin_int.ToString() + "-" + amNeuAcMax_int.ToString() + ")";
+            }
+            if (monoAcetyl == true)
+            {
+                param_monoAcetyl = Environment.NewLine + "Acetyl (" + acetylMin_int.ToString() + "-" + acetylMax_int.ToString() + ")";
+            }
+            if (monolNeuGc == true)
+            {
+                param_monolNeuGc = Environment.NewLine + "lNeuGc (" + lNeuGcMin_int.ToString() + "-" + lNeuGcMax_int.ToString() + ")";
+            }
+            if (monoeeNeuGc == true)
+            {
+                param_monoeeNeuGc = Environment.NewLine + "eNeuGc (" + eeNeuGcMin_int.ToString() + "-" + eeNeuGcMax_int.ToString() + ")";
+            }
+            if (monodNeuGc == true)
+            {
+                param_monodNeuGc = Environment.NewLine + "dNeuGc (" + dNeuGcMin_int.ToString() + "-" + dNeuGcMax_int.ToString() + ")";
+            }
+            if (monoamNeuGc == true)
+            {
+                param_monoamNeuGc = Environment.NewLine + "amNeuGc (" + amNeuGcMin_int.ToString() + "-" + amNeuGcMax_int.ToString() + ")";
+            }
             // Converting precursor list to series of strings for subsequent confirmation
             string combinedTargets = string.Join(Environment.NewLine, targets.ToArray());
             File.WriteAllText(string.Concat(saveFileDialog1.FileName.AsSpan(0, saveFileDialog1.FileName.Length - 4), "_parameters.txt"),
@@ -684,8 +877,8 @@ namespace glycombo
                 + "Derivatisation: "
                 + derivatisation.ToString()
                 + Environment.NewLine
-                + "Reduced: "
-                + reduced.ToString()
+                + "Reducing end: "
+                + reducedEnd.ToString()
                 + Environment.NewLine
                 + Environment.NewLine
                 + "Monosaccharide ranges"
@@ -702,6 +895,15 @@ namespace glycombo
                 + param_monoNeu5Gc
                 + param_monoPhos
                 + param_monoSulf
+                + param_monolNeuAc
+                + param_monoeeNeuAc
+                + param_monodNeuAc
+                + param_monoamNeuAc
+                + param_monoAcetyl
+                + param_monolNeuGc
+                + param_monoeeNeuGc
+                + param_monodNeuGc
+                + param_monoamNeuGc
                 + Environment.NewLine
                 + Environment.NewLine
                 + "Precursor targets"
@@ -729,7 +931,7 @@ namespace glycombo
                 if (nativeChecked == true)
                 {
                     // Native
-                    solutions = solutions.Replace("146.057908", "dHex ").Replace("162.052823", "Hex ").Replace("291.095416", "Neu5Ac ").Replace("307.090331", "Neu5Gc ").Replace("203.079372", "HexNAc ").Replace("79.966331", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("161.068808", "HexN ").Replace("176.032088", "HexA ").Replace("187.084458", "dHexNAc ").Replace("132.042258", "Pent ").Replace("250.068867", "KDN ");
+                    solutions = solutions.Replace("146.057908", "dHex ").Replace("162.052823", "Hex ").Replace("291.095416", "Neu5Ac ").Replace("307.090331", "Neu5Gc ").Replace("203.079372", "HexNAc ").Replace("79.966331", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("161.068808", "HexN ").Replace("176.032088", "HexA ").Replace("187.084458", "dHexNAc ").Replace("132.042258", "Pent ").Replace("250.068867", "KDN ").Replace("273.0848518", "lneuac ").Replace("319.1267166", "eeneuac ").Replace("318.1427011", "dneuac ").Replace("290.1114009", "amneuac ").Replace("42.010565", "acetyl ").Replace("289.0797664", "lneugc ").Replace("335.1216313", "eeneugc ").Replace("306.1063155", "dneugc ").Replace("334.1376157", "amneugc ");
                 }
                 else
                 {
@@ -746,17 +948,26 @@ namespace glycombo
                 int chemicalFormulaeN = 0;
                 int chemicalFormulaeP = 0;
                 int chemicalFormulaeS = 0;
-                int dHexCount;
-                int HexACount;
-                int HexNCount;
-                int PentCount;
-                int KDNCount;
-                int hexCount;
-                int neuAcCount;
-                int neuGcCount;
-                int hexNAcCount;
-                int phosCount;
-                int dhexnacCount;
+                int dHexCount = 0;
+                int HexACount = 0;
+                int HexNCount = 0;
+                int PentCount = 0;
+                int KDNCount= 0;
+                int hexCount = 0;
+                int neuAcCount = 0;
+                int neuGcCount = 0;
+                int hexNAcCount = 0;
+                int phosCount = 0;
+                int dhexnacCount = 0;
+                int lNeuAcCount = 0;
+                int eeNeuAcCount = 0;
+                int dNeuAcCount = 0;
+                int amNeuAcCount = 0;
+                int acetylCount = 0;
+                int lNeuGcCount = 0;
+                int eeNeuGcCount = 0;
+                int dNeuGcCount = 0;
+                int amNeuGcCount = 0;
 
                 // Native processing
                 if (nativeChecked == true)
@@ -811,7 +1022,7 @@ namespace glycombo
                         chemicalFormulaeO += (hexCount * 5);
                         solutionsUpdate = solutionsUpdate + "(Hex)" + Convert.ToString(hexCount) + " ";
                     }
-                    neuAcCount = Regex.Matches(solutions, "Neu5Ac").Count;
+                    neuAcCount = Regex.Matches(solutions, "Neu5Ac ").Count;
                     if (neuAcCount > 0)
                     {
                         chemicalFormulaeC += (neuAcCount * 11);
@@ -855,15 +1066,135 @@ namespace glycombo
                         chemicalFormulaeO += (dhexnacCount * 4);
                         solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
                     }
-                    if (reduced == false)
+                    lNeuAcCount = Regex.Matches(solutions, "lneuac ").Count;
+                    if (lNeuAcCount > 0)
                     {
-                        chemicalFormulaeH += 2;
-                        chemicalFormulaeO += 1;
+                        chemicalFormulaeC += (lNeuAcCount * 11);
+                        chemicalFormulaeH += (lNeuAcCount * 15);
+                        chemicalFormulaeN += (lNeuAcCount);
+                        chemicalFormulaeO += (lNeuAcCount * 7);
+                        solutionsUpdate = solutionsUpdate + "(lNeuAc)" + Convert.ToString(lNeuAcCount) + " ";
                     }
-                    else
+                    eeNeuAcCount = Regex.Matches(solutions, "eeneuac ").Count;
+                    if (eeNeuAcCount > 0)
                     {
-                        chemicalFormulaeH += 4;
-                        chemicalFormulaeO += 1;
+                        chemicalFormulaeC += (eeNeuAcCount * 13);
+                        chemicalFormulaeH += (eeNeuAcCount * 21);
+                        chemicalFormulaeN += (eeNeuAcCount);
+                        chemicalFormulaeO += (eeNeuAcCount * 8);
+                        solutionsUpdate = solutionsUpdate + "(eNeuAc)" + Convert.ToString(eeNeuAcCount) + " ";
+                    }
+                    dNeuAcCount = Regex.Matches(solutions, "dneuac ").Count;
+                    if (dNeuAcCount > 0)
+                    {
+                        chemicalFormulaeC += (dNeuAcCount * 13);
+                        chemicalFormulaeH += (dNeuAcCount * 22);
+                        chemicalFormulaeN += (dNeuAcCount * 2);
+                        chemicalFormulaeO += (dNeuAcCount * 7);
+                        solutionsUpdate = solutionsUpdate + "(dNeuAc)" + Convert.ToString(dNeuAcCount) + " ";
+                    }
+                    amNeuAcCount = Regex.Matches(solutions, "amneuac ").Count;
+                    if (amNeuAcCount > 0)
+                    {
+                        chemicalFormulaeC += (amNeuAcCount * 11);
+                        chemicalFormulaeH += (amNeuAcCount * 18);
+                        chemicalFormulaeN += (amNeuAcCount * 2);
+                        chemicalFormulaeO += (amNeuAcCount * 7);
+                        solutionsUpdate = solutionsUpdate + "(amNeuAc)" + Convert.ToString(amNeuAcCount) + " ";
+                    }
+                    acetylCount = Regex.Matches(solutions, "acetyl ").Count;
+                    if (acetylCount > 0)
+                    {
+                        chemicalFormulaeC += (dhexnacCount * 2);
+                        chemicalFormulaeH += (dhexnacCount * 2);
+                        chemicalFormulaeO += (dhexnacCount * 1);
+                        solutionsUpdate = solutionsUpdate + "(acetyl)" + Convert.ToString(acetylCount) + " ";
+                    }
+                    lNeuGcCount = Regex.Matches(solutions, "lneugc ").Count;
+                    if (lNeuGcCount > 0)
+                    {
+                        chemicalFormulaeC += (lNeuGcCount * 11);
+                        chemicalFormulaeH += (lNeuGcCount * 15);
+                        chemicalFormulaeN += (lNeuGcCount);
+                        chemicalFormulaeO += (lNeuGcCount * 8);
+                        solutionsUpdate = solutionsUpdate + "(lNeuGc)" + Convert.ToString(lNeuGcCount) + " ";
+                    }
+                    eeNeuGcCount = Regex.Matches(solutions, "eeneugc ").Count;
+                    if (eeNeuGcCount > 0)
+                    {
+                        chemicalFormulaeC += (eeNeuGcCount * 13);
+                        chemicalFormulaeH += (eeNeuGcCount * 21);
+                        chemicalFormulaeN += (eeNeuGcCount);
+                        chemicalFormulaeO += (eeNeuGcCount * 9);
+                        solutionsUpdate = solutionsUpdate + "(eNeuGc)" + Convert.ToString(eeNeuGcCount) + " ";
+                    }
+                    dNeuGcCount = Regex.Matches(solutions, "dneugc ").Count;
+                    if (dNeuGcCount > 0)
+                    {
+                        chemicalFormulaeC += (dNeuGcCount * 13);
+                        chemicalFormulaeH += (dNeuGcCount * 22);
+                        chemicalFormulaeN += (dNeuGcCount * 2);
+                        chemicalFormulaeO += (dNeuGcCount * 8);
+                        solutionsUpdate = solutionsUpdate + "(dNeuGc)" + Convert.ToString(dNeuGcCount) + " ";
+                    }
+                    amNeuGcCount = Regex.Matches(solutions, "amneugc ").Count;
+                    if (amNeuGcCount > 0)
+                    {
+                        chemicalFormulaeC += (amNeuGcCount * 11);
+                        chemicalFormulaeH += (amNeuGcCount * 18);
+                        chemicalFormulaeN += (amNeuGcCount * 2);
+                        chemicalFormulaeO += (amNeuGcCount * 8);
+                        solutionsUpdate = solutionsUpdate + "(amNeuGc)" + Convert.ToString(amNeuGcCount) + " ";
+                    }
+
+                    switch (reducedEnd)
+                    {
+                        case "Free":
+                            chemicalFormulaeH += 2;
+                            chemicalFormulaeO += 1;
+                            break;
+                        case "Reduced":
+                            chemicalFormulaeH += 4;
+                            chemicalFormulaeO += 1;
+                            break;
+                        case "InstantPC":
+                            chemicalFormulaeC += 14;
+                            chemicalFormulaeH += 21;
+                            chemicalFormulaeN += 3;
+                            chemicalFormulaeO += 3;
+                            break;
+                        case "Rapifluor-MS":
+                            chemicalFormulaeC += 17;
+                            chemicalFormulaeH += 23;
+                            chemicalFormulaeN += 5;
+                            chemicalFormulaeO += 2;
+                            break;
+                        case "2AA":
+                            chemicalFormulaeC += 7;
+                            chemicalFormulaeH += 9;
+                            chemicalFormulaeN += 1;
+                            chemicalFormulaeO += 2;
+                            break;
+                        case "2AB":
+                            chemicalFormulaeC += 7;
+                            chemicalFormulaeH += 10;
+                            chemicalFormulaeN += 2;
+                            chemicalFormulaeO += 1;
+                            break;
+                        case "Procainamide":
+                            chemicalFormulaeC += 13;
+                            chemicalFormulaeH += 23;
+                            chemicalFormulaeN += 3;
+                            chemicalFormulaeO += 1;
+                            break;
+                        case "girP":
+                            chemicalFormulaeC += 7;
+                            chemicalFormulaeH += 10;
+                            chemicalFormulaeN += 3;
+                            chemicalFormulaeO += 1;
+                            break;
+                        default:
+                            break;
                     }
                 }
                 else
@@ -964,17 +1295,21 @@ namespace glycombo
                         chemicalFormulaeO += (dhexnacCount * 4);
                         solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
                     }
-                    if (reduced == false)
+
+                    switch (reducingEndBox.SelectedIndex)
                     {
-                        chemicalFormulaeC += 2;
-                        chemicalFormulaeH += 6;
-                        chemicalFormulaeO += 1;
-                    }
-                    else
-                    {
-                        chemicalFormulaeC += 3;
-                        chemicalFormulaeH += 10;
-                        chemicalFormulaeO += 1;
+                        case 0:
+                            chemicalFormulaeC += 2;
+                            chemicalFormulaeH += 6;
+                            chemicalFormulaeO += 1;
+                            break;
+                        case 1:
+                            chemicalFormulaeC += 3;
+                            chemicalFormulaeH += 10;
+                            chemicalFormulaeO += 1;
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -994,30 +1329,57 @@ namespace glycombo
                 // Reducing end status, native or permethylated
                 if (nativeChecked == true)
                 {
-                    // Native
-                    if (reduced == false)
+                    switch (reducedEnd)
                     {
-                        observedMass = s + 18.010565m;
-                        theoreticalMass = target + 18.010565m;
-                    }
-                    else
-                    {
-                        observedMass = s + 20.026215m;
-                        theoreticalMass = target + 20.026215m;
+                        case "Free":
+                            observedMass = s + 18.010565m;
+                            theoreticalMass = target + 18.010565m;
+                            break;
+                        case "Reduced":
+                            observedMass = s + 20.026195m;
+                            theoreticalMass = target + 20.026195m;
+                            break;
+                        case "InstantPC":
+                            observedMass = s + 18.010565m + 261.1477m;
+                            theoreticalMass = target + 18.010565m + 261.1477m;
+                            break;
+                        case "Rapifluor-MS":
+                            observedMass = s + 18.010565m + 311.17461m;
+                            theoreticalMass = target + 18.010565m + 311.17461m;
+                            break;
+                        case "2AA":
+                            observedMass = s + 18.010565m + 121.052774m;
+                            theoreticalMass = target + 18.010565m + 121.052774m;
+                            break;
+                        case "2AB":
+                            observedMass = s + 18.010565m + 120.068758m;
+                            theoreticalMass = target + 18.010565m + 120.068758m;
+                            break;
+                        case "Procainamide":
+                            observedMass = s + 18.010565m + 219.1735574m;
+                            theoreticalMass = target + 18.010565m + 219.1735574m;
+                            break;
+                        case "girP":
+                            observedMass = s + 18.010565m + 134.06405m;
+                            theoreticalMass = target + 18.010565m + 134.06405m;
+                            break;
+                        default:
+                            break;
                     }
                 }
                 else
                 {
                     // Permethylated
-                    if (reduced == false)
+                    switch (reducedEnd)
                     {
-                        observedMass = s + 18.010565m + 28.031300m;
-                        theoreticalMass = target + 18.010565m + 28.031300m;
-                    }
-                    else
-                    {
-                        observedMass = s + 20.026195m + 42.046950m;
-                        theoreticalMass = target + 20.026195m + 42.046950m;
+                        case "Free":
+                            observedMass = s + 18.010565m + 28.031300m;
+                            theoreticalMass = target + 18.010565m + 28.031300m;
+                            break;
+                        case "Reduced":
+                            observedMass = s + 20.026195m + 42.046950m;
+                            theoreticalMass = target + 20.026195m + 42.046950m;
+                            break;
                     }
                 }
 
@@ -1137,6 +1499,51 @@ namespace glycombo
                 {
                     outOfBounds += 1;
                 }
+                if (lNeuAcCount < lNeuAcMin_int
+                    || lNeuAcCount > lNeuAcMax_int)
+                {
+                    outOfBounds += 1;
+                }
+                if (eeNeuAcCount < eeNeuAcMin_int
+                    || eeNeuAcCount > eeNeuAcMax_int)
+                {
+                    outOfBounds += 1;
+                }
+                if (dNeuAcCount < dNeuAcMin_int
+                    || dNeuAcCount > dNeuAcMax_int)
+                {
+                    outOfBounds += 1;
+                }
+                if (amNeuAcCount < amNeuAcMin_int
+                    || amNeuAcCount > amNeuAcMax_int)
+                {
+                    outOfBounds += 1;
+                }
+                if (acetylCount < acetylMin_int
+                    || acetylCount > acetylMax_int)
+                {
+                    outOfBounds += 1;
+                }
+                if (lNeuGcCount < lNeuGcMin_int
+                    || lNeuGcCount > lNeuGcMax_int)
+                {
+                    outOfBounds += 1;
+                }
+                if (eeNeuGcCount < eeNeuGcMin_int
+                    || eeNeuGcCount > eeNeuGcMax_int)
+                {
+                    outOfBounds += 1;
+                }
+                if (dNeuGcCount < dNeuGcMin_int
+                    || dNeuGcCount > dNeuGcMax_int)
+                {
+                    outOfBounds += 1;
+                }
+                if (amNeuGcCount < amNeuGcMin_int
+                    || amNeuGcCount > amNeuGcMax_int)
+                {
+                    outOfBounds += 1;
+                }
 
                 // The only solutions that get reported are those that do not fall outside of any specified monosaccharide ranges
                 if (outOfBounds == 0)
@@ -1179,194 +1586,344 @@ namespace glycombo
             }
         }
 
-        private void ToggleSwitch1_Toggled(object sender, RoutedEventArgs e)
+        private void HextoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container1.Visibility = Visibility.Visible;
+                    Hex_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container1.Visibility = Visibility.Collapsed;
+                    Hex_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch2_Toggled(object sender, RoutedEventArgs e)
+        private void HexNActoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container2.Visibility = Visibility.Visible;
+                    HexNAc_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container2.Visibility = Visibility.Collapsed;
+                    HexNAc_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch3_Toggled(object sender, RoutedEventArgs e)
+        private void dHextoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container3.Visibility = Visibility.Visible;
+                    dHex_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container3.Visibility = Visibility.Collapsed;
+                    dHex_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch4_Toggled(object sender, RoutedEventArgs e)
+        private void Neu5ActoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container4.Visibility = Visibility.Visible;
+                    NeuAc_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container4.Visibility = Visibility.Collapsed;
+                    NeuAc_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch5_Toggled(object sender, RoutedEventArgs e)
+        private void Neu5GctoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container5.Visibility = Visibility.Visible;
+                    NeuGc_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container5.Visibility = Visibility.Collapsed;
+                    NeuGc_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch6_Toggled(object sender, RoutedEventArgs e)
+        private void HexNtoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container6.Visibility = Visibility.Visible;
+                    HexN_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container6.Visibility = Visibility.Collapsed;
+                    HexN_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch7_Toggled(object sender, RoutedEventArgs e)
+        private void HexAtoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container7.Visibility = Visibility.Visible;
+                    HexA_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container7.Visibility = Visibility.Collapsed;
+                    HexA_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch8_Toggled(object sender, RoutedEventArgs e)
+        private void dHexNActoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container8.Visibility = Visibility.Visible;
+                    dHexNAc_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container8.Visibility = Visibility.Collapsed;
+                    dHexNAc_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch9_Toggled(object sender, RoutedEventArgs e)
+        private void PenttoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container9.Visibility = Visibility.Visible;
+                    Pent_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container9.Visibility = Visibility.Collapsed;
+                    Pent_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch10_Toggled(object sender, RoutedEventArgs e)
+        private void KDNtoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container10.Visibility = Visibility.Visible;
+                    KDN_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container10.Visibility = Visibility.Collapsed;
+                    KDN_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch11_Toggled(object sender, RoutedEventArgs e)
+        private void PhostoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container11.Visibility = Visibility.Visible;
+                    Phos_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container11.Visibility = Visibility.Collapsed;
+                    Phos_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
 
-        private void ToggleSwitch12_Toggled(object sender, RoutedEventArgs e)
+        private void SulftoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
                 if (toggleSwitch.IsOn == true)
                 {
-                    container12.Visibility = Visibility.Visible;
+                    Sulf_container.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    container12.Visibility = Visibility.Collapsed;
+                    Sulf_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+
+        private void lNeuActoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    lNeuAc_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    lNeuAc_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        private void eNeuActoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    eNeuAc_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    eNeuAc_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+
+        private void dNeuActoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    dNeuAc_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    dNeuAc_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+
+        private void amNeuActoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    amNeuAc_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    amNeuAc_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        private void AcetyltoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    Acetyl_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    Acetyl_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+
+        private void lNeuGctoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    lNeuGc_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    lNeuGc_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        private void eNeuGctoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    eNeuGc_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    eNeuGc_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+
+        private void dNeuGctoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    dNeuGc_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    dNeuGc_container.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+
+        private void amNeuGctoggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    amNeuGc_container.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    amNeuGc_container.Visibility = Visibility.Collapsed;
                 }
             }
         }
@@ -1381,7 +1938,6 @@ namespace glycombo
             filePath = "";
             offByOneChecked = false;
             nativeChecked = false;
-            freeChecked = false;
             DaChecked = false;
             TextChecked = false;
             submitbutton.IsEnabled = false;
@@ -1390,6 +1946,7 @@ namespace glycombo
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
         {
             submitbutton.IsEnabled = false;
+            TextChecked = false;
         }
 
         private void PresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1420,6 +1977,15 @@ namespace glycombo
                     KDNtoggleSwitch.IsOn = false;
                     PhostoggleSwitch.IsOn = false;
                     SulftoggleSwitch.IsOn = false;
+                    lNeuActoggleSwitch.IsOn = false;
+                    eNeuActoggleSwitch.IsOn = false;
+                    dNeuActoggleSwitch.IsOn = false;
+                    amNeuActoggleSwitch.IsOn = false;
+                    AcetyltoggleSwitch.IsOn = false;
+                    lNeuGctoggleSwitch.IsOn = false;
+                    eNeuGctoggleSwitch.IsOn = false;
+                    dNeuGctoggleSwitch.IsOn = false;
+                    amNeuGctoggleSwitch.IsOn = false;
                     advanced.Visibility = Visibility.Collapsed;
                     advanced_text.Text = "Show Advanced Monosaccharides";
                     break;
@@ -1447,6 +2013,15 @@ namespace glycombo
                     KDNtoggleSwitch.IsOn = false;
                     PhostoggleSwitch.IsOn = false;
                     SulftoggleSwitch.IsOn = false;
+                    lNeuActoggleSwitch.IsOn = false;
+                    eNeuActoggleSwitch.IsOn = false;
+                    dNeuActoggleSwitch.IsOn = false;
+                    amNeuActoggleSwitch.IsOn = false;
+                    AcetyltoggleSwitch.IsOn = false;
+                    lNeuGctoggleSwitch.IsOn = false;
+                    eNeuGctoggleSwitch.IsOn = false;
+                    dNeuGctoggleSwitch.IsOn = false;
+                    amNeuGctoggleSwitch.IsOn = false;
                     advanced.Visibility = Visibility.Collapsed;
                     advanced_text.Text = "Show Advanced Monosaccharides";
                     break;
@@ -1476,6 +2051,15 @@ namespace glycombo
                     SulftoggleSwitch.IsOn = true;
                     SulfMin.Text = "0";
                     SulfMax.Text = "2";
+                    lNeuActoggleSwitch.IsOn = false;
+                    eNeuActoggleSwitch.IsOn = false;
+                    dNeuActoggleSwitch.IsOn = false;
+                    amNeuActoggleSwitch.IsOn = false;
+                    AcetyltoggleSwitch.IsOn = false;
+                    lNeuGctoggleSwitch.IsOn = false;
+                    eNeuGctoggleSwitch.IsOn = false;
+                    dNeuGctoggleSwitch.IsOn = false;
+                    amNeuGctoggleSwitch.IsOn = false;
                     advanced.Visibility = Visibility.Visible;
                     advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
@@ -1503,6 +2087,15 @@ namespace glycombo
                     KDNtoggleSwitch.IsOn = false;
                     PhostoggleSwitch.IsOn = false;
                     SulftoggleSwitch.IsOn = false;
+                    lNeuActoggleSwitch.IsOn = false;
+                    eNeuActoggleSwitch.IsOn = false;
+                    dNeuActoggleSwitch.IsOn = false;
+                    amNeuActoggleSwitch.IsOn = false;
+                    AcetyltoggleSwitch.IsOn = false;
+                    lNeuGctoggleSwitch.IsOn = false;
+                    eNeuGctoggleSwitch.IsOn = false;
+                    dNeuGctoggleSwitch.IsOn = false;
+                    amNeuGctoggleSwitch.IsOn = false;
                     advanced.Visibility = Visibility.Collapsed;
                     advanced_text.Text = "Show Advanced Monosaccharides";
                     break;
@@ -1532,6 +2125,15 @@ namespace glycombo
                     KDNtoggleSwitch.IsOn = false;
                     PhostoggleSwitch.IsOn = false;
                     SulftoggleSwitch.IsOn = false;
+                    lNeuActoggleSwitch.IsOn = false;
+                    eNeuActoggleSwitch.IsOn = false;
+                    dNeuActoggleSwitch.IsOn = false;
+                    amNeuActoggleSwitch.IsOn = false;
+                    AcetyltoggleSwitch.IsOn = false;
+                    lNeuGctoggleSwitch.IsOn = false;
+                    eNeuGctoggleSwitch.IsOn = false;
+                    dNeuGctoggleSwitch.IsOn = false;
+                    amNeuGctoggleSwitch.IsOn = false;
                     advanced.Visibility = Visibility.Visible;
                     advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
@@ -1563,6 +2165,15 @@ namespace glycombo
                     KDNtoggleSwitch.IsOn = false;
                     PhostoggleSwitch.IsOn = false;
                     SulftoggleSwitch.IsOn = false;
+                    lNeuActoggleSwitch.IsOn = false;
+                    eNeuActoggleSwitch.IsOn = false;
+                    dNeuActoggleSwitch.IsOn = false;
+                    amNeuActoggleSwitch.IsOn = false;
+                    AcetyltoggleSwitch.IsOn = false;
+                    lNeuGctoggleSwitch.IsOn = false;
+                    eNeuGctoggleSwitch.IsOn = false;
+                    dNeuGctoggleSwitch.IsOn = false;
+                    amNeuGctoggleSwitch.IsOn = false;
                     advanced.Visibility = Visibility.Visible;
                     advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
@@ -1598,6 +2209,15 @@ namespace glycombo
                     SulftoggleSwitch.IsOn = true;
                     SulfMin.Text = "0";
                     SulfMax.Text = "2";
+                    lNeuActoggleSwitch.IsOn = false;
+                    eNeuActoggleSwitch.IsOn = false;
+                    dNeuActoggleSwitch.IsOn = false;
+                    amNeuActoggleSwitch.IsOn = false;
+                    AcetyltoggleSwitch.IsOn = false;
+                    lNeuGctoggleSwitch.IsOn = false;
+                    eNeuGctoggleSwitch.IsOn = false;
+                    dNeuGctoggleSwitch.IsOn = false;
+                    amNeuGctoggleSwitch.IsOn = false;
                     advanced.Visibility = Visibility.Visible;
                     advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
@@ -1633,6 +2253,15 @@ namespace glycombo
                     SulftoggleSwitch.IsOn = false;
                     SulfMin.Text = "0";
                     SulfMax.Text = "0";
+                    lNeuActoggleSwitch.IsOn = false;
+                    eNeuActoggleSwitch.IsOn = false;
+                    dNeuActoggleSwitch.IsOn = false;
+                    amNeuActoggleSwitch.IsOn = false;
+                    AcetyltoggleSwitch.IsOn = false;
+                    lNeuGctoggleSwitch.IsOn = false;
+                    eNeuGctoggleSwitch.IsOn = false;
+                    dNeuGctoggleSwitch.IsOn = false;
+                    amNeuGctoggleSwitch.IsOn = false;
                     advanced.Visibility = Visibility.Visible;
                     advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
@@ -1641,6 +2270,11 @@ namespace glycombo
                     //what you want when nothing is selected
                     break;
             }
+        }
+
+        private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            TextChecked = true;
         }
     }
 }
