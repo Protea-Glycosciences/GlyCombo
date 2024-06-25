@@ -2275,6 +2275,16 @@ namespace glycombo
         private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
         {
             TextChecked = true;
+            submitbutton = (Button)FindName("submitbutton");
+            if (submitbutton != null)
+            {
+                submitbutton.IsEnabled = true;
+            }
+            else
+            {
+                // Handle the null case
+                Console.WriteLine("submitbutton is null");
+            }
         }
     }
 }
