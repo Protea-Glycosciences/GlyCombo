@@ -1559,11 +1559,14 @@ namespace glycombo
             }
 
             // Keep adding monosaccharides until remainder resets
+            // Starting from current index k, each subset of numbers is considered only once
+            // By starting the loop at k, each combination is built by progressively adding monosaccharides, avoiding different combinations of the same numbers
             for (int k = 0; k < numbers.Count; k++)
             {
                 List<decimal> remaining = [];
                 decimal n = numbers[k];
                 for (int j = k; j < numbers.Count; j++) remaining.Add(numbers[j]);
+                // Combinations are built in a consistent order, avoiding permutations of the same set of monosaccharides
                 List<decimal> partial_rec = new(partial)
                 {
                     n
