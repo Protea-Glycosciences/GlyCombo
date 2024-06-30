@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:glycombo"
         mc:Ignorable="d"
-        Title="GlyCombo 0.5 - Protea Glycosciences" Height="648" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="655" MinWidth="800">
+        Title="GlyCombo 0.6 - Protea Glycosciences" Height="648" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="655" MinWidth="800">
 
 
     <Grid Margin="3,3,7,3" RenderTransformOrigin="0.43,0.449">
@@ -29,7 +29,7 @@
             <RadioButton GroupName="Upload" Name="TextRadioButton" Grid.Row="0" Grid.Column="1" IsChecked="True" Checked="TextRadioButton_Checked">Text</RadioButton>
             <RadioButton GroupName="Upload" Name="MzmlRadioButton" Grid.Row="0" Grid.Column="1" Checked="MzmlRadioButton_Checked">mzML</RadioButton>
             <ui:LayoutPanel x:Name="TextInput" Margin="0,10,0,0" >
-                <TextBox x:Name="InputMasses" Grid.Row="0" Height="65" Width="175" HorizontalAlignment="Left" PreviewTextInput="NumberValidationTextBox" ui:ControlHelper.PlaceholderText="Insert list of masses" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True"></TextBox>
+                <TextBox x:Name="InputMasses" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Height="65" Width="175" HorizontalAlignment="Left" ui:ControlHelper.PlaceholderText="Insert list of masses" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True"></TextBox>
                 <ui:LayoutPanel.Style>
                     <Style TargetType="ui:LayoutPanel">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -58,7 +58,7 @@
         <Label Style="{StaticResource heading}" HorizontalAlignment="Center" Width="114" Height="80" VerticalAlignment="Top" Margin="0,9,0,0" Grid.Row="1">Mass Error:</Label>
         <StackPanel Grid.Column="1" Margin="10,0,10,0" Height="100" VerticalAlignment="Center" Grid.Row="1">
             <ui:LayoutPanel>
-                <TextBox x:Name="DaError" Grid.Row="1" Grid.ColumnSpan="2" Text="0.6" PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" TextAlignment="Right" Width="175"/>
+                <TextBox x:Name="DaError" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="1" Grid.ColumnSpan="2" Text="0.6" HorizontalAlignment="Left" TextAlignment="Right" Width="175"/>
                 <ui:LayoutPanel.Style>
                     <Style TargetType="ui:LayoutPanel">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -71,7 +71,7 @@
                 </ui:LayoutPanel.Style>
             </ui:LayoutPanel>
             <ui:LayoutPanel>
-                <TextBox x:Name="ppmError" Grid.Row="1" Grid.ColumnSpan="2" Text="50" HorizontalAlignment="Left" TextAlignment="Right" Width="175"/>
+                <TextBox x:Name="ppmError" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="1" Grid.ColumnSpan="2" Text="50" HorizontalAlignment="Left" TextAlignment="Right" Width="175"/>
                 <ui:LayoutPanel.Style>
                     <Style TargetType="ui:LayoutPanel">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -117,36 +117,36 @@
         <ui:ToggleSwitch x:Name="HextoggleSwitch" Grid.Row="0" Grid.Column="2" Margin="0,20,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="HextoggleSwitch_Toggled" Width="50" Height="32"/>
         <Label Grid.Row="0" Grid.Column="2" Margin="50,26,0,0" Height="20" VerticalAlignment="Top">Hexose (Hex)</Label>
         <ui:LayoutPanel x:Name="Hex_container" Grid.Row="0" Grid.Column="2" Margin="0,26,0,147" Visibility="Collapsed">
-            <TextBox x:Name="HexMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2"  VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
-            <TextBox x:Name="HexMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+            <TextBox x:Name="HexMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2"  VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+            <TextBox x:Name="HexMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
         </ui:LayoutPanel>
 
         <ui:ToggleSwitch x:Name="HexNActoggleSwitch" Grid.Row="0" Grid.Column="2" Margin="0,46,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="HexNActoggleSwitch_Toggled" Width="50" Height="32"/>
         <Label Grid.Row="0" Grid.Column="2" Margin="50,53,0,0" Height="20" VerticalAlignment="Top">N-acetyl-hexosamine (HexNAc)</Label>
         <ui:LayoutPanel x:Name="HexNAc_container" Grid.Row="0" Grid.Column="2" Margin="0,53,0,122" Visibility="Collapsed">
-            <TextBox x:Name="HexNAcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
-            <TextBox x:Name="HexNAcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+            <TextBox x:Name="HexNAcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+            <TextBox x:Name="HexNAcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
         </ui:LayoutPanel>
 
         <ui:ToggleSwitch x:Name="dHextoggleSwitch" Grid.Column="2" OffContent="" OnContent="" Toggled="dHextoggleSwitch_Toggled" Width="50" Height="32" Margin="0,72,0,0" VerticalAlignment="Top"/>
         <Label Grid.Column="2" Margin="50,77,0,0" Height="20" VerticalAlignment="Top">Deoxyhexose (dHex)</Label>
         <ui:LayoutPanel x:Name="dHex_container" Grid.Row="0" Grid.Column="2" Margin="0,77,0,96" Visibility="Collapsed">
-            <TextBox x:Name="dHexMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
-            <TextBox x:Name="dHexMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+            <TextBox x:Name="dHexMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+            <TextBox x:Name="dHexMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Right"/>
         </ui:LayoutPanel>
 
         <ui:ToggleSwitch x:Name="Neu5ActoggleSwitch" Grid.Column="2" OffContent="" OnContent="" Toggled="Neu5ActoggleSwitch_Toggled" Width="50" Height="32" Margin="0,98,0,0" VerticalAlignment="Top"/>
         <Label Grid.Row="0" Grid.Column="2" Margin="50,104,0,0" Height="20" VerticalAlignment="Top">N-acetyl-neuraminic acid (NeuAc)</Label>
         <ui:LayoutPanel x:Name="NeuAc_container" Grid.Row="0" Grid.Column="2" Margin="0,104,0,42" Visibility="Collapsed">
-            <TextBox x:Name="Neu5AcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
-            <TextBox x:Name="Neu5AcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
+            <TextBox x:Name="Neu5AcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
+            <TextBox x:Name="Neu5AcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
         </ui:LayoutPanel>
 
         <ui:ToggleSwitch x:Name="Neu5GctoggleSwitch" Grid.Row="0" Grid.Column="2" Margin="0,124,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="Neu5GctoggleSwitch_Toggled" Width="50" Height="32"/>
         <Label Grid.Row="0" Grid.Column="2" Margin="50,130,0,0" Height="20" VerticalAlignment="Top">N-glycolyl-neuraminic acid (NeuGc)</Label>
         <ui:LayoutPanel x:Name="NeuGc_container" Grid.Row="0" Grid.Column="2" Margin="0,129,0,17" Visibility="Collapsed">
-            <TextBox x:Name="Neu5GcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
-            <TextBox x:Name="Neu5GcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
+            <TextBox x:Name="Neu5GcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
+            <TextBox x:Name="Neu5GcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
         </ui:LayoutPanel>
 
         <Button x:Name="advanced_button" Grid.Column="2" VerticalAlignment="Top" Click="Advanced_Button" Margin="10,157,0,0" Padding="8,2,8,2" Height="27" Width="230">
@@ -169,113 +169,113 @@
             <ui:ToggleSwitch x:Name="HexNtoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,397" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="HexNtoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,404" Height="20" VerticalAlignment="Bottom">Hexosamine (HexN)</Label>
             <ui:LayoutPanel x:Name="HexN_container" Margin="0,0,0,401" Visibility="Collapsed" Height="24" VerticalAlignment="Bottom">
-                <TextBox x:Name="HexNMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
-                <TextBox x:Name="HexNMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+                <TextBox x:Name="HexNMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+                <TextBox x:Name="HexNMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="HexAtoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" OffContent="" OnContent="" Toggled="HexAtoggleSwitch_Toggled" Width="50" Margin="0,0,0,370" VerticalAlignment="Bottom"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,377" Height="20" VerticalAlignment="Bottom">Hexuronic acid (HexA)</Label>
             <ui:LayoutPanel x:Name="HexA_container" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,363" Visibility="Collapsed" Height="34" VerticalAlignment="Bottom">
-                <TextBox x:Name="HexAMin" PreviewTextInput="NumberValidationTextBox" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,2,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
-                <TextBox x:Name="HexAMax" PreviewTextInput="NumberValidationTextBox" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,2,0,0" Width="50" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+                <TextBox x:Name="HexAMin" local:NumericInputBehavior.IsNumericInput="True" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,2,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+                <TextBox x:Name="HexAMax" local:NumericInputBehavior.IsNumericInput="True" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,2,0,0" Width="50" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="dHexNActoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" OffContent="" OnContent="" Toggled="dHexNActoggleSwitch_Toggled" Width="50" Margin="0,0,0,343" VerticalAlignment="Bottom"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,350" Height="20" VerticalAlignment="Bottom">N-acetyl-deoxyhexose (dHexNAc)</Label>
             <ui:LayoutPanel x:Name="dHexNAc_container" Margin="0,0,0,342" Visibility="Collapsed" Height="28" VerticalAlignment="Bottom">
-                <TextBox x:Name="dHexNAcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,1,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
-                <TextBox x:Name="dHexNAcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,1,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+                <TextBox x:Name="dHexNAcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,1,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+                <TextBox x:Name="dHexNAcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,1,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="PenttoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" OffContent="" OnContent="" Toggled="PenttoggleSwitch_Toggled" Width="50" Margin="0,0,0,316" VerticalAlignment="Bottom"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,321" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="248">Pentose (Pent)</Label>
             <ui:LayoutPanel x:Name="Pent_container" Margin="0,0,0,314" Visibility="Collapsed" Height="29" VerticalAlignment="Bottom">
-                <TextBox x:Name="PentMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
-                <TextBox x:Name="PentMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="PentMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="PentMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="KDNtoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,289" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="KDNtoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,296" Height="20" VerticalAlignment="Bottom">KDN</Label>
             <ui:LayoutPanel x:Name="KDN_container" Margin="0,0,0,289" Visibility="Collapsed" Height="27" VerticalAlignment="Bottom">
-                <TextBox x:Name="KDNMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
-                <TextBox x:Name="KDNMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="KDNMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="KDNMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="PhostoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,262" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="PhostoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,269" Height="20" VerticalAlignment="Bottom">Phosphate (Phos)</Label>
             <ui:LayoutPanel x:Name="Phos_container" Margin="0,0,0,262" Visibility="Collapsed" Height="27" VerticalAlignment="Bottom">
-                <TextBox x:Name="PhosMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
-                <TextBox x:Name="PhosMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="PhosMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="PhosMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="SulftoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,235" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="SulftoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,242" Height="20" VerticalAlignment="Bottom">Sulfate (Sulf)</Label>
             <ui:LayoutPanel x:Name="Sulf_container" Margin="0,0,0,235" Visibility="Collapsed" Height="27" VerticalAlignment="Bottom">
-                <TextBox x:Name="SulfMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
-                <TextBox x:Name="SulfMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="SulfMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="SulfMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="lNeuActoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,211" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="lNeuActoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,217" Height="20" VerticalAlignment="Bottom">Lactonised NeuAc (L)</Label>
             <ui:LayoutPanel x:Name="lNeuAc_container" Margin="0,0,0,210" Visibility="Collapsed" Height="27" VerticalAlignment="Bottom">
-                <TextBox x:Name="lNeuAcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
-                <TextBox x:Name="lNeuAcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="lNeuAcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="lNeuAcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="eNeuActoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,186" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="eNeuActoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,192" Height="20" VerticalAlignment="Bottom">Ethyl Esterified NeuAc (E)</Label>
             <ui:LayoutPanel x:Name="eNeuAc_container" Margin="0,0,0,191" Visibility="Collapsed" Height="21" VerticalAlignment="Bottom">
-                <TextBox x:Name="eeNeuAcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
-                <TextBox x:Name="eeNeuAcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="eeNeuAcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="eeNeuAcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="dNeuActoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,161" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="dNeuActoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,167" Height="20" VerticalAlignment="Bottom">Diethylamidated NeuAc (D)</Label>
             <ui:LayoutPanel x:Name="dNeuAc_container" Margin="0,0,0,162" Visibility="Collapsed" Height="24" VerticalAlignment="Bottom">
-                <TextBox x:Name="dNeuAcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
-                <TextBox x:Name="dNeuAcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="dNeuAcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="dNeuAcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="amNeuActoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,136" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="amNeuActoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,142" Height="20" VerticalAlignment="Bottom">Ammonia Amidated NeuAc (Am)</Label>
             <ui:LayoutPanel x:Name="amNeuAc_container" Margin="0,0,0,142" Visibility="Collapsed" Height="20" VerticalAlignment="Bottom">
-                <TextBox x:Name="amNeuAcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
-                <TextBox x:Name="amNeuAcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="amNeuAcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="amNeuAcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="AcetyltoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,111" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="AcetyltoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,117" Height="20" VerticalAlignment="Bottom">Acetylation (Acetyl)</Label>
             <ui:LayoutPanel x:Name="Acetyl_container" Margin="0,0,0,116" Visibility="Collapsed" Height="21" VerticalAlignment="Bottom">
-                <TextBox x:Name="AcetylMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
-                <TextBox x:Name="AcetylMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="AcetylMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
+                <TextBox x:Name="AcetylMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"></TextBox>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="lNeuGctoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,85" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="lNeuGctoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,92" Height="20" VerticalAlignment="Bottom">Lactonised NeuGc (LG)</Label>
             <ui:LayoutPanel x:Name="lNeuGc_container" Margin="0,0,0,89" Visibility="Collapsed" Height="22" VerticalAlignment="Bottom">
-                <TextBox x:Name="lNeuGcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
-                <TextBox x:Name="lNeuGcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="lNeuGcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="lNeuGcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="eNeuGctoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,59" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="eNeuGctoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,66" Height="20" VerticalAlignment="Bottom">Ethyl Esterified NeuGc (EG)</Label>
             <ui:LayoutPanel x:Name="eNeuGc_container" Margin="0,0,0,63" Visibility="Collapsed" Height="21" VerticalAlignment="Bottom">
-                <TextBox x:Name="eeNeuGcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
-                <TextBox x:Name="eeNeuGcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="eeNeuGcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
+                <TextBox x:Name="eeNeuGcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="dNeuGctoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,33" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="dNeuGctoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,39" Height="20" VerticalAlignment="Bottom">Diethylamidated NeuGc (DG)</Label>
             <ui:LayoutPanel x:Name="dNeuGc_container" Margin="0,0,0,38" Visibility="Collapsed" Height="20" VerticalAlignment="Bottom">
-                <TextBox x:Name="dNeuGcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
-                <TextBox x:Name="dNeuGcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="dNeuGcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="dNeuGcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
             </ui:LayoutPanel>
 
             <ui:ToggleSwitch x:Name="amNeuGctoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="0,0,0,7" VerticalAlignment="Bottom" OffContent="" OnContent="" Toggled="amNeuGctoggleSwitch_Toggled" Width="50"/>
             <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,13" Height="20" VerticalAlignment="Bottom">Ammonia Amidated NeuGc (AmG)</Label>
             <ui:LayoutPanel x:Name="amNeuGc_container" Margin="0,0,0,13" Visibility="Collapsed" Height="20" VerticalAlignment="Bottom">
-                <TextBox x:Name="amNeuGcMin" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
-                <TextBox x:Name="amNeuGcMax" Grid.Row="0" Grid.RowSpan="5" PreviewTextInput="NumberValidationTextBox" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="amNeuGcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
+                <TextBox x:Name="amNeuGcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
             </ui:LayoutPanel>
 
         </ui:LayoutPanel>
@@ -287,6 +287,7 @@
             </Hyperlink>
         </TextBlock>
         <ProgressBar x:Name="ProgressBarMZML" Visibility="Collapsed" IsIndeterminate="True" HorizontalAlignment="Left" Height="8" Margin="10,73,0,0" Width="175" RenderTransformOrigin="0.5,0.5" Grid.Column="1" VerticalAlignment="Top"/>
+        <Button x:Name="customMonosaccharides" Grid.Column="2" Content="{Binding ButtonText}" MinWidth="125" IsEnabled="True" Click="customMonosaccharides_Click" Margin="109,3,0,0" VerticalAlignment="Top" Height="18" Width="99" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden" Background="#33000000" FontSize="12" Padding="1,1,1,1" BorderThickness="0,0,0,0" HorizontalContentAlignment="Center"/>
     </Grid>
 
 </Window>
