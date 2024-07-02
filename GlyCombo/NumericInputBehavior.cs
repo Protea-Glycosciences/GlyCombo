@@ -30,34 +30,43 @@ namespace glycombo
             {
                 if ((bool)e.NewValue)
                 {
-                    textBox.PreviewTextInput += TextBox_PreviewTextInput;
+                    textBox.PreviewTextInput += OnPreviewTextInput;
+                    textBox.PreviewKeyDown += OnPreviewKeyDown;
                     DataObject.AddPastingHandler(textBox, OnPaste);
                 }
                 else
                 {
-                    textBox.PreviewTextInput -= TextBox_PreviewTextInput;
+                    textBox.PreviewTextInput -= OnPreviewTextInput;
+                    textBox.PreviewKeyDown -= OnPreviewKeyDown;
                     DataObject.RemovePastingHandler(textBox, OnPaste);
                 }
             }
         }
 
-        private static void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private static void OnPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            TextBox textBox = sender as TextBox;
-            string newText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
+            e.Handled = !IsTextAllowed(e.Text);
+        }
 
-            e.Handled = !Regex.IsMatch(newText, @"^[0-9]*\.?[0-9]*$") || (e.Text == "." && textBox.Text.Contains("."));
+        private static void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Enter)
+            {
+                // Allow Enter key for new line
+                e.Handled = false;
+            }
         }
 
         private static void OnPaste(object sender, DataObjectPastingEventArgs e)
         {
             if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                string text = (string)e.DataObject.GetData(typeof(string));
-                TextBox textBox = sender as TextBox;
-                string newText = textBox.Text.Insert(textBox.SelectionStart, text);
-
-                if (!Regex.IsMatch(newText, @"^[0-9]*\.?[0-9]*$"))
+                var text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsTextAllowed(text))
                 {
                     e.CancelCommand();
                 }
@@ -66,6 +75,12 @@ namespace glycombo
             {
                 e.CancelCommand();
             }
+        }
+
+        private static bool IsTextAllowed(string text)
+        {
+            var regex = new Regex(@"^[0-9]*\.?[0-9]*$");
+            return regex.IsMatch(text) || text.Contains("\n") || text.Contains("\r");
         }
     }
 }
