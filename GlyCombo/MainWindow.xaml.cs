@@ -2543,7 +2543,7 @@ namespace glycombo
 
         private void customMonosaccharides_Click(object sender, RoutedEventArgs e)
         {
-            if (customInfoForm == null) // Create a new instance if it doesn't exist or is disposed
+            if (customInfoForm == null || !customInfoForm.IsLoaded) // Create a new instance if it doesn't exist or is disposed
             {
                 customInfoForm = new CustomForm(ViewModel);
                 customInfoForm.Show();
