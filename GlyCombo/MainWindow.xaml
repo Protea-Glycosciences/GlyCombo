@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:glycombo"
         mc:Ignorable="d"
-        Title="GlyCombo 0.6 - Protea Glycosciences" Height="648" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="655" MinWidth="800">
+        Title="GlyCombo 0.6.1 - Protea Glycosciences" Height="648" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="655" MinWidth="800">
 
 
     <Grid Margin="3,3,7,3" RenderTransformOrigin="0.43,0.449">
