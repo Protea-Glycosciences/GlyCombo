@@ -247,7 +247,7 @@ namespace glycombo
             DataContext = ViewModel;
         }
 
-            private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             // Taking user to the Github website for support
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
@@ -260,7 +260,14 @@ namespace glycombo
             {
                 ProgressBarMZML.Visibility = Visibility.Visible;
                 // Running the mzML formatting in a different thread so we can give a status update
-                await Task.Run(() => mzMLProcess());
+                if (TextRadioButton.IsChecked != true)
+                {
+                    await Task.Run(() => mzMLProcess());
+                }
+                else
+                {
+                    await Task.Run(() => txtProcess());
+                }
             }
             finally
             {
@@ -298,6 +305,179 @@ namespace glycombo
             polarity = "";
             List<decimal> precursors = [];
                 foreach (String file in openFileDialog.FileNames)
+            {
+                // Going to process each file one at a time using this section of the code.
+                // Read each line from the given file
+                StreamReader sr = new(file);
+
+                // Parse each line of the mzml to extract important information from MS2 scans of the mzML (polarity, precursor m/z, charge state, scan # for given MS2)
+                while ((line = sr.ReadLine()) != null)
+                {
+                    // Problem: Bruker and Thermo mzmls have all lines in different positions
+                    // Thermo order: Spectrum index (including scan#), then "ms level" value="2", then "negative", then "selected ion m/z", then "charge state"
+                    // Bruker order: Spectrum index (including scan#), then "negative scan", then "ms level" value ="2", then "charge state", then "selected ion m/z"
+                    // Sciex doesn't use scan #, so we've adapted cycle and experiment number to make (X.Y) representation instead
+                    // Code modified to perform this per spectrum, rather than trying to hard code by line positions
+
+                    // find lines containing positive or negative mode
+                    if (line.Contains("MS:1000129"))
+                    {
+                        polarity = "negative";
+                    }
+                    if (line.Contains("MS:1000130"))
+                    {
+                        polarity = "positive";
+                    }
+
+                    // find lines containing retention time, to minute time scale
+                    if (line.Contains("MS:1000016"))
+                    {
+                        // Bruker records retention time by the second
+                        if (line.Contains("unitName=\"second\""))
+                        {
+                            // split the line containing this by "
+                            RTLine = line.Split("\"");
+                            // After the 7th ", that's where the charge can be found, so convert it from string array into int
+                            retentionTime = decimal.Parse(RTLine[7]) / 60;
+                        }
+                        else
+                        // whereas Thermo/Sciex records RT by the minute
+                        {
+                            // split the line containing this by "
+                            RTLine = line.Split("\"");
+                            // After the 7th ", that's where the charge can be found, so convert it from string array into int
+                            retentionTime = decimal.Parse(RTLine[7]);
+                        }
+                    }
+
+                    // find lines containing total ion chromatogram intensity for that scan, only supported by Thermo and Sciex
+                    if (line.Contains("MS:1000285"))
+                    {
+                        // split the line containing this by "
+                        TICLine = line.Split("\"");
+                        // After the 7th ", that's where the charge can be found, so convert it from string array into int
+                        TIC = decimal.Parse(TICLine[7], System.Globalization.NumberStyles.AllowExponent | System.Globalization.NumberStyles.AllowDecimalPoint);
+                    }
+
+                    // find lines containing the precursor
+                    if (line.Contains("\"selected ion m/z\""))
+                    {
+                        // split the line containing this by "
+                        precursorLine = line.Split("\"");
+                        // After the 7th ", that's where the precursor m/z can be found, so convert it from string array into decimal for accuracy
+                        precursor = Math.Round(decimal.Parse(precursorLine[7]), 6);
+                    }
+                    // find lines containing the charge
+                    if (line.Contains("\"charge state\""))
+                    {
+                        // split the line containing this by "
+                        chargeLine = line.Split("\"");
+                        // After the 7th ", that's where the charge can be found, so convert it from string array into int
+                        charge = int.Parse(chargeLine[7]);
+                    }
+                    // find lines containing the scan number
+                    if (line.Contains("scan=")
+                        // To ensure we don't pick up the Thermo spectrum title
+                        && line.Contains("defaultArrayLength"))
+                    {
+                        // split the line containing this by "
+                        scanLine = line.Split("\"");
+                        // After the 3rd ", that's where the scan # can be found. This is the Thermo-specific extraction:
+                        if (line.Contains("controller"))
+                        {
+                            scanNumber = scanLine[3].Replace("controllerType=0 controllerNumber=1 scan=", "");
+                        }
+                        // And this is for Bruker
+                        else
+                        {
+                            scanNumber = scanLine[3].Replace("scan=", "");
+                        }
+                    }
+                    // Sciex specific scan number interpretation
+                    if (line.Contains(" cycle=")
+                        && line.Contains(" experiment=")
+                        && line.Contains("defaultArrayLength"))
+                    {
+                        //split the line containing cycle and experiment number by =
+                        scanLine = line.Split("=");
+                        // Cycle # is after the 5th "="
+                        string cycleScan = scanLine[5].Replace(" experiment", ".");
+                        string experimentScan = scanLine[6].Replace("\" defaultArrayLength", "");
+                        scanNumber = cycleScan + experimentScan;
+                    }
+                    if (line.Contains("</spectrum>"))
+                    {
+                        if (precursor != 0 && charge != 0)
+                        {
+                            // Convert precursor m/z and z to obtain neutral precursor mass
+                            switch (polarity)
+                            {
+                                case "negative":
+                                    neutralPrecursorListmzml += Convert.ToString(charge * precursor + (charge * 1.007276m)) + Environment.NewLine;
+                                    charge = -charge;
+                                    break;
+                                case "positive":
+                                    neutralPrecursorListmzml += Convert.ToString(charge * precursor - (charge * 1.007276m)) + Environment.NewLine;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            // Put the scan value into a list of scan numbers that feature MS2.
+                            scans.Add(decimal.Parse(scanNumber));
+                            // Adds charge to a list for the end report
+                            charges.Add(charge);
+                            // Add RT to a list for the end report
+                            retentionTimes.Add(retentionTime);
+                            // Add TIC to a list for the end report
+                            TICs.Add(TIC);
+                            // Add stripped file name to the index
+                            string fileName = file.Substring(file.LastIndexOf('\\') + 1);
+                            files.Add(fileName);
+                        }
+                        precursor = 0;
+                        charge = 0;
+                        scanNumber = "";
+                        polarity = "";
+                        retentionTime = 0;
+                        TIC = 0;
+                    }
+                }
+                string fileNameOutput = file.Substring(file.LastIndexOf('\\') + 1);
+            }
+            if (!scans.Any())
+            {
+                MessageBox.Show("No MS2 found in the given mzML file. Please confirm the selected file has MS2 scans, or select a different file.");
+            }
+            else
+            {
+                // Provide list of all filenames provided in the openFileDialog, without the directory name
+                string allFiles = string.Join(", ", openFileDialog.FileNames.Select(System.IO.Path.GetFileName));
+                // Provide number of scans for each filename
+                MessageBox.Show("Files " + allFiles + " have completed uploading with a total number of " + scans.Count + " MS2 scans identified.");
+            }
+        }
+
+        private void txtProcess()
+        {
+            // Ask the user which text or csv file they want to analyse. Also allow .csv input.
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "text files (mzML)|*.mzML",
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+
+                // Get the selected file path
+                filePath = openFileDialog.FileName;
+            }
+            else
+            {
+                return;
+            }
+
+            List<decimal> precursors = [];
+            foreach (String file in openFileDialog.FileNames)
             {
                 // Going to process each file one at a time using this section of the code.
                 // Read each line from the given file
@@ -1826,20 +2006,6 @@ namespace glycombo
             }
         }
 
-        private void Advanced_Button(object sender, RoutedEventArgs e)
-        {
-            if (advanced.Visibility == Visibility.Collapsed)
-            {
-                advanced.Visibility = Visibility.Visible;
-                advanced_text.Text = "Hide Advanced Monosaccharides";
-            }
-            else
-            {
-                advanced.Visibility = Visibility.Collapsed;
-                advanced_text.Text = "Show Advanced Monosaccharides";
-            }
-        }
-
         private void HextoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
@@ -2199,6 +2365,17 @@ namespace glycombo
 
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
         {
+            browseButton = (Button)FindName("browseButton");
+            if (browseButton != null)
+            {
+                browseButton.IsEnabled = true;
+                browseButton.Content = "Browse mzML";
+            }
+            else
+            {
+                // Handle the null case
+                Console.WriteLine("browseButton is null");
+            }
             submitbutton.IsEnabled = false;
             TextChecked = false;
         }
@@ -2240,8 +2417,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Collapsed;
-                    advanced_text.Text = "Show Advanced Monosaccharides";
                     break;
 
                 case 1: // Mammal NG
@@ -2276,8 +2451,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Collapsed;
-                    advanced_text.Text = "Show Advanced Monosaccharides";
                     break;
 
                 case 2: // Mammal OG
@@ -2314,8 +2487,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 case 3: // GSL
@@ -2350,8 +2521,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Collapsed;
-                    advanced_text.Text = "Show Advanced Monosaccharides";
                     break;
 
                 case 4: // Plant N-glycan
@@ -2388,8 +2557,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 case 5: // Plant O-glycan
@@ -2428,8 +2595,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 case 6: // Fungal N-glycan
@@ -2472,8 +2637,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 case 7: // Fungal O-glycan
@@ -2516,8 +2679,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 default:
@@ -2529,6 +2690,17 @@ namespace glycombo
         private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
         {
             TextChecked = true;
+            browseButton = (Button)FindName("browseButton");
+            if (browseButton != null)
+            {
+                browseButton.IsEnabled = true;
+                browseButton.Content = "Browse txt";
+            }
+            else
+            {
+                // Handle the null case
+                Console.WriteLine("browseButton is null");
+            }
             submitbutton = (Button)FindName("submitbutton");
             if (submitbutton != null)
             {
@@ -2553,5 +2725,6 @@ namespace glycombo
                 customInfoForm.Show(); // Bring the existing form to the front if it's already open
             }
         }
+
     }
 }
