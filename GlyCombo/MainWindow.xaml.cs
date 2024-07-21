@@ -62,6 +62,7 @@ namespace glycombo
         private decimal eeneugc;
         private decimal dneugc;
         private decimal amneugc;
+        private decimal sulf;
         private int HexMin_int;
         private int HexMax_int;
         private int HexNAcMin_int;
@@ -188,7 +189,6 @@ namespace glycombo
         // For multiple tasks, enabling progress bar
         private bool DaChecked;
         private bool TextChecked;
-        private bool nativeChecked;
         private bool offByOneChecked;
 
 
@@ -266,7 +266,48 @@ namespace glycombo
                 }
                 else
                 {
-                    await Task.Run(() => txtProcess());
+                    // Ask the user which text or csv file they want to analyse. Also allow .csv input.
+                    OpenFileDialog openFileDialog = new()
+                    {
+                        Filter = "Text files (*.txt)|*.txt|CSV files (*.csv)|*.csv",
+                        Multiselect = true
+                    };
+
+                    if (openFileDialog.ShowDialog() == true)
+                    {
+
+                        // Get the selected file path
+                        filePath = openFileDialog.FileName;
+                    }
+                    else
+                    {
+                        return;
+                    }
+
+                    foreach (String file in openFileDialog.FileNames)
+                    {
+                        // File type specific processing
+                        string fileExtension = System.IO.Path.GetExtension(file).ToLower();
+                        string fileContent = "";
+
+                        if (fileExtension == ".txt")
+                        {
+                            // Process to make a string from the txt file
+                            fileContent = ReadMassFileWithSeparator(file, Environment.NewLine);
+
+                            // Replace text box with the individual mass values
+                            InputMasses.Text = fileContent;
+                        }
+                        else if (fileExtension == ".csv")
+                        {
+                            // Process to make a string from the csv
+                            fileContent = ReadMassFileWithSeparator(file, ",");
+
+                            // Replace text box with the individual mass values
+                            InputMasses.Text = fileContent;
+
+                        }
+                    }
                 }
             }
             finally
@@ -457,177 +498,18 @@ namespace glycombo
             }
         }
 
-        private void txtProcess()
+        static string ReadMassFileWithSeparator(string filePath, string separator)
         {
-            // Ask the user which text or csv file they want to analyse. Also allow .csv input.
-            OpenFileDialog openFileDialog = new()
+            // Processes the neutral mass input with separators
+            string[] lines = File.ReadAllLines(filePath);
+            if (separator == ",")
             {
-                Filter = "text files (mzML)|*.mzML",
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-
-                // Get the selected file path
-                filePath = openFileDialog.FileName;
-            }
-            else
-            {
-                return;
-            }
-
-            List<decimal> precursors = [];
-            foreach (String file in openFileDialog.FileNames)
-            {
-                // Going to process each file one at a time using this section of the code.
-                // Read each line from the given file
-                StreamReader sr = new(file);
-
-                // Parse each line of the mzml to extract important information from MS2 scans of the mzML (polarity, precursor m/z, charge state, scan # for given MS2)
-                while ((line = sr.ReadLine()) != null)
+                for (int i = 0; i < lines.Length; i++)
                 {
-                    // Problem: Bruker and Thermo mzmls have all lines in different positions
-                    // Thermo order: Spectrum index (including scan#), then "ms level" value="2", then "negative", then "selected ion m/z", then "charge state"
-                    // Bruker order: Spectrum index (including scan#), then "negative scan", then "ms level" value ="2", then "charge state", then "selected ion m/z"
-                    // Sciex doesn't use scan #, so we've adapted cycle and experiment number to make (X.Y) representation instead
-                    // Code modified to perform this per spectrum, rather than trying to hard code by line positions
-
-                    // find lines containing positive or negative mode
-                    if (line.Contains("MS:1000129"))
-                    {
-                        polarity = "negative";
-                    }
-                    if (line.Contains("MS:1000130"))
-                    {
-                        polarity = "positive";
-                    }
-
-                    // find lines containing retention time, to minute time scale
-                    if (line.Contains("MS:1000016"))
-                    {
-                        // Bruker records retention time by the second
-                        if (line.Contains("unitName=\"second\""))
-                        {
-                            // split the line containing this by "
-                            RTLine = line.Split("\"");
-                            // After the 7th ", that's where the charge can be found, so convert it from string array into int
-                            retentionTime = decimal.Parse(RTLine[7]) / 60;
-                        }
-                        else
-                        // whereas Thermo/Sciex records RT by the minute
-                        {
-                            // split the line containing this by "
-                            RTLine = line.Split("\"");
-                            // After the 7th ", that's where the charge can be found, so convert it from string array into int
-                            retentionTime = decimal.Parse(RTLine[7]);
-                        }
-                    }
-
-                    // find lines containing total ion chromatogram intensity for that scan, only supported by Thermo and Sciex
-                    if (line.Contains("MS:1000285"))
-                    {
-                        // split the line containing this by "
-                        TICLine = line.Split("\"");
-                        // After the 7th ", that's where the charge can be found, so convert it from string array into int
-                        TIC = decimal.Parse(TICLine[7], System.Globalization.NumberStyles.AllowExponent | System.Globalization.NumberStyles.AllowDecimalPoint);
-                    }
-
-                    // find lines containing the precursor
-                    if (line.Contains("\"selected ion m/z\""))
-                    {
-                        // split the line containing this by "
-                        precursorLine = line.Split("\"");
-                        // After the 7th ", that's where the precursor m/z can be found, so convert it from string array into decimal for accuracy
-                        precursor = Math.Round(decimal.Parse(precursorLine[7]), 6);
-                    }
-                    // find lines containing the charge
-                    if (line.Contains("\"charge state\""))
-                    {
-                        // split the line containing this by "
-                        chargeLine = line.Split("\"");
-                        // After the 7th ", that's where the charge can be found, so convert it from string array into int
-                        charge = int.Parse(chargeLine[7]);
-                    }
-                    // find lines containing the scan number
-                    if (line.Contains("scan=")
-                        // To ensure we don't pick up the Thermo spectrum title
-                        && line.Contains("defaultArrayLength"))
-                    {
-                        // split the line containing this by "
-                        scanLine = line.Split("\"");
-                        // After the 3rd ", that's where the scan # can be found. This is the Thermo-specific extraction:
-                        if (line.Contains("controller"))
-                        {
-                            scanNumber = scanLine[3].Replace("controllerType=0 controllerNumber=1 scan=", "");
-                        }
-                        // And this is for Bruker
-                        else
-                        {
-                            scanNumber = scanLine[3].Replace("scan=", "");
-                        }
-                    }
-                    // Sciex specific scan number interpretation
-                    if (line.Contains(" cycle=")
-                        && line.Contains(" experiment=")
-                        && line.Contains("defaultArrayLength"))
-                    {
-                        //split the line containing cycle and experiment number by =
-                        scanLine = line.Split("=");
-                        // Cycle # is after the 5th "="
-                        string cycleScan = scanLine[5].Replace(" experiment", ".");
-                        string experimentScan = scanLine[6].Replace("\" defaultArrayLength", "");
-                        scanNumber = cycleScan + experimentScan;
-                    }
-                    if (line.Contains("</spectrum>"))
-                    {
-                        if (precursor != 0 && charge != 0)
-                        {
-                            // Convert precursor m/z and z to obtain neutral precursor mass
-                            switch (polarity)
-                            {
-                                case "negative":
-                                    neutralPrecursorListmzml += Convert.ToString(charge * precursor + (charge * 1.007276m)) + Environment.NewLine;
-                                    charge = -charge;
-                                    break;
-                                case "positive":
-                                    neutralPrecursorListmzml += Convert.ToString(charge * precursor - (charge * 1.007276m)) + Environment.NewLine;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            // Put the scan value into a list of scan numbers that feature MS2.
-                            scans.Add(decimal.Parse(scanNumber));
-                            // Adds charge to a list for the end report
-                            charges.Add(charge);
-                            // Add RT to a list for the end report
-                            retentionTimes.Add(retentionTime);
-                            // Add TIC to a list for the end report
-                            TICs.Add(TIC);
-                            // Add stripped file name to the index
-                            string fileName = file.Substring(file.LastIndexOf('\\') + 1);
-                            files.Add(fileName);
-                        }
-                        precursor = 0;
-                        charge = 0;
-                        scanNumber = "";
-                        polarity = "";
-                        retentionTime = 0;
-                        TIC = 0;
-                    }
+                    lines[i] = lines[i].Replace(",", Environment.NewLine);
                 }
-                string fileNameOutput = file.Substring(file.LastIndexOf('\\') + 1);
             }
-            if (!scans.Any())
-            {
-                MessageBox.Show("No MS2 found in the given mzML file. Please confirm the selected file has MS2 scans, or select a different file.");
-            }
-            else
-            {
-                // Provide list of all filenames provided in the openFileDialog, without the directory name
-                string allFiles = string.Join(", ", openFileDialog.FileNames.Select(System.IO.Path.GetFileName));
-                // Provide number of scans for each filename
-                MessageBox.Show("Files " + allFiles + " have completed uploading with a total number of " + scans.Count + " MS2 scans identified.");
-            }
+            return string.Join(separator, lines);
         }
 
         // Execution of the combinatorial analysis
@@ -728,24 +610,40 @@ namespace glycombo
                     eeneugc = 335.1216313m;
                     dneugc = 306.1063155m;
                     amneugc = 334.1376157m;
+                    sulf = 79.956815m;
                 }
-                else
+                if (Permeth.IsChecked == true)
                 {
                     derivatisation = "Permethylated";
                     // Permethylated
                     dhex = 174.089210m; // permethylated mass =  chemical formula = C8H14O4
                     hex = 204.099775m; // permethylated mass =  chemical formula = C9H16O5
                     hexnac = 245.126324m; // permethylated mass =  chemical formula = C11H19NO5
-                    hexn = 217.131409m; // permethylated mass =  chemical formula = C10H19NO4
+                    hexn = 203.115758m; // permethylated mass =  chemical formula = C9H17NO4
                     hexa = 218.079040m; // permethylated mass =  chemical formula = C9H14O6
-                    dhexnac = 215.115759m; // permethylated mass =  chemical formula = C10H17N1O4
+                    dhexnac = 215.115758m; // permethylated mass =  chemical formula = C10H17N1O4
                     pent = 160.073560m; // permethylated mass =  chemical formula = C7H12O4
                     kdn = 320.147120m; // permethylated mass =  chemical formula = C14H24O8
                     neuac = 361.173669m; // permethylated mass =  chemical formula = C16H27NO8
                     neugc = 391.184234m; // permethylated mass =  chemical formula = C17H29NO9
                     phos = 93.981983m; // permethylated mass =  chemical formula = CH3O3P
+                    sulf = 79.956815m; 
                 }
-                decimal sulf = 79.956815m; // Nothing changes with permethylation
+                if (Peracetyl.IsChecked == true)
+                {
+                    derivatisation = "Peracetylated";
+                    // Peracetylated
+                    dhex = 230.079038m; // chemical formula = C10H14O6
+                    hex = 288.084517m; // chemical formula = C12H16O8
+                    hexnac = 287.100501m; // chemical formula = C12H17NO7
+                    hexn = 287.100501m; // chemical formula = C12H17NO7
+                    hexa = 260.053217m; // chemical formula = C10H12O8
+                    dhexnac = 247.105587m; // chemical formula = C10H17NO6
+                    pent = 216.063388m; // chemical formula = C9H12O6
+                    kdn = 376.100561m; // chemical formula = C15H20O11
+                    neuac = 417.127110m; // chemical formula = C17H23NO11
+                    neugc = 475.132593m; // chemical formula = C19H25NO13
+                }
 
                 // Add the components to combinatorial analysis based on which monosaccharides the user chooses to include
                 if (HextoggleSwitch.IsOn == true)
@@ -916,7 +814,6 @@ namespace glycombo
                 // Early processing of target list, breaking it down so that the reducing ends are removed
                 if (Native.IsChecked == true)
                 {
-                    nativeChecked = true;
                     switch (reducingEndBox.SelectedIndex)
                     {
                         case 0:
@@ -955,7 +852,7 @@ namespace glycombo
                             break;
                     }
                 }
-                else
+                if (Permeth.IsChecked == true || Peracetyl.IsChecked == true)
                 {
                     switch (reducingEndBox.SelectedIndex)
                     {
@@ -1285,15 +1182,20 @@ namespace glycombo
                 solutions = string.Join("", partial.ToArray());            
                 
                 // This replaces all the masses with their respective monosaccharide identities
-                if (nativeChecked == true)
+                if (derivatisation == "Native")
                 {
                     // Native
                     solutions = solutions.Replace("146.057908", "dHex ").Replace("162.052823", "Hex ").Replace("291.095416", "Neu5Ac ").Replace("307.090331", "Neu5Gc ").Replace("203.079372", "HexNAc ").Replace("79.966331", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("161.068808", "HexN ").Replace("176.032088", "HexA ").Replace("187.084458", "dHexNAc ").Replace("132.042258", "Pent ").Replace("250.068867", "KDN ").Replace("273.0848518", "lneuac ").Replace("319.1267166", "eeneuac ").Replace("318.1427011", "dneuac ").Replace("290.1114009", "amneuac ").Replace("42.010565", "acetyl ").Replace("289.0797664", "lneugc ").Replace("335.1216313", "eeneugc ").Replace("306.1063155", "dneugc ").Replace("334.1376157", "amneugc ").Replace(customMono1Mass.ToString(),customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
                 }
-                else
+                if (derivatisation == "Permethylated")
                 {
                     // Permethylated
-                    solutions = solutions.Replace("174.089210", "dHex ").Replace("204.099775", "Hex ").Replace("361.173669", "Neu5Ac ").Replace("391.184234", "Neu5Gc ").Replace("245.126324", "HexNAc ").Replace("93.981983", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("217.131409", "HexN ").Replace("218.079040", "HexA ").Replace("215.115759", "dHexNAc ").Replace("160.073560", "Pent ").Replace("320.147120", "KDN ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
+                    solutions = solutions.Replace("174.089210", "dHex ").Replace("204.099775", "Hex ").Replace("361.173669", "Neu5Ac ").Replace("391.184234", "Neu5Gc ").Replace("245.126324", "HexNAc ").Replace("93.981983", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("203.115758", "HexN ").Replace("218.079040", "HexA ").Replace("215.115759", "dHexNAc ").Replace("160.073560", "Pent ").Replace("320.147120", "KDN ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
+                }
+                if (derivatisation == "Peracetylated")
+                {
+                    // Peracetylated
+                    solutions = solutions.Replace("230.079038", "dHex ").Replace("288.084517", "Hex ").Replace("417.127110", "Neu5Ac ").Replace("475.132593", "Neu5Gc ").Replace("287.100501", "HexNAc ").Replace("93.981983", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("287.100501", "HexN ").Replace("260.053217", "HexA ").Replace("247.105587", "dHexNAc ").Replace("216.063388", "Pent ").Replace("376.100561", "KDN ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
                 }
 
                 // This replaces repeated monosaccharide names with 1 monosaccharide name and the number of the occurences
@@ -1331,7 +1233,7 @@ namespace glycombo
                 int customMono5Count = 0;
 
                 // Native processing
-                if (nativeChecked == true)
+                if (derivatisation == "Native")
                 {
                     // Chemical formulae for native
                     dHexCount = Regex.Matches(solutions, "dHex ").Count;
@@ -1558,8 +1460,8 @@ namespace glycombo
                             break;
                     }
                 }
-                else
                 // Permethylated processing
+                if (derivatisation == "Permethylated")
                 {
                     // Chemical formulae for permethylated
                     dHexCount = Regex.Matches(solutions, "dHex ").Count;
@@ -1581,8 +1483,8 @@ namespace glycombo
                     HexNCount = Regex.Matches(solutions, "HexN ").Count;
                     if (HexNCount > 0)
                     {
-                        chemicalFormulaeC += (HexNCount * 10);
-                        chemicalFormulaeH += (HexNCount * 19);
+                        chemicalFormulaeC += (HexNCount * 9);
+                        chemicalFormulaeH += (HexNCount * 17);
                         chemicalFormulaeO += (HexNCount * 4);
                         chemicalFormulaeN += (HexNCount);
                         solutionsUpdate = solutionsUpdate + "(HexN)" + Convert.ToString(HexNCount) + " ";
@@ -1673,6 +1575,121 @@ namespace glycombo
                             break;
                     }
                 }
+                // peracetylated processing
+                if (derivatisation == "Peracetylated")
+                {
+                    // Chemical formulae for peracetylated
+                    dHexCount = Regex.Matches(solutions, "dHex ").Count;
+                    if (dHexCount > 0)
+                    {
+                        chemicalFormulaeC += (dHexCount * 10);
+                        chemicalFormulaeH += (dHexCount * 14);
+                        chemicalFormulaeO += (dHexCount * 6);
+                        solutionsUpdate = solutionsUpdate + "(dHex)" + Convert.ToString(dHexCount) + " ";
+                    }
+                    HexACount = Regex.Matches(solutions, "HexA ").Count;
+                    if (HexACount > 0)
+                    {
+                        chemicalFormulaeC += (HexACount * 10);
+                        chemicalFormulaeH += (HexACount * 12);
+                        chemicalFormulaeO += (HexACount * 8);
+                        solutionsUpdate = solutionsUpdate + "(HexA)" + Convert.ToString(HexACount) + " ";
+                    }
+                    HexNCount = Regex.Matches(solutions, "HexN ").Count;
+                    if (HexNCount > 0)
+                    {
+                        chemicalFormulaeC += (HexNCount * 12);
+                        chemicalFormulaeH += (HexNCount * 17);
+                        chemicalFormulaeO += (HexNCount * 7);
+                        chemicalFormulaeN += (HexNCount);
+                        solutionsUpdate = solutionsUpdate + "(HexN)" + Convert.ToString(HexNCount) + " ";
+                    }
+                    PentCount = Regex.Matches(solutions, "Pent ").Count;
+                    if (PentCount > 0)
+                    {
+                        chemicalFormulaeC += (PentCount * 9);
+                        chemicalFormulaeH += (PentCount * 12);
+                        chemicalFormulaeO += (PentCount * 6);
+                        solutionsUpdate = solutionsUpdate + "(Pent)" + Convert.ToString(PentCount) + " ";
+                    }
+                    KDNCount = Regex.Matches(solutions, "KDN ").Count;
+                    if (KDNCount > 0)
+                    {
+                        chemicalFormulaeC += (KDNCount * 15);
+                        chemicalFormulaeH += (KDNCount * 28);
+                        chemicalFormulaeO += (KDNCount * 11);
+                        solutionsUpdate = solutionsUpdate + "(KDN)" + Convert.ToString(KDNCount) + " ";
+                    }
+                    hexCount = Regex.Matches(solutions, "Hex ").Count - Regex.Matches(solutions, "dHex ").Count;
+                    if (hexCount > 0)
+                    {
+                        chemicalFormulaeC += (hexCount * 12);
+                        chemicalFormulaeH += (hexCount * 16);
+                        chemicalFormulaeO += (hexCount * 8);
+                        solutionsUpdate = solutionsUpdate + "(Hex)" + Convert.ToString(hexCount) + " ";
+                    }
+                    neuAcCount = Regex.Matches(solutions, "Neu5Ac ").Count;
+                    if (neuAcCount > 0)
+                    {
+                        chemicalFormulaeC += (neuAcCount * 17);
+                        chemicalFormulaeH += (neuAcCount * 23);
+                        chemicalFormulaeN += (neuAcCount);
+                        chemicalFormulaeO += (neuAcCount * 11);
+                        solutionsUpdate = solutionsUpdate + "(NeuAc)" + Convert.ToString(neuAcCount) + " ";
+                    }
+                    neuGcCount = Regex.Matches(solutions, "Neu5Gc ").Count;
+                    if (neuGcCount > 0)
+                    {
+                        chemicalFormulaeC += (neuGcCount * 19);
+                        chemicalFormulaeH += (neuGcCount * 25);
+                        chemicalFormulaeN += (neuGcCount);
+                        chemicalFormulaeO += (neuGcCount * 13);
+                        solutionsUpdate = solutionsUpdate + "(NeuGc)" + Convert.ToString(neuGcCount) + " ";
+                    }
+                    hexNAcCount = Regex.Matches(solutions, "HexNAc ").Count - Regex.Matches(solutions, "dHexNAc ").Count;
+                    if (hexNAcCount > 0)
+                    {
+                        chemicalFormulaeC += (hexNAcCount * 12);
+                        chemicalFormulaeH += (hexNAcCount * 17);
+                        chemicalFormulaeN += (hexNAcCount);
+                        chemicalFormulaeO += (hexNAcCount * 7);
+                        solutionsUpdate = solutionsUpdate + "(HexNAc)" + Convert.ToString(hexNAcCount) + " ";
+                    }
+                    phosCount = Regex.Matches(solutions, "Phos ").Count;
+                    if (phosCount > 0)
+                    {
+                        chemicalFormulaeC += (phosCount);
+                        chemicalFormulaeH += (phosCount * 3);
+                        chemicalFormulaeO += (phosCount * 3);
+                        chemicalFormulaeP += (phosCount);
+                        solutionsUpdate = solutionsUpdate + "(Phos)" + Convert.ToString(phosCount) + " ";
+                    }
+                    dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
+                    if (dhexnacCount > 0)
+                    {
+                        chemicalFormulaeC += (dhexnacCount * 10);
+                        chemicalFormulaeH += (dhexnacCount * 17);
+                        chemicalFormulaeN += (dhexnacCount);
+                        chemicalFormulaeO += (dhexnacCount * 6);
+                        solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
+                    }
+
+                    switch (reducingEndBox.SelectedIndex)
+                    {
+                        case 0:
+                            chemicalFormulaeC += 2;
+                            chemicalFormulaeH += 6;
+                            chemicalFormulaeO += 1;
+                            break;
+                        case 1:
+                            chemicalFormulaeC += 3;
+                            chemicalFormulaeH += 10;
+                            chemicalFormulaeO += 1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
                 // Sulfate is the same chemical formulae independent of derivatization status, same for the custom monosaccharides
                 int sulfCount = Regex.Matches(solutions, "Sulf ").Count;
@@ -1732,8 +1749,8 @@ namespace glycombo
                 string chemicalFormula = "C" + chemicalFormulaeC + "H" + chemicalFormulaeH + "N" + chemicalFormulaeN + "O" + chemicalFormulaeO + "P" + chemicalFormulaeP + "S" + chemicalFormulaeS;
                 chemicalFormula = chemicalFormula.Replace("N0", "").Replace("P0", "").Replace("S0", "");
 
-                // Reducing end status, native or permethylated
-                if (nativeChecked == true)
+                // Reducing end status: native, permethylated, or peracetylated
+                if (derivatisation == "Native")
                 {
                     switch (reducedEnd)
                     {
@@ -1773,9 +1790,24 @@ namespace glycombo
                             break;
                     }
                 }
-                else
+                if (derivatisation == "Permethylated")
                 {
                     // Permethylated
+                    switch (reducedEnd)
+                    {
+                        case "Free":
+                            observedMass = s + 18.010565m + 28.031300m;
+                            theoreticalMass = target + 18.010565m + 28.031300m;
+                            break;
+                        case "Reduced":
+                            observedMass = s + 20.026195m + 42.046950m;
+                            theoreticalMass = target + 20.026195m + 42.046950m;
+                            break;
+                    }
+                }
+                if (derivatisation == "Peracetylated")
+                {
+                    // Peracetylated (to do)
                     switch (reducedEnd)
                     {
                         case "Free":
@@ -2357,7 +2389,7 @@ namespace glycombo
             InputMasses.Text = "";
             filePath = "";
             offByOneChecked = false;
-            nativeChecked = false;
+            derivatisation = "";
             DaChecked = false;
             TextChecked = false;
             submitbutton.IsEnabled = false;
@@ -2378,6 +2410,9 @@ namespace glycombo
             }
             submitbutton.IsEnabled = false;
             TextChecked = false;
+            inputOrLabel.Visibility = Visibility.Collapsed;
+            InputMasses.Visibility = Visibility.Collapsed;
+
         }
 
         private void PresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2711,6 +2746,11 @@ namespace glycombo
                 // Handle the null case
                 Console.WriteLine("submitbutton is null");
             }
+            if (inputOrLabel != null && InputMasses != null)
+            {
+                inputOrLabel.Visibility = Visibility.Visible;
+                InputMasses.Visibility = Visibility.Visible;
+            }
         }
 
         private void customMonosaccharides_Click(object sender, RoutedEventArgs e)
@@ -2726,5 +2766,16 @@ namespace glycombo
             }
         }
 
+        private void customAdductCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (customAdductCheckBox.IsChecked == true) {
+                customAdductMassLabel.Visibility = Visibility.Visible;
+                customAdductMassText.Visibility = Visibility.Visible;
+            }
+            else {
+                customAdductMassLabel.Visibility=Visibility.Collapsed;
+                customAdductMassText.Visibility = Visibility.Collapsed;
+            }
+        }
     }
 }
