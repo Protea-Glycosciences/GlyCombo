@@ -284,7 +284,7 @@
                     <CheckBox x:Name="negativeMTFACheckBox" Content="[M+TFA]-" Margin="553,151,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
                     <CheckBox x:Name="negativeMAACheckBox" Content="[M+COOH]-" Margin="553,119,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
                     <Label x:Name="customAdductLabel" Content="Custom adduct" HorizontalAlignment="Left" Margin="489,188,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <CheckBox x:Name="customAdductCheckBox" Content="Custom" Margin="489,0,0,0" Width="78" MinWidth="40" Checked="customAdductCheckBox_Checked"/>
+                    <CheckBox x:Name="customAdductCheckBox" Content="Custom" Margin="489,0,0,0" Width="78" MinWidth="40" Checked="customAdductCheckBox_Checked" Unchecked="customAdductCheckBox_Unchecked"/>
                     <Label x:Name="customAdductMassLabel" Content="Custom Adduct Mass" HorizontalAlignment="Left" Margin="619,188,0,0" Visibility="Collapsed" VerticalAlignment="Top" FontWeight="Bold"/>
                     <TextBox x:Name="customAdductMassText" local:NumericInputBehavior.IsNumericInput="True" Text="" Visibility="Collapsed" HorizontalAlignment="Left" TextAlignment="Right" Width="134" Margin="618,212,0,213"/>
                 </Grid>

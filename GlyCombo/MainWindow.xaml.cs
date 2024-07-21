@@ -253,7 +253,6 @@ namespace glycombo
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
         }
 
-
         private async void UploadButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -585,7 +584,7 @@ namespace glycombo
                 solutionMultiples = "";
                 resetbutton.IsEnabled = IsEnabled;
                 ProgressBarSubmit.Visibility = Visibility.Visible;
-                // Define the components in the combinatorial analysis, native and permethylated
+                // Define the components in the combinatorial analysis: native, permethylated, peracetylated
                 if (Native.IsChecked == true)
                 {
                     derivatisation = "Native";
@@ -610,24 +609,24 @@ namespace glycombo
                     eeneugc = 335.1216313m;
                     dneugc = 306.1063155m;
                     amneugc = 334.1376157m;
-                    sulf = 79.956815m;
+                    sulf = 79.956815m; // SO3
                 }
                 if (Permeth.IsChecked == true)
                 {
                     derivatisation = "Permethylated";
                     // Permethylated
-                    dhex = 174.089210m; // permethylated mass =  chemical formula = C8H14O4
-                    hex = 204.099775m; // permethylated mass =  chemical formula = C9H16O5
-                    hexnac = 245.126324m; // permethylated mass =  chemical formula = C11H19NO5
-                    hexn = 203.115758m; // permethylated mass =  chemical formula = C9H17NO4
-                    hexa = 218.079040m; // permethylated mass =  chemical formula = C9H14O6
-                    dhexnac = 215.115758m; // permethylated mass =  chemical formula = C10H17N1O4
-                    pent = 160.073560m; // permethylated mass =  chemical formula = C7H12O4
-                    kdn = 320.147120m; // permethylated mass =  chemical formula = C14H24O8
-                    neuac = 361.173669m; // permethylated mass =  chemical formula = C16H27NO8
-                    neugc = 391.184234m; // permethylated mass =  chemical formula = C17H29NO9
-                    phos = 93.981983m; // permethylated mass =  chemical formula = CH3O3P
-                    sulf = 79.956815m; 
+                    dhex = 174.089210m; // chemical formula = C8H14O4
+                    hex = 204.099775m; //  chemical formula = C9H16O5
+                    hexnac = 245.126324m; //  chemical formula = C11H19NO5
+                    hexn = 203.115758m; //  chemical formula = C9H17NO4
+                    hexa = 218.079040m; //  chemical formula = C9H14O6
+                    dhexnac = 215.115758m; //  chemical formula = C10H17N1O4
+                    pent = 160.073560m; //  chemical formula = C7H12O4
+                    kdn = 320.147120m; // chemical formula = C14H24O8
+                    neuac = 361.173669m; // chemical formula = C16H27NO8
+                    neugc = 391.184234m; // chemical formula = C17H29NO9
+                    phos = 93.981980m; // chemical formula = PO3H3C1
+                    sulf = 65.941165m; // chemical formula = SO3C-1H-2
                 }
                 if (Peracetyl.IsChecked == true)
                 {
@@ -643,6 +642,8 @@ namespace glycombo
                     kdn = 376.100561m; // chemical formula = C15H20O11
                     neuac = 417.127110m; // chemical formula = C17H23NO11
                     neugc = 475.132593m; // chemical formula = C19H25NO13
+                    phos = 37.955765m; // chemical formula = PO2C-2H-1
+                    sulf = 37.946250m; // chemical formula = SO2C-2H-2
                 }
 
                 // Add the components to combinatorial analysis based on which monosaccharides the user chooses to include
@@ -852,17 +853,33 @@ namespace glycombo
                             break;
                     }
                 }
-                if (Permeth.IsChecked == true || Peracetyl.IsChecked == true)
+                if (Permeth.IsChecked == true)
                 {
                     switch (reducingEndBox.SelectedIndex)
                     {
                         case 0:
                             reducedEnd = "Free";
-                            targets = targets.Select(z => z - 18.010555m).ToList();
+                            targets = targets.Select(z => z - (18.010555m + 28.031300m)).ToList();
                             break;
                         case 1:
                             reducedEnd = "Reduced";
-                            targets = targets.Select(z => z - 20.026195m).ToList();
+                            targets = targets.Select(z => z - (20.026195m + 42.046950m)).ToList();
+                            break;
+                        default:
+                            break;
+                    }
+                }                 
+                if (Peracetyl.IsChecked == true)
+                {
+                    switch (reducingEndBox.SelectedIndex)
+                    {
+                        case 0:
+                            reducedEnd = "Free";
+                            targets = targets.Select(z => z - (18.010555m + 84.021129m)).ToList();
+                            break;
+                        case 1:
+                            reducedEnd = "Reduced";
+                            targets = targets.Select(z => z - (20.026195m + 126.031694m)).ToList();
                             break;
                         default:
                             break;
@@ -1216,6 +1233,7 @@ namespace glycombo
                 int neuGcCount = 0;
                 int hexNAcCount = 0;
                 int phosCount = 0;
+                int sulfCount = 0;
                 int dhexnacCount = 0;
                 int lNeuAcCount = 0;
                 int eeNeuAcCount = 0;
@@ -1558,6 +1576,15 @@ namespace glycombo
                         chemicalFormulaeO += (dhexnacCount * 4);
                         solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
                     }
+                    sulfCount = Regex.Matches(solutions, "Sulf ").Count;
+                    if (sulfCount > 0)
+                    {
+                        chemicalFormulaeC += (sulfCount * -1);
+                        chemicalFormulaeH += (sulfCount * -2);
+                        chemicalFormulaeO += (sulfCount * 3);
+                        chemicalFormulaeS += (sulfCount);
+                        solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
+                    }
 
                     switch (reducingEndBox.SelectedIndex)
                     {
@@ -1658,9 +1685,9 @@ namespace glycombo
                     phosCount = Regex.Matches(solutions, "Phos ").Count;
                     if (phosCount > 0)
                     {
-                        chemicalFormulaeC += (phosCount);
-                        chemicalFormulaeH += (phosCount * 3);
-                        chemicalFormulaeO += (phosCount * 3);
+                        chemicalFormulaeC += (phosCount * -2);
+                        chemicalFormulaeH += (phosCount * -1);
+                        chemicalFormulaeO += (phosCount * 2);
                         chemicalFormulaeP += (phosCount);
                         solutionsUpdate = solutionsUpdate + "(Phos)" + Convert.ToString(phosCount) + " ";
                     }
@@ -1673,32 +1700,34 @@ namespace glycombo
                         chemicalFormulaeO += (dhexnacCount * 6);
                         solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
                     }
+                    sulfCount = Regex.Matches(solutions, "Sulf ").Count;
+                    if (sulfCount > 0)
+                    {
+                        chemicalFormulaeC += (sulfCount * -2);
+                        chemicalFormulaeH += (sulfCount * -2);
+                        chemicalFormulaeO += (sulfCount * 2);
+                        chemicalFormulaeS += (sulfCount);
+                        solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
+                    }
 
                     switch (reducingEndBox.SelectedIndex)
                     {
                         case 0:
-                            chemicalFormulaeC += 2;
+                            chemicalFormulaeC += 4;
                             chemicalFormulaeH += 6;
-                            chemicalFormulaeO += 1;
+                            chemicalFormulaeO += 3;
                             break;
                         case 1:
-                            chemicalFormulaeC += 3;
+                            chemicalFormulaeC += 6;
                             chemicalFormulaeH += 10;
-                            chemicalFormulaeO += 1;
+                            chemicalFormulaeO += 4;
                             break;
                         default:
                             break;
                     }
                 }
 
-                // Sulfate is the same chemical formulae independent of derivatization status, same for the custom monosaccharides
-                int sulfCount = Regex.Matches(solutions, "Sulf ").Count;
-                if (sulfCount > 0)
-                {
-                    chemicalFormulaeO += (sulfCount * 3);
-                    chemicalFormulaeS += (sulfCount);
-                    solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
-                }
+                // Custom monosaccharides are independent of derivatisation status
                 customMono1Count = Regex.Matches(solutions, customMono1Name + " ").Count;
                 if (customMono1Count > 0)
                 {
@@ -1807,16 +1836,16 @@ namespace glycombo
                 }
                 if (derivatisation == "Peracetylated")
                 {
-                    // Peracetylated (to do)
+                    // Peracetylated
                     switch (reducedEnd)
                     {
                         case "Free":
-                            observedMass = s + 18.010565m + 28.031300m;
-                            theoreticalMass = target + 18.010565m + 28.031300m;
+                            observedMass = s + 18.010565m + 84.021129m;
+                            theoreticalMass = target + 18.010565m + 84.021129m;
                             break;
                         case "Reduced":
-                            observedMass = s + 20.026195m + 42.046950m;
-                            theoreticalMass = target + 20.026195m + 42.046950m;
+                            observedMass = s + 20.026195m + 126.031694m;
+                            theoreticalMass = target + 20.026195m + 126.031694m;
                             break;
                     }
                 }
@@ -2772,10 +2801,12 @@ namespace glycombo
                 customAdductMassLabel.Visibility = Visibility.Visible;
                 customAdductMassText.Visibility = Visibility.Visible;
             }
-            else {
-                customAdductMassLabel.Visibility=Visibility.Collapsed;
+        }
+
+        private void customAdductCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+                customAdductMassLabel.Visibility = Visibility.Collapsed;
                 customAdductMassText.Visibility = Visibility.Collapsed;
-            }
         }
     }
 }
