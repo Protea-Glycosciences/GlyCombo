@@ -73,33 +73,33 @@
                     </StackPanel>
 
                     <Button x:Name="submitbutton" Content="Submit" MinWidth="175" IsEnabled="True" Click="Button1_Click" Margin="525,333,0,0" VerticalAlignment="Top" Height="31" Width="175"/>
-                    <ProgressBar x:Name="ProgressBarSubmit" Visibility="Visible" IsIndeterminate="True" HorizontalAlignment="Left" Height="8" Margin="144,502,0,0" Width="175" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top"/>
+                    <ProgressBar x:Name="ProgressBarSubmit" Visibility="Collapsed" IsIndeterminate="True" HorizontalAlignment="Left" Height="8" Margin="525,325,0,0" Width="175" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top"/>
                     <Button x:Name="resetbutton" Content="Reset" MinWidth="175" IsEnabled="False" Click="Reset_Click" Margin="525,387,0,0" Height="32" Width="175" VerticalAlignment="Top"/>
-                    <ui:LayoutPanel x:Name="Hex_container" Grid.Row="0" Margin="340,31,10,401" Visibility="Visible">
+                    <ui:LayoutPanel x:Name="Hex_container" Grid.Row="0" Margin="340,31,10,401" Visibility="Collapsed">
                         <TextBox x:Name="HexMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2"  VerticalAlignment="Center" Margin="284,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left"/>
                         <TextBox x:Name="HexMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left" Margin="354,0,0,0"/>
                     </ui:LayoutPanel>
-                    <ui:LayoutPanel x:Name="HexNAc_container" Grid.Row="0" Margin="340,60,10,379" Visibility="Visible">
+                    <ui:LayoutPanel x:Name="HexNAc_container" Grid.Row="0" Margin="340,60,10,379" Visibility="Collapsed">
                         <TextBox x:Name="HexNAcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="284,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left"/>
                         <TextBox x:Name="HexNAcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left" Margin="354,0,0,0"/>
                     </ui:LayoutPanel>
-                    <ui:LayoutPanel x:Name="dHex_container" Grid.Row="0" Margin="340,85,10,352" Visibility="Visible">
+                    <ui:LayoutPanel x:Name="dHex_container" Grid.Row="0" Margin="340,85,10,352" Visibility="Collapsed">
                         <TextBox x:Name="dHexMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Margin="284,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left"/>
                         <TextBox x:Name="dHexMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left" Margin="354,0,0,0"/>
                     </ui:LayoutPanel>
-                    <ui:LayoutPanel x:Name="NeuAc_container" Grid.Row="0" Margin="340,112,10,326" Visibility="Visible">
+                    <ui:LayoutPanel x:Name="NeuAc_container" Grid.Row="0" Margin="340,112,10,326" Visibility="Collapsed">
                         <TextBox x:Name="Neu5AcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="284,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
                         <TextBox x:Name="Neu5AcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="354,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
                     </ui:LayoutPanel>
-                    <ui:LayoutPanel x:Name="NeuGc_container" Grid.Row="0" Margin="340,137,10,300" Visibility="Visible">
-                        <TextBox x:Name="Neu5GcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,102,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
-                        <TextBox x:Name="Neu5GcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,32,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
+                    <ui:LayoutPanel x:Name="NeuGc_container" Grid.Row="0" Margin="340,137,10,300" Visibility="Collapsed">
+                        <TextBox x:Name="Neu5GcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="284,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left"/>
+                        <TextBox x:Name="Neu5GcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="354,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
                     </ui:LayoutPanel>
                     <Label Margin="10,10,688,401" Style="{StaticResource heading}" Content="Input:"/>
                     <TextBox x:Name="InputMasses" local:NumericInputBehavior.IsNumericInput="True" Width="175" HorizontalAlignment="Left" ui:ControlHelper.PlaceholderText="Insert list of neutral or singly charged masses" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" Margin="137,82,0,0" Height="102" VerticalAlignment="Top"/>
                     <Label Grid.Row="0" Style="{StaticResource subheading}" Margin="330,7,352,428" Content="Monosaccharides"/>
-                    <Label Grid.Row="0" Margin="0,7,33,242" Style="{StaticResource subheading}" HorizontalAlignment="Right" Width="76" Content="Maximum"/>
-                    <Label Grid.Row="0" Margin="0,7,112,242" HorizontalAlignment="Right" Style="{StaticResource subheading}" Width="64" Content="Minimum"/>
+                    <Label Grid.Row="0" Margin="0,7,33,428" Style="{StaticResource subheading}" HorizontalAlignment="Right" Width="76" Content="Maximum"/>
+                    <Label Grid.Row="0" Margin="0,7,109,425" HorizontalAlignment="Right" Style="{StaticResource subheading}" Width="67" Content="Minimum"/>
                     <ui:ToggleSwitch x:Name="HextoggleSwitch" Margin="339,27,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="HextoggleSwitch_Toggled" Width="50" Height="32"/>
                     <Label Margin="389,33,167,0" Height="20" VerticalAlignment="Top" Content="Hexose (Hex)"/>
                     <ui:ToggleSwitch x:Name="HexNActoggleSwitch" Margin="339,53,0,0" OffContent="" OnContent="" Toggled="HexNActoggleSwitch_Toggled" Width="50" Height="32" VerticalAlignment="Top"/>
@@ -270,19 +270,19 @@
                     </ui:LayoutPanel>
                     <CheckBox x:Name="OffByOne" FontSize="14" Content="Off by One" VerticalAlignment="Top" Margin="45,511,642,0" HorizontalAlignment="Stretch" MinWidth="76" Height="31"/>
                     <Label Content="Advanced monosaccharides" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <Label x:Name="adductLabel" Content="Adducts - Text list assumed singly charged" HorizontalAlignment="Left" Margin="489,12,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <Label x:Name="adductLabel" Content="Adducts" HorizontalAlignment="Left" Margin="489,12,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="neutralAdductLabel" Content="Neutral" HorizontalAlignment="Left" Margin="489,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="negativeAdductLabel" Content="Negative" HorizontalAlignment="Left" Margin="553,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="positiveAdductLabel" Content="Positive" HorizontalAlignment="Left" Margin="693,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <CheckBox x:Name="neutralMCheckBox" Content="[M]" Margin="489,55,0,0" VerticalAlignment="Top" Width="78" MinWidth="40" IsChecked="True"/>
                     <CheckBox x:Name="negativeMHCheckBox" Content="[M-H]-" Margin="553,55,0,0" VerticalAlignment="Top" Width="78" MinWidth="40"/>
                     <CheckBox x:Name="positiveMHCheckBox" Content="[M+H]+" Margin="693,55,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
+                    <CheckBox x:Name="negativeMFACheckBox" Content="[M+COO]-" Margin="553,87,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
                     <CheckBox x:Name="positiveMNaCheckBox" Content="[M+Na]+" Margin="693,87,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
+                    <CheckBox x:Name="negativeMAACheckBox" Content="[M+CH3COO]-" Margin="553,119,0,0" VerticalAlignment="Top" Width="135" MinWidth="40"/>
                     <CheckBox x:Name="positiveMKCheckBox" Content="[M+K]+" Margin="693,119,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
+                    <CheckBox x:Name="negativeMTFACheckBox" Content="[M+TFA-H]-" Margin="553,151,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
                     <CheckBox x:Name="positiveMNH4CheckBox" Content="[M+NH4]+" Margin="693,151,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
-                    <CheckBox x:Name="negativeMFACheckBox" Content="[M+COOH]-" Margin="553,87,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
-                    <CheckBox x:Name="negativeMTFACheckBox" Content="[M+TFA]-" Margin="553,151,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
-                    <CheckBox x:Name="negativeMAACheckBox" Content="[M+COOH]-" Margin="553,119,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
                     <Label x:Name="customAdductLabel" Content="Custom adduct" HorizontalAlignment="Left" Margin="489,188,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <CheckBox x:Name="customAdductCheckBox" Content="Custom" Margin="489,0,0,0" Width="78" MinWidth="40" Checked="customAdductCheckBox_Checked" Unchecked="customAdductCheckBox_Unchecked"/>
                     <Label x:Name="customAdductMassLabel" Content="Custom Adduct Mass" HorizontalAlignment="Left" Margin="619,188,0,0" Visibility="Collapsed" VerticalAlignment="Top" FontWeight="Bold"/>

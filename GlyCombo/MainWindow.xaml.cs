@@ -22,6 +22,8 @@ using Windows.Media.Capture;
 using System.Collections.Generic;
 using GlyCombo;
 using System.Reflection.Metadata;
+using System.Collections;
+using System.Security.Policy;
 
 namespace glycombo
 {
@@ -42,6 +44,7 @@ namespace glycombo
         private decimal observedMass;
         private decimal theoreticalMass;
         private decimal error;
+        // Monosaccharides
         private decimal dhex;
         private decimal hex;
         private decimal hexnac;
@@ -63,6 +66,11 @@ namespace glycombo
         private decimal dneugc;
         private decimal amneugc;
         private decimal sulf;
+        // Adducts
+        private decimal adductCustom;
+        List<decimal> targetAdducts;
+        List<decimal> targetAdductsProcessing;
+        // Monoaccharide ranges
         private int HexMin_int;
         private int HexMax_int;
         private int HexNAcMin_int;
@@ -157,6 +165,17 @@ namespace glycombo
         private bool monoCustom5 = false;
         private string errorType;
         private string derivatisation;
+        private string param_adductSummary;
+        private bool param_adductposH;
+        private bool param_adductposNa;
+        private bool param_adductposK;
+        private bool param_adductposNH4;
+        private bool param_adductNeutral;
+        private bool param_adductnegH;
+        private bool param_adductnegFA;
+        private bool param_adductnegAA;
+        private bool param_adductnegTFA;
+        private bool param_adductCustom;
         private string param_monoHex;
         private string param_monoHexA;
         private string param_monodHex;
@@ -799,7 +818,222 @@ namespace glycombo
                     StringSplitOptions.RemoveEmptyEntries));
                 targets = targetStrings.ConvertAll(decimal.Parse);
 
+                // Adduct calculation
+                // This can result in huge combinatorial searches but it's there for the user as an option
+                // if mzml input used, force M+H and M-H, then let the user add on other adducts (problem with this is that positive mode will have negative adducts etc)
+               
+                // Only trigger this if something other than M is selected
+                if (negativeMHCheckBox.IsChecked == true ||
+                    negativeMFACheckBox.IsChecked == true ||
+                    negativeMAACheckBox.IsChecked == true ||
+                    negativeMTFACheckBox.IsChecked == true ||
+                    positiveMHCheckBox.IsChecked == true ||
+                    positiveMNaCheckBox.IsChecked == true ||
+                    positiveMKCheckBox.IsChecked == true ||
+                    positiveMNH4CheckBox.IsChecked == true
+                    )
+                {
+                    // mzML input has been processed as de / protonated to generate a neutral mass list, so adducts offset is +/- 1 Da for the respective negative/positive adducts
+                    // We also don't bother with doing M, M+H, and M-H because they are all the same after mzML processing (M+H and M-H become M)
+                    if (MzmlRadioButton.IsChecked == true)
+                    {
+                        // Making a separate list to then be used for target building
+                        targetAdductsProcessing = targets;
+                        targetAdducts = new List<decimal>();
 
+                        // Subtracting H- from all targets and saving that as a new list
+                        if (negativeMHCheckBox.IsChecked == true || neutralMCheckBox.IsChecked == true || positiveMHCheckBox.IsChecked == true)
+                        {
+                            param_adductNeutral = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o]);
+                            }
+                        }
+                        // M+COOH adduct calculation
+                        if (negativeMFACheckBox.IsChecked == true)
+                        {
+                            param_adductnegFA = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)44.998201 - (decimal)1.007276);
+                            }
+                        }
+                        // M+acetic acid adduct calculation
+                        if (negativeMAACheckBox.IsChecked == true)
+                        {
+                            param_adductnegAA = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)59.013851 - (decimal)1.007276);
+                            }
+                        }
+                        // M+TFA adduct calculation
+                        if (negativeMTFACheckBox.IsChecked == true)
+                        {
+                            param_adductnegTFA = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)112.985586 - (decimal)1.007276);
+                            }
+                        }
+                        // M+Na adduct calculation
+                        if (positiveMNaCheckBox.IsChecked == true)
+                        {
+                            param_adductposNa = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)22.989218 + (decimal)1.007276);
+                            }
+                        }
+                        // M+K adduct calculation
+                        if (positiveMKCheckBox.IsChecked == true)
+                        {
+                            param_adductposK = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)38.963158 + (decimal)1.007276);
+                            }
+                        }
+                        // M+NH4 adduct calculation
+                        if (positiveMNH4CheckBox.IsChecked == true)
+                        {
+                            param_adductposNH4 = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)18.033823 + (decimal)1.007276);
+                            }
+                        }
+                        // Custom adduct calculcation
+                        if (customAdductCheckBox.IsChecked == true)
+                        {
+                            param_adductCustom = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - Convert.ToDecimal(customAdductMassText));
+                            }
+                        }
+                        targets = targetAdducts;
+                    }
+                    // Text input is singly charged m/z values that are observed via experiments like MALDI-MS of permethylated glycans so no modification of mass is needed.
+                    if (TextRadioButton.IsChecked == true)
+                    {
+                        // Making a separate list to then be used for target building
+                        targetAdductsProcessing = targets;
+                        targetAdducts = new List<decimal>();
+
+                        // Subtracting H- from all targets and saving that as a new list
+                        if (negativeMHCheckBox.IsChecked == true)
+                        {
+                            param_adductposH = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] + (decimal)1.007276);
+                            }
+                        }
+                        // Appending the list with the original text if the user has M selected
+                        if (neutralMCheckBox.IsChecked == true)
+                        {
+                            param_adductNeutral = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o]);
+                            }
+                        }
+                        // M+COOH adduct calculation
+                        if (negativeMFACheckBox.IsChecked == true)
+                        {
+                            param_adductnegFA = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)44.998201);
+                            }
+                        }
+                        // M+acetic acid adduct calculation
+                        if (negativeMAACheckBox.IsChecked == true)
+                        {
+                            param_adductnegAA = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)59.013851);
+                            }
+                        }
+                        // M+TFA adduct calculation
+                        if (negativeMTFACheckBox.IsChecked == true)
+                        {
+                            param_adductnegTFA = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)112.985586);
+                            }
+                        }
+                        // M+H adduct calculation
+                        if (positiveMHCheckBox.IsChecked == true)
+                        {
+                            param_adductposH = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)1.007276);
+                            }
+                        }
+                        // M+Na adduct calculation
+                        if (positiveMNaCheckBox.IsChecked == true)
+                        {
+                            param_adductposNa = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)22.989218);
+                            }
+                        }
+                        // M+K adduct calculation
+                        if (positiveMKCheckBox.IsChecked == true)
+                        {
+                            param_adductposK = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)38.963158);
+                            }
+                        }
+                        // M+NH4 adduct calculation
+                        if (positiveMNH4CheckBox.IsChecked == true)
+                        {
+                            param_adductposNH4 = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)18.033823);
+                            }
+                        }
+                        // Custom adduct calculcation
+                        if (customAdductCheckBox.IsChecked == true)
+                        {
+                            param_adductCustom = true;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - Convert.ToDecimal(customAdductMassText));
+                            }
+                        }
+                        targets = targetAdducts;
+                    }
+                }
+                
                 // For enabling off-by-one errors. Thermo is pretty good at correcting the selected ion m/z when it picks an isotopic distribution, but might be useful for others
                 if (OffByOne.IsChecked == true)
                 {
@@ -808,7 +1042,7 @@ namespace glycombo
                     targetsToAdd = targets.Count;
                     for (int o = 0; o < targetsToAdd; o++)
                     {
-                        targets.Add(targets[o] - (decimal)1.00727);
+                        targets.Add(targets[o] - (decimal)1.007276);
                     }
                 }
 
@@ -1025,6 +1259,18 @@ namespace glycombo
             File.WriteAllText(saveFileDialog1.FileName, solutionHeader + Environment.NewLine + solutionMultiples);
 
             // Prepare the parameter report for the search used
+            param_adductSummary = Environment.NewLine + "Adducts: ";
+            if (param_adductNeutral == true) { param_adductSummary += "[M] "; }
+            if (param_adductnegH == true) { param_adductSummary += "[M-H]- "; }
+            if (param_adductnegFA == true) { param_adductSummary += "[M+COO]- "; }
+            if (param_adductnegAA == true) { param_adductSummary += "[M+CH3COO]- "; }
+            if (param_adductnegTFA == true) { param_adductSummary += "[M+TFA-H]- "; }
+            if (param_adductposH == true) { param_adductSummary += "[M+H]+ "; }
+            if (param_adductposNa == true) { param_adductSummary += "[M+Na]+ "; }
+            if (param_adductposK == true) { param_adductSummary += "[M+K]+ "; }
+            if (param_adductposNH4 == true) { param_adductSummary += "[M+NH4]+ "; }
+            if (param_adductCustom == true) { param_adductSummary += "[M" + Convert.ToString(customAdductMassText) + "]"; }
+
             if (monoHex == true)
             {
                 param_monoHex = Environment.NewLine + "Hex (" + HexMin_int.ToString() + "-" + HexMax_int.ToString() + ")";
@@ -1146,6 +1392,7 @@ namespace glycombo
                 + "Reducing end: "
                 + reducedEnd.ToString()
                 + Environment.NewLine
+                + param_adductSummary
                 + Environment.NewLine
                 + "Monosaccharide ranges"
                 + Environment.NewLine
@@ -1175,7 +1422,6 @@ namespace glycombo
                 + param_monoCustom3
                 + param_monoCustom4
                 + param_monoCustom5
-                + Environment.NewLine
                 + Environment.NewLine
                 + "Precursor targets"
                 + Environment.NewLine
@@ -1585,15 +1831,14 @@ namespace glycombo
                         chemicalFormulaeS += (sulfCount);
                         solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
                     }
-
-                    switch (reducingEndBox.SelectedIndex)
+                    switch (reducedEnd)
                     {
-                        case 0:
+                        case "Free":
                             chemicalFormulaeC += 2;
                             chemicalFormulaeH += 6;
                             chemicalFormulaeO += 1;
                             break;
-                        case 1:
+                        case "Reduced":
                             chemicalFormulaeC += 3;
                             chemicalFormulaeH += 10;
                             chemicalFormulaeO += 1;
@@ -1709,15 +1954,14 @@ namespace glycombo
                         chemicalFormulaeS += (sulfCount);
                         solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
                     }
-
-                    switch (reducingEndBox.SelectedIndex)
+                    switch (reducedEnd)
                     {
-                        case 0:
+                        case "Free":
                             chemicalFormulaeC += 4;
                             chemicalFormulaeH += 6;
                             chemicalFormulaeO += 3;
                             break;
-                        case 1:
+                        case "Reduced":
                             chemicalFormulaeC += 6;
                             chemicalFormulaeH += 10;
                             chemicalFormulaeO += 4;
@@ -2441,7 +2685,10 @@ namespace glycombo
             TextChecked = false;
             inputOrLabel.Visibility = Visibility.Collapsed;
             InputMasses.Visibility = Visibility.Collapsed;
-
+            positiveMHCheckBox.IsEnabled = false;
+            negativeMHCheckBox.IsEnabled = false;
+            positiveMHCheckBox.IsChecked = true;
+            negativeMHCheckBox.IsChecked = true;
         }
 
         private void PresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2779,6 +3026,12 @@ namespace glycombo
             {
                 inputOrLabel.Visibility = Visibility.Visible;
                 InputMasses.Visibility = Visibility.Visible;
+            }
+            if (positiveMHCheckBox != null && negativeMHCheckBox != null) {
+                positiveMHCheckBox.IsChecked = false;
+                negativeMHCheckBox.IsChecked = false;
+                positiveMHCheckBox.IsEnabled = true;
+                negativeMHCheckBox.IsEnabled = true;
             }
         }
 
