@@ -63,6 +63,7 @@
                             <ComboBoxItem Content="2-aminobenzamide"/>
                             <ComboBoxItem Content="Procainamide"/>
                             <ComboBoxItem Content="Girard's reagent P"/>
+                            <ComboBoxItem Content="Custom"/>
                         </ComboBox>
                     </StackPanel>
                     <Label Margin="10,354,688,0" Style="{StaticResource heading}" Height="64" VerticalAlignment="Top">Glycan State:</Label>
@@ -268,7 +269,7 @@
                             <TextBox x:Name="amNeuGcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
                         </ui:LayoutPanel>
                     </ui:LayoutPanel>
-                    <CheckBox x:Name="OffByOne" FontSize="14" Content="Off by One" VerticalAlignment="Top" Margin="45,511,642,0" HorizontalAlignment="Stretch" MinWidth="76" Height="31"/>
+                    <CheckBox x:Name="OffByOne" FontSize="14" Content="Off by One precursor searching" VerticalAlignment="Top" Margin="489,415,55,0" HorizontalAlignment="Stretch" MinWidth="76" Height="31" Checked="OffByOne_Checked"/>
                     <Label Content="Advanced monosaccharides" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="adductLabel" Content="Adducts" HorizontalAlignment="Left" Margin="489,12,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="neutralAdductLabel" Content="Neutral" HorizontalAlignment="Left" Margin="489,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
@@ -285,12 +286,20 @@
                     <CheckBox x:Name="positiveMNH4CheckBox" Content="[M+NH4]+" Margin="693,151,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
                     <Label x:Name="customAdductLabel" Content="Custom adduct" HorizontalAlignment="Left" Margin="489,188,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <CheckBox x:Name="customAdductCheckBox" Content="Custom" Margin="489,0,0,0" Width="78" MinWidth="40" Checked="customAdductCheckBox_Checked" Unchecked="customAdductCheckBox_Unchecked"/>
-                    <Label x:Name="customAdductMassLabel" Content="Custom Adduct Mass" HorizontalAlignment="Left" Margin="619,188,0,0" Visibility="Collapsed" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <TextBox x:Name="customAdductMassText" local:NumericInputBehavior.IsNumericInput="True" Text="" Visibility="Collapsed" HorizontalAlignment="Left" TextAlignment="Right" Width="134" Margin="618,212,0,213"/>
+                    <Label x:Name="customAdductMassLabel" Content="Mass" HorizontalAlignment="Left" Margin="597,188,0,0" Visibility="Collapsed" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <TextBox x:Name="customAdductMassText" local:NumericInputBehavior.IsNumericInput="True" Text="" Visibility="Collapsed" HorizontalAlignment="Left" TextAlignment="Right" Width="113" Margin="597,212,0,213"/>
+                    <Label x:Name="customAdductPolarityLabel" Content="Polarity" HorizontalAlignment="Left" Margin="724,188,0,0" Visibility="Collapsed" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <ComboBox x:Name="customAdductPolarity" Margin="724,0,0,0" Width="64" VerticalAlignment="Center" Padding="12,6,6,6" IsEnabled="False" Visibility="Collapsed">
+                        <ComboBoxItem Content="+" IsSelected="True"/>
+                        <ComboBoxItem Content="-"/>
+                    </ComboBox>
                 </Grid>
             </TabItem>
             <TabItem Header="Custom">
-                <Grid Background="#FFE5E5E5" Margin="0,0,0,9"/>
+                <Grid Background="#FFE5E5E5" Margin="0,0,0,9">
+                    <Label x:Name="customAdductLabel_Form" Content="Custom adduct" HorizontalAlignment="Left" Margin="27,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <Label x:Name="customMonosaccharideLabel" Content="Custom monosaccharide" HorizontalAlignment="Left" Margin="432,25,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                </Grid>
             </TabItem>
             <TabItem Header="Documentation">
                 <Grid Background="#FFE5E5E5" Margin="0,0,0,9"/>

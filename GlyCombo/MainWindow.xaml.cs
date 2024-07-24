@@ -68,6 +68,7 @@ namespace glycombo
         private decimal sulf;
         // Adducts
         private decimal adductCustom;
+        private int searchRepeats;
         List<decimal> targetAdducts;
         List<decimal> targetAdductsProcessing;
         // Monoaccharide ranges
@@ -844,6 +845,7 @@ namespace glycombo
                         // Subtracting H- from all targets and saving that as a new list
                         if (negativeMHCheckBox.IsChecked == true || neutralMCheckBox.IsChecked == true || positiveMHCheckBox.IsChecked == true)
                         {
+                            searchRepeats += 1;
                             param_adductNeutral = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
@@ -854,6 +856,7 @@ namespace glycombo
                         // M+COOH adduct calculation
                         if (negativeMFACheckBox.IsChecked == true)
                         {
+                            searchRepeats += 1;
                             param_adductnegFA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
@@ -864,6 +867,7 @@ namespace glycombo
                         // M+acetic acid adduct calculation
                         if (negativeMAACheckBox.IsChecked == true)
                         {
+                            searchRepeats += 1;
                             param_adductnegAA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
@@ -874,6 +878,7 @@ namespace glycombo
                         // M+TFA adduct calculation
                         if (negativeMTFACheckBox.IsChecked == true)
                         {
+                            searchRepeats += 1;
                             param_adductnegTFA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
@@ -884,6 +889,7 @@ namespace glycombo
                         // M+Na adduct calculation
                         if (positiveMNaCheckBox.IsChecked == true)
                         {
+                            searchRepeats += 1;
                             param_adductposNa = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
@@ -894,6 +900,7 @@ namespace glycombo
                         // M+K adduct calculation
                         if (positiveMKCheckBox.IsChecked == true)
                         {
+                            searchRepeats += 1;
                             param_adductposK = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
@@ -904,6 +911,7 @@ namespace glycombo
                         // M+NH4 adduct calculation
                         if (positiveMNH4CheckBox.IsChecked == true)
                         {
+                            searchRepeats += 1;
                             param_adductposNH4 = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
@@ -914,11 +922,21 @@ namespace glycombo
                         // Custom adduct calculcation
                         if (customAdductCheckBox.IsChecked == true)
                         {
+                            searchRepeats += 1;
                             param_adductCustom = true;
                             targetsToAdd = targetAdductsProcessing.Count;
+                            // Processing of customAdductMassText to account for mzML assuming a protonated/deprotonated precursor
+                            if (customAdductPolarity.SelectedIndex == 0) // Protonated
+                            {
+                                adductCustom = Convert.ToDecimal(customAdductMassText.Text) - (decimal)1.007276;
+                            }
+                            else // Deprotonated
+                            {
+                                adductCustom = Convert.ToDecimal(customAdductMassText.Text) + (decimal)1.007276;
+                            }
                             for (int o = 0; o < targetsToAdd; o++)
                             {
-                                targetAdducts.Add(targetAdductsProcessing[o] - Convert.ToDecimal(customAdductMassText));
+                                targetAdducts.Add(targetAdductsProcessing[o] - adductCustom);
                             }
                         }
                         targets = targetAdducts;
@@ -1037,6 +1055,7 @@ namespace glycombo
                 // For enabling off-by-one errors. Thermo is pretty good at correcting the selected ion m/z when it picks an isotopic distribution, but might be useful for others
                 if (OffByOne.IsChecked == true)
                 {
+                    searchRepeats += 1;
                     offByOneChecked = true;
                     // For each target in the list, remove one hydrogen to account for the C13 isotope being picked instead of monoisotopic (negative mode only)
                     targetsToAdd = targets.Count;
@@ -1269,7 +1288,7 @@ namespace glycombo
             if (param_adductposNa == true) { param_adductSummary += "[M+Na]+ "; }
             if (param_adductposK == true) { param_adductSummary += "[M+K]+ "; }
             if (param_adductposNH4 == true) { param_adductSummary += "[M+NH4]+ "; }
-            if (param_adductCustom == true) { param_adductSummary += "[M" + Convert.ToString(customAdductMassText) + "]"; }
+            if (param_adductCustom == true) { param_adductSummary += "[M+" + customAdductMassText + "]" + customAdductPolarity.Text; }
 
             if (monoHex == true)
             {
@@ -2108,34 +2127,29 @@ namespace glycombo
                     string FileForOutput = "";
 
                     // mzml input therefore output needs to be include scan #, charge, RT and TIC values.
-                    // OffByOne error essentially doubles the target list, need to ensure that we can assign metadata to the +1 targets (otherwise it tries to call metadata from a limited list)
-                    if (offByOneChecked == true)
+                    // Adducts multiply the target list, this step ensures that we can assign metadata to all of the targets (otherwise it looks for targets that aren't there)
+                    for (int z = 0; z < searchRepeats; z++)
                     {
-                        if (i < targetsToAdd)
+                        int index = i % scans.Count;
+                        scanNumberForOutput = Convert.ToString(scans.ElementAt(index));
+                        chargeForOutput = Convert.ToString(charges.ElementAt(index));
+                        retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(index));
+                        TICForOutput = Convert.ToString(TICs.ElementAt(index));
+                        FileForOutput = Convert.ToString(files.ElementAt(index));
+
+                        // OffByOne error essentially doubles the target list, need to ensure that we can assign metadata to the +1 targets (otherwise it tries to call metadata from a limited list)
+                        if (offByOneChecked == true)
                         {
-                            scanNumberForOutput = Convert.ToString(scans.ElementAt(i));
-                            chargeForOutput = Convert.ToString(charges.ElementAt(i));
-                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i));
-                            TICForOutput = Convert.ToString(TICs.ElementAt(i));
-                            FileForOutput = Convert.ToString(files.ElementAt(i));
-                        }
-                        else
-                        {
-                            scanNumberForOutput = Convert.ToString(scans.ElementAt(i-targetsToAdd));
-                            chargeForOutput = Convert.ToString(charges.ElementAt(i-targetsToAdd));
-                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i-targetsToAdd));
-                            TICForOutput = Convert.ToString(TICs.ElementAt(i-targetsToAdd));
-                            FileForOutput = Convert.ToString(files.ElementAt(i - targetsToAdd));
+                            // Repeat the logic based on the condition
+                            index = (i + 1) % scans.Count;
+                            scanNumberForOutput = Convert.ToString(scans.ElementAt(index));
+                            chargeForOutput = Convert.ToString(charges.ElementAt(index));
+                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(index));
+                            TICForOutput = Convert.ToString(TICs.ElementAt(index));
+                            FileForOutput = Convert.ToString(files.ElementAt(index));
                         }
                     }
-                    else
-                    {
-                        scanNumberForOutput = Convert.ToString(scans.ElementAt(i));
-                        chargeForOutput = Convert.ToString(charges.ElementAt(i));
-                        retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i));
-                        TICForOutput = Convert.ToString(TICs.ElementAt(i));
-                        FileForOutput = Convert.ToString(files.ElementAt(i));
-                    }
+
                     // Adding of each string component to output
                     solutionProcess += solutionsUpdate + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + theoreticalMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + observedMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chemicalFormula + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + error + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + scanNumberForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chargeForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + retentionTimeForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + TICForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + FileForOutput + Environment.NewLine;
                 }
@@ -2670,6 +2684,10 @@ namespace glycombo
 
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
         {
+            if (customAdductPolarity != null)
+            {
+                customAdductPolarity.IsEnabled = true;
+            }
             browseButton = (Button)FindName("browseButton");
             if (browseButton != null)
             {
@@ -3001,26 +3019,20 @@ namespace glycombo
         private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
         {
             TextChecked = true;
+            if (customAdductPolarity != null)
+            {
+                customAdductPolarity.IsEnabled = false;
+            }
             browseButton = (Button)FindName("browseButton");
             if (browseButton != null)
             {
                 browseButton.IsEnabled = true;
                 browseButton.Content = "Browse txt";
             }
-            else
-            {
-                // Handle the null case
-                Console.WriteLine("browseButton is null");
-            }
             submitbutton = (Button)FindName("submitbutton");
             if (submitbutton != null)
             {
                 submitbutton.IsEnabled = true;
-            }
-            else
-            {
-                // Handle the null case
-                Console.WriteLine("submitbutton is null");
             }
             if (inputOrLabel != null && InputMasses != null)
             {
@@ -3053,13 +3065,17 @@ namespace glycombo
             if (customAdductCheckBox.IsChecked == true) {
                 customAdductMassLabel.Visibility = Visibility.Visible;
                 customAdductMassText.Visibility = Visibility.Visible;
+                customAdductPolarity.Visibility = Visibility.Visible;
+                customAdductPolarityLabel.Visibility = Visibility.Visible;
             }
         }
 
         private void customAdductCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-                customAdductMassLabel.Visibility = Visibility.Collapsed;
-                customAdductMassText.Visibility = Visibility.Collapsed;
+            customAdductMassLabel.Visibility = Visibility.Collapsed;
+            customAdductMassText.Visibility = Visibility.Collapsed;
+            customAdductPolarity.Visibility = Visibility.Collapsed;
+            customAdductPolarityLabel.Visibility = Visibility.Collapsed;
         }
     }
 }
