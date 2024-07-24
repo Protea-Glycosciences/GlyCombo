@@ -54,7 +54,7 @@
                     </StackPanel>
                     <Label Margin="10,305,688,0" Style="{StaticResource heading}" Height="32" VerticalAlignment="Top">Reducing End:</Label>
                     <StackPanel  Margin="137,305,467,0" Height="32" VerticalAlignment="Top">
-                        <ComboBox x:Name="reducingEndBox" Width="171" SelectedIndex="0">
+                        <ComboBox x:Name="reducingEndBox" Width="171" SelectedIndex="0" SelectionChanged="reducingEndBox_SelectionChanged">
                             <ComboBoxItem Content="Free"/>
                             <ComboBoxItem Content="Reduced"/>
                             <ComboBoxItem Content="InstantPC"/>
@@ -269,7 +269,7 @@
                             <TextBox x:Name="amNeuGcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0"/>
                         </ui:LayoutPanel>
                     </ui:LayoutPanel>
-                    <CheckBox x:Name="OffByOne" FontSize="14" Content="Off by One precursor searching" VerticalAlignment="Top" Margin="489,415,55,0" HorizontalAlignment="Stretch" MinWidth="76" Height="31" Checked="OffByOne_Checked"/>
+                    <CheckBox x:Name="OffByOne" FontSize="14" Content="Off by One precursor searching" VerticalAlignment="Top" Margin="489,415,55,0" HorizontalAlignment="Stretch" MinWidth="76" Height="31"/>
                     <Label Content="Advanced monosaccharides" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="adductLabel" Content="Adducts" HorizontalAlignment="Left" Margin="489,12,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="neutralAdductLabel" Content="Neutral" HorizontalAlignment="Left" Margin="489,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
@@ -297,8 +297,82 @@
             </TabItem>
             <TabItem Header="Custom">
                 <Grid Background="#FFE5E5E5" Margin="0,0,0,9">
-                    <Label x:Name="customAdductLabel_Form" Content="Custom adduct" HorizontalAlignment="Left" Margin="27,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <Label x:Name="customMonosaccharideLabel" Content="Custom monosaccharide" HorizontalAlignment="Left" Margin="432,25,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <TextBlock x:Name="customText" Margin="10,10,10,349" TextWrapping="Wrap" Text="TextBlock" MaxHeight="100"/>
+                    <Label Content="Custom Monosaccharides" Margin="9,89,0,0" FontWeight="Bold" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="168"/>
+                    <CheckBox x:Name="customMonoCheck1" Content="1" Margin="9,137,0,0" VerticalAlignment="Top" Width="17" MinWidth="50" Checked="customMonoCheck1_Checked" Unchecked="customMonoCheck1_Unchecked" Height="32"/>
+                    <CheckBox x:Name="customMonoCheck2" Content="2" Margin="9,172,0,0" VerticalAlignment="Top" Width="17" MinWidth="50" Checked="customMonoCheck2_Checked" Unchecked="customMonoCheck2_Unchecked" Height="32"/>
+                    <CheckBox x:Name="customMonoCheck3" Content="3" Margin="9,207,0,0" VerticalAlignment="Top" Width="17" MinWidth="50" Checked="customMonoCheck3_Checked" Unchecked="customMonoCheck3_Unchecked" Height="32"/>
+                    <CheckBox x:Name="customMonoCheck4" Content="4" Margin="9,243,0,0" VerticalAlignment="Top" Width="17" MinWidth="50" Checked="customMonoCheck4_Checked" Unchecked="customMonoCheck4_Unchecked" Height="32"/>
+                    <CheckBox x:Name="customMonoCheck5" Content="5" Margin="9,278,0,0" VerticalAlignment="Top" Width="17" MinWidth="50" Checked="customMonoCheck5_Checked" Unchecked="customMonoCheck5_Unchecked" Height="32"/>
+                    <Label Content="Enable" Margin="9,113,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="41"/>
+                    <TextBox x:Name="customMonoNameBox1"  Margin="62,137,0,0" TextWrapping="Wrap" Text="Custom Name 1" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="129" FontSize="12"/>
+                    <Label Content="Custom Name" HorizontalAlignment="Left" Margin="62,113,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="customMonoMassBox1" local:NumericInputBehavior.IsNumericInput="True" Margin="202,137,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" Width="124" Height="32" VerticalAlignment="Top" FontSize="12"  Text="0"/>
+                    <Label Content="Monoisotopic mass" HorizontalAlignment="Left" Margin="202,113,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="customSettingsSave" Content="Export settings" Margin="13,417,0,0" VerticalAlignment="Top" Click="customSettingsSave_Click" Width="149"/>
+                    <Button x:Name="customSettingsLoad" Content="Import settings" Margin="179,417,0,0" VerticalAlignment="Top" Click="customSettingsLoad_Click" Width="151"/>
+                    <Label Content="Chemical formula" Margin="333,93,0,0" FontWeight="Bold" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="116"/>
+                    <TextBox x:Name="customMonoCBox1" Margin="333,137,0,0" local:NumericInputBehavior.IsNumericInput="True" MinWidth="62" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="66" FontSize="12" Padding="5,5,0,6" Text="0"/>
+                    <Label Content="C" Margin="333,116,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="9"/>
+                    <Label Content="H" Margin="405,117,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="10"/>
+                    <TextBox x:Name="customMonoHBox1" Margin="403,137,0,0" local:NumericInputBehavior.IsNumericInput="True" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="65" FontSize="12" Padding="5,5,0,6" Text="0"/>
+                    <Label Content="N" Margin="476,116,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="10"/>
+                    <TextBox x:Name="customMonoNBox1" Margin="472,137,0,0" local:NumericInputBehavior.IsNumericInput="True" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="65" FontSize="12" Padding="5,5,0,6" Text="0"/>
+                    <Label Content="O" Margin="545,116,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="11"/>
+                    <TextBox x:Name="customMonoOBox1" Margin="542,137,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" Padding="5,5,0,6" Text="0"/>
+                    <Label Content="Ranges" Margin="619,93,0,0" FontWeight="Bold" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="48"/>
+                    <TextBox x:Name="customMonoMinBox1" Margin="618,137,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" MaxLength="2" Text="0"/>
+                    <Label Content="Min" Margin="619,116,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="24"/>
+                    <TextBox x:Name="customMonoMaxBox1" Margin="693,137,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" MaxLength="2" Text="0"/>
+                    <Label Content="Max" HorizontalAlignment="Left" Margin="690,116,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="customMonoNameBox2" Margin="62,173,0,0" TextWrapping="Wrap" Text="Custom Name 2" HorizontalAlignment="Left" Width="129" Height="32" VerticalAlignment="Top" FontSize="12"/>
+                    <TextBox x:Name="customMonoMassBox2" Margin="202,173,0,0" local:NumericInputBehavior.IsNumericInput="True" TextWrapping="Wrap" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="124" FontSize="12" Text="0"/>
+                    <TextBox x:Name="customMonoCBox2" Margin="333,173,0,0" local:NumericInputBehavior.IsNumericInput="True" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="66" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoHBox2" Margin="403,173,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoNBox2" Margin="472,173,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoOBox2" Margin="542,173,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoMinBox2" Margin="618,173,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" MaxLength="2" Text="0"/>
+                    <TextBox x:Name="customMonoMaxBox2" Margin="693,173,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" MaxLength="2" Text="0"/>
+                    <TextBox x:Name="customMonoNameBox3" Margin="62,208,0,0" TextWrapping="Wrap" Text="Custom Name 3" HorizontalAlignment="Left" Width="129" Height="32" VerticalAlignment="Top" FontSize="12"/>
+                    <TextBox x:Name="customMonoMassBox3" Margin="202,208,0,0" local:NumericInputBehavior.IsNumericInput="True" TextWrapping="Wrap" HorizontalAlignment="Left" Width="124" Height="32" VerticalAlignment="Top" FontSize="12" Text="0"/>
+                    <TextBox x:Name="customMonoCBox3" Margin="333,208,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoHBox3" Margin="403,208,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoNBox3" Margin="472,208,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoOBox3" Margin="542,208,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoMinBox3" Margin="618,208,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" MaxLength="2" Text="0"/>
+                    <TextBox x:Name="customMonoMaxBox3" Margin="693,208,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" MaxLength="2" Text="0"/>
+                    <TextBox x:Name="customMonoNameBox4" Margin="62,245,0,0" TextWrapping="Wrap" Text="Custom Name 4" HorizontalAlignment="Left" Width="129" Height="32" VerticalAlignment="Top" FontSize="12"/>
+                    <TextBox x:Name="customMonoMassBox4" Margin="202,245,0,0" local:NumericInputBehavior.IsNumericInput="True" TextWrapping="Wrap" HorizontalAlignment="Left" Width="124" Height="32" VerticalAlignment="Top" FontSize="12" Text="0"/>
+                    <TextBox x:Name="customMonoCBox4" Margin="333,245,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoHBox4" Margin="403,245,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoNBox4" Margin="472,245,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoOBox4" Margin="542,245,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoMinBox4" Margin="618,245,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" MaxLength="2" Text="0"/>
+                    <TextBox x:Name="customMonoMaxBox4" Margin="693,245,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" MaxLength="2" Text="0"/>
+                    <TextBox x:Name="customMonoNameBox5" Margin="62,281,0,0" TextWrapping="Wrap" Text="Custom Name 5" HorizontalAlignment="Left" Width="129" Height="32" VerticalAlignment="Top" FontSize="12"/>
+                    <TextBox x:Name="customMonoMassBox5" Margin="202,281,0,0" local:NumericInputBehavior.IsNumericInput="True" TextWrapping="Wrap" HorizontalAlignment="Left" Width="124" Height="32" VerticalAlignment="Top" FontSize="12" Text="0"/>
+                    <TextBox x:Name="customMonoCBox5" Margin="333,281,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoHBox5" Margin="403,281,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoNBox5" Margin="472,281,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoOBox5" Margin="542,281,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" Padding="5,5,1,6" Text="0"/>
+                    <TextBox x:Name="customMonoMinBox5" Margin="618,281,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" MaxLength="2" Text="0"/>
+                    <TextBox x:Name="customMonoMaxBox5" Margin="693,281,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" FontSize="12" MaxLength="2" Text="0"/>
+                    <Label Content="Custom Reducing End" Margin="10,327,0,0" FontWeight="Bold" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="168"/>
+                    <CheckBox x:Name="customReducingCheck" Content="" Margin="22,371,0,0" VerticalAlignment="Top" Width="17" MinWidth="50" Height="32" Checked="customReducingCheck_Checked" Unchecked="customReducingCheck_Unchecked"/>
+                    <Label Content="Enable" Margin="10,347,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="41"/>
+                    <TextBox x:Name="customReducingNameBox"  Margin="63,371,0,0" TextWrapping="Wrap" Text="Custom Name 1" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="129" FontSize="12" Visibility="Collapsed"/>
+                    <Label Content="Custom Name" HorizontalAlignment="Left" Margin="63,347,0,0" VerticalAlignment="Top"/>
+                    <TextBox x:Name="customReducingMassBox" local:NumericInputBehavior.IsNumericInput="True" Margin="203,371,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" Width="124" Height="32" VerticalAlignment="Top" FontSize="12"  Text="0" Visibility="Collapsed"/>
+                    <Label Content="Monoisotopic mass" HorizontalAlignment="Left" Margin="203,347,0,0" VerticalAlignment="Top"/>
+                    <Label Content="Chemical formula" Margin="334,327,0,0" FontWeight="Bold" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="116"/>
+                    <TextBox x:Name="customReducingCBox" Margin="334,371,0,0" local:NumericInputBehavior.IsNumericInput="True" MinWidth="62" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="66" FontSize="12" Padding="5,5,0,6" Text="0" Visibility="Collapsed"/>
+                    <Label Content="C" Margin="334,350,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="9"/>
+                    <Label Content="H" Margin="406,351,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="10"/>
+                    <TextBox x:Name="customReducingHBox" Margin="404,371,0,0" local:NumericInputBehavior.IsNumericInput="True" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="65" FontSize="12" Padding="5,5,0,6" Text="0" Visibility="Collapsed"/>
+                    <Label Content="N" Margin="477,350,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="10"/>
+                    <TextBox x:Name="customReducingNBox" Margin="473,371,0,0" local:NumericInputBehavior.IsNumericInput="True" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="65" FontSize="12" Padding="5,5,0,6" Text="0" Visibility="Collapsed"/>
+                    <Label Content="O" Margin="546,350,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="11"/>
+                    <TextBox x:Name="customReducingOBox" Margin="543,371,0,0" local:NumericInputBehavior.IsNumericInput="True" Width="65" MinWidth="65" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" Padding="5,5,0,6" Text="0" Visibility="Collapsed"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Documentation">
