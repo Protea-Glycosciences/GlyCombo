@@ -177,6 +177,7 @@ namespace glycombo
         private bool param_adductnegAA;
         private bool param_adductnegTFA;
         private bool param_adductCustom;
+        private string param_customReducingEnd;
         private string param_monoHex;
         private string param_monoHexA;
         private string param_monodHex;
@@ -1418,6 +1419,11 @@ namespace glycombo
                             reducedEnd = "girP";
                             targets = targets.Select(z => z - (18.010555m + 134.07182m)).ToList();
                             break;
+                        case 8:
+                            reducedEnd = "Custom";
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox))).ToList();
+                            param_customReducingEnd = "Mass: " + customReducingMassBox + " Chemical formula: C" + customReducingCBox + "H" + customReducingHBox + "N" + customReducingNBox + "O" + customReducingOBox;
+                            break;
                         default:
                             break;
                     }
@@ -1434,6 +1440,11 @@ namespace glycombo
                             reducedEnd = "Reduced";
                             targets = targets.Select(z => z - (20.026195m + 42.046950m)).ToList();
                             break;
+                        case 8:
+                            reducedEnd = "Custom";
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox))).ToList();
+                            param_customReducingEnd = "Mass: " + customReducingMassBox + " Chemical formula: C" + customReducingCBox + "H" + customReducingHBox + "N" + customReducingNBox + "O" + customReducingOBox;
+                            break;
                         default:
                             break;
                     }
@@ -1449,6 +1460,11 @@ namespace glycombo
                         case 1:
                             reducedEnd = "Reduced";
                             targets = targets.Select(z => z - (20.026195m + 126.031694m)).ToList();
+                            break;
+                        case 8:
+                            reducedEnd = "Custom";
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox))).ToList();
+                            param_customReducingEnd = "Mass: " + customReducingMassBox + " Chemical formula: C" + customReducingCBox + "H" + customReducingHBox + "N" + customReducingNBox + "O" + customReducingOBox;
                             break;
                         default:
                             break;
@@ -1726,6 +1742,7 @@ namespace glycombo
                 + Environment.NewLine
                 + "Reducing end: "
                 + reducedEnd.ToString()
+                + param_customReducingEnd
                 + Environment.NewLine
                 + param_adductSummary
                 + Environment.NewLine
@@ -2055,6 +2072,12 @@ namespace glycombo
                             chemicalFormulaeN += 3;
                             chemicalFormulaeO += 1;
                             break;
+                        case "Custom":
+                            chemicalFormulaeC += Convert.ToInt16(customReducingCBox.Text);
+                            chemicalFormulaeH += Convert.ToInt16(customReducingHBox.Text);
+                            chemicalFormulaeN += Convert.ToInt16(customReducingNBox.Text);
+                            chemicalFormulaeO += Convert.ToInt16(customReducingOBox.Text);
+                            break;
                         default:
                             break;
                     }
@@ -2177,6 +2200,12 @@ namespace glycombo
                             chemicalFormulaeC += 3;
                             chemicalFormulaeH += 10;
                             chemicalFormulaeO += 1;
+                            break;
+                        case "Custom":
+                            chemicalFormulaeC += Convert.ToInt16(customReducingCBox.Text);
+                            chemicalFormulaeH += Convert.ToInt16(customReducingHBox.Text);
+                            chemicalFormulaeN += Convert.ToInt16(customReducingNBox.Text);
+                            chemicalFormulaeO += Convert.ToInt16(customReducingOBox.Text);
                             break;
                         default:
                             break;
@@ -2301,6 +2330,12 @@ namespace glycombo
                             chemicalFormulaeH += 10;
                             chemicalFormulaeO += 4;
                             break;
+                        case "Custom":
+                            chemicalFormulaeC += Convert.ToInt16(customReducingCBox.Text);
+                            chemicalFormulaeH += Convert.ToInt16(customReducingHBox.Text);
+                            chemicalFormulaeN += Convert.ToInt16(customReducingNBox.Text);
+                            chemicalFormulaeO += Convert.ToInt16(customReducingOBox.Text);
+                            break;
                         default:
                             break;
                     }
@@ -2394,6 +2429,10 @@ namespace glycombo
                             observedMass = s + 18.010565m + 134.06405m;
                             theoreticalMass = target + 18.010565m + 134.06405m;
                             break;
+                        case "Custom":
+                            observedMass = s + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            theoreticalMass = target + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            break;
                         default:
                             break;
                     }
@@ -2411,6 +2450,12 @@ namespace glycombo
                             observedMass = s + 20.026195m + 42.046950m;
                             theoreticalMass = target + 20.026195m + 42.046950m;
                             break;
+                        case "Custom":
+                            observedMass = s + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            theoreticalMass = target + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            break;
+                        default:
+                            break;
                     }
                 }
                 if (derivatisation == "Peracetylated")
@@ -2425,6 +2470,12 @@ namespace glycombo
                         case "Reduced":
                             observedMass = s + 20.026195m + 126.031694m;
                             theoreticalMass = target + 20.026195m + 126.031694m;
+                            break;
+                        case "Custom":
+                            observedMass = s + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            theoreticalMass = target + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            break;
+                        default:
                             break;
                     }
                 }
