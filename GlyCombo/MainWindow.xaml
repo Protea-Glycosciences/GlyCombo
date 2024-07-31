@@ -276,14 +276,14 @@
                     <Label x:Name="negativeAdductLabel" Content="Negative" HorizontalAlignment="Left" Margin="553,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Label x:Name="positiveAdductLabel" Content="Positive" HorizontalAlignment="Left" Margin="693,31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <CheckBox x:Name="neutralMCheckBox" Content="[M]" Margin="489,55,0,0" VerticalAlignment="Top" Width="78" MinWidth="40" IsChecked="True"/>
-                    <CheckBox x:Name="negativeMHCheckBox" Content="[M-H]-" Margin="553,55,0,0" VerticalAlignment="Top" Width="78" MinWidth="40"/>
-                    <CheckBox x:Name="positiveMHCheckBox" Content="[M+H]+" Margin="693,55,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
-                    <CheckBox x:Name="negativeMFACheckBox" Content="[M+COO]-" Margin="553,87,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
-                    <CheckBox x:Name="positiveMNaCheckBox" Content="[M+Na]+" Margin="693,87,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
-                    <CheckBox x:Name="negativeMAACheckBox" Content="[M+CH3COO]-" Margin="553,119,0,0" VerticalAlignment="Top" Width="135" MinWidth="40"/>
-                    <CheckBox x:Name="positiveMKCheckBox" Content="[M+K]+" Margin="693,119,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
-                    <CheckBox x:Name="negativeMTFACheckBox" Content="[M+TFA-H]-" Margin="553,151,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
-                    <CheckBox x:Name="positiveMNH4CheckBox" Content="[M+NH4]+" Margin="693,151,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
+                    <CheckBox x:Name="negativeMHCheckBox" Content="[M-H]⁻" Margin="553,55,0,0" VerticalAlignment="Top" Width="78" MinWidth="40"/>
+                    <CheckBox x:Name="positiveMHCheckBox" Content="[M+H]⁺" Margin="693,55,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
+                    <CheckBox x:Name="negativeMFACheckBox" Content="[M+COO]⁻" Margin="553,87,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
+                    <CheckBox x:Name="positiveMNaCheckBox" Content="[M+Na]⁺" Margin="693,87,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
+                    <CheckBox x:Name="negativeMAACheckBox" Content="[M+CH₃COO]⁻" Margin="553,119,0,0" VerticalAlignment="Top" Width="135" MinWidth="40"/>
+                    <CheckBox x:Name="positiveMKCheckBox" Content="[M+K]⁺" Margin="693,119,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
+                    <CheckBox x:Name="negativeMTFACheckBox" Content="[M+TFA-H]⁻" Margin="553,151,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
+                    <CheckBox x:Name="positiveMNH4CheckBox" Content="[M+NH₄]⁺" Margin="693,151,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Custom">
