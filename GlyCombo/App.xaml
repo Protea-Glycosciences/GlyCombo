@@ -18,6 +18,10 @@
                 <Setter Property="FontSize" Value="12" />
                 <Setter Property="FontWeight" Value="bold" />
             </Style>
+			<Style x:Key="italic" TargetType="Label">
+				<Setter Property="FontSize" Value="12" />
+				<Setter Property="FontWeight" Value="italic" />
+			</Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
