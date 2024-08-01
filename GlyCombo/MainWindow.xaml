@@ -105,13 +105,13 @@
                     <ui:ToggleSwitch x:Name="HextoggleSwitch" Margin="339,27,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="HextoggleSwitch_Toggled" Width="50" Height="32"/>
                     <Label Margin="389,33,167,0" Height="20" VerticalAlignment="Top" Content="Hexose (Hex)"/>
                     <ui:ToggleSwitch x:Name="HexNActoggleSwitch" Margin="339,53,0,0" OffContent="" OnContent="" Toggled="HexNActoggleSwitch_Toggled" Width="50" Height="32" VerticalAlignment="Top"/>
-                    <Label Margin="389,60,167,0" Height="20" VerticalAlignment="Top" Content="N-acetyl-hexosamine (HexNAc)"/>
+                    <Label Margin="389,60,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-acetyl-hexosamine (HexNAc)"/>
                     <ui:ToggleSwitch x:Name="dHextoggleSwitch" OffContent="" OnContent="" Toggled="dHextoggleSwitch_Toggled" Width="50" Height="32" Margin="339,79,0,0" VerticalAlignment="Top"/>
                     <Label Margin="389,84,167,0" Height="20" VerticalAlignment="Top" Content="Deoxyhexose (dHex)"/>
                     <ui:ToggleSwitch x:Name="Neu5ActoggleSwitch" OffContent="" OnContent="" Toggled="Neu5ActoggleSwitch_Toggled" Width="50" Height="32" Margin="339,105,0,0" VerticalAlignment="Top"/>
-                    <Label Margin="389,111,167,0" Height="20" VerticalAlignment="Top" Content="N-acetyl-neuraminic acid (NeuAc)"/>
+                    <Label Margin="389,111,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-acetyl-neuraminic acid (NeuAc)"/>
                     <ui:ToggleSwitch x:Name="Neu5GctoggleSwitch" Margin="339,131,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="Neu5GctoggleSwitch_Toggled" Width="50" Height="32"/>
-                    <Label Margin="389,137,167,0" Height="20" VerticalAlignment="Top" Content="N-glycolyl-neuraminic acid (NeuGc)"/>
+                    <Label Margin="389,137,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-glycolyl-neuraminic acid (NeuGc)"/>
 
                     <ComboBox x:Name="PresetCombo" Margin="588,164,42,0" ui:ControlHelper.PlaceholderText="Presets" FontSize="12" SelectionChanged="PresetCombo_SelectionChanged" Height="27" HorizontalAlignment="Stretch">
                         <ComboBoxItem Content="N/A" FontSize="12"/>
@@ -175,7 +175,7 @@
                         </ui:LayoutPanel>
 
                         <ui:ToggleSwitch x:Name="dHexNActoggleSwitch" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" OffContent="" OnContent="" Toggled="dHexNActoggleSwitch_Toggled" Width="50" Margin="0,0,0,343" VerticalAlignment="Bottom"/>
-                        <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,350" Height="20" VerticalAlignment="Bottom">N-acetyl-deoxyhexose (dHexNAc)</Label>
+                        <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Margin="50,0,0,350" Height="20" VerticalAlignment="Bottom">𝑁-acetyl-deoxyhexose (dHexNAc)</Label>
                         <ui:LayoutPanel x:Name="dHexNAc_container" Margin="0,0,0,342" Visibility="Collapsed" Height="28" VerticalAlignment="Bottom">
                             <TextBox x:Name="dHexNAcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,1,70,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
                             <TextBox x:Name="dHexNAcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="0,1,0,0" Width="50" Height="20" MinHeight="0" Padding="10,0,6,0" HorizontalAlignment="Right"/>
