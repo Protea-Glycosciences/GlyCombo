@@ -72,7 +72,8 @@
                         <RadioButton GroupName="State" Name="Permeth" Grid.Row="3" Grid.Column="1" >Permethylated</RadioButton>
                         <RadioButton GroupName="State" Name="Peracetyl" Grid.Row="3" Grid.Column="1" >Peracetylated</RadioButton>
                     </StackPanel>
-
+                    <Label  Style="{StaticResource heading}" Height="34" Width="300" Content="Current Monosaccharide Selection" Margin="339,227,161,198"/>
+                    <Label x:Name="ResultLabel" Style="{StaticResource monosaccharides}" Margin="339,261,42,141" Height="60" Width="400"></Label>
                     <Button x:Name="submitbutton" Content="Submit" MinWidth="175" IsEnabled="True" Click="Button1_Click" Margin="525,333,0,0" VerticalAlignment="Top" Height="31" Width="175"/>
                     <ProgressBar x:Name="ProgressBarSubmit" Visibility="Collapsed" IsIndeterminate="True" HorizontalAlignment="Left" Height="8" Margin="525,325,0,0" Width="175" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top"/>
                     <Button x:Name="resetbutton" Content="Reset" MinWidth="175" IsEnabled="False" Click="Reset_Click" Margin="525,387,0,0" Height="32" Width="175" VerticalAlignment="Top"/>
@@ -111,6 +112,7 @@
                     <Label Margin="389,111,167,0" Height="20" VerticalAlignment="Top" Content="N-acetyl-neuraminic acid (NeuAc)"/>
                     <ui:ToggleSwitch x:Name="Neu5GctoggleSwitch" Margin="339,131,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="Neu5GctoggleSwitch_Toggled" Width="50" Height="32"/>
                     <Label Margin="389,137,167,0" Height="20" VerticalAlignment="Top" Content="N-glycolyl-neuraminic acid (NeuGc)"/>
+
                     <ComboBox x:Name="PresetCombo" Margin="588,164,42,0" ui:ControlHelper.PlaceholderText="Presets" FontSize="12" SelectionChanged="PresetCombo_SelectionChanged" Height="27" HorizontalAlignment="Stretch">
                         <ComboBoxItem Content="N/A" FontSize="12"/>
                         <ComboBoxItem Content="Mammal 𝑁-glycan" FontSize="12"/>
@@ -121,6 +123,7 @@
                         <ComboBoxItem Content="Fungal 𝑁-glycan" FontSize="12"/>
                         <ComboBoxItem Content="Fungal 𝑂-glycan" FontSize="12"/>
                     </ComboBox>
+
                     <StackPanel  Margin="137,10,478,368">
                         <RadioButton GroupName="Upload" x:Name="TextRadioButton" Grid.Row="0" Grid.Column="1" IsChecked="True" Checked="TextRadioButton_Checked" Content="Text"/>
                         <RadioButton GroupName="Upload" x:Name="MzmlRadioButton" Grid.Row="0" Grid.Column="1" Checked="MzmlRadioButton_Checked" Content="mzML"/>
