@@ -316,7 +316,7 @@ namespace glycombo
 
         public void customMonoCheck1_Checked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox1.Visibility = Visibility.Visible;
             customMonoMassBox1.Visibility = Visibility.Visible;
             customMonoCBox1.Visibility = Visibility.Visible;
@@ -332,7 +332,7 @@ namespace glycombo
 
         public void customMonoCheck1_Unchecked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox1.Visibility = Visibility.Collapsed;
             customMonoMassBox1.Visibility = Visibility.Collapsed;
             customMonoCBox1.Visibility = Visibility.Collapsed;
@@ -480,7 +480,7 @@ namespace glycombo
 
         public void customMonoCheck3_Unchecked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox3.Visibility = Visibility.Collapsed;
             customMonoMassBox3.Visibility = Visibility.Collapsed;
             customMonoCBox3.Visibility = Visibility.Collapsed;
@@ -496,7 +496,7 @@ namespace glycombo
 
         public void customMonoCheck2_Unchecked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox2.Visibility = Visibility.Collapsed;
             customMonoMassBox2.Visibility = Visibility.Collapsed;
             customMonoCBox2.Visibility = Visibility.Collapsed;
@@ -512,7 +512,7 @@ namespace glycombo
 
         public void customMonoCheck4_Unchecked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox4.Visibility = Visibility.Collapsed;
             customMonoMassBox4.Visibility = Visibility.Collapsed;
             customMonoCBox4.Visibility = Visibility.Collapsed;
@@ -528,7 +528,7 @@ namespace glycombo
 
         public void customMonoCheck5_Unchecked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox5.Visibility = Visibility.Collapsed;
             customMonoMassBox5.Visibility = Visibility.Collapsed;
             customMonoCBox5.Visibility = Visibility.Collapsed;
@@ -544,7 +544,7 @@ namespace glycombo
 
         public void customMonoCheck2_Checked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox2.Visibility = Visibility.Visible;
             customMonoMassBox2.Visibility = Visibility.Visible;
             customMonoCBox2.Visibility = Visibility.Visible;
@@ -560,7 +560,7 @@ namespace glycombo
 
         public void customMonoCheck3_Checked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox3.Visibility = Visibility.Visible;
             customMonoMassBox3.Visibility = Visibility.Visible;
             customMonoCBox3.Visibility = Visibility.Visible;
@@ -576,7 +576,7 @@ namespace glycombo
 
         public void customMonoCheck4_Checked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox4.Visibility = Visibility.Visible;
             customMonoMassBox4.Visibility = Visibility.Visible;
             customMonoCBox4.Visibility = Visibility.Visible;
@@ -592,7 +592,7 @@ namespace glycombo
 
         public void customMonoCheck5_Checked(object sender, RoutedEventArgs e)
         {
-            UpdateResultTextBox();
+            UpdateMonosaccharideTextBox();
             customMonoNameBox5.Visibility = Visibility.Visible;
             customMonoMassBox5.Visibility = Visibility.Visible;
             customMonoCBox5.Visibility = Visibility.Visible;
@@ -2707,7 +2707,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     Hex_container.Visibility = Visibility.Visible;
@@ -2724,7 +2724,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     HexNAc_container.Visibility = Visibility.Visible;
@@ -2741,7 +2741,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     dHex_container.Visibility = Visibility.Visible;
@@ -2758,7 +2758,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     NeuAc_container.Visibility = Visibility.Visible;
@@ -2775,7 +2775,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     NeuGc_container.Visibility = Visibility.Visible;
@@ -2792,7 +2792,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     HexN_container.Visibility = Visibility.Visible;
@@ -2809,7 +2809,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     HexA_container.Visibility = Visibility.Visible;
@@ -2826,7 +2826,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     dHexNAc_container.Visibility = Visibility.Visible;
@@ -2843,7 +2843,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     Pent_container.Visibility = Visibility.Visible;
@@ -2860,7 +2860,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     KDN_container.Visibility = Visibility.Visible;
@@ -2877,7 +2877,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     Phos_container.Visibility = Visibility.Visible;
@@ -2894,7 +2894,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     Sulf_container.Visibility = Visibility.Visible;
@@ -2912,7 +2912,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     lNeuAc_container.Visibility = Visibility.Visible;
@@ -2929,7 +2929,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     eNeuAc_container.Visibility = Visibility.Visible;
@@ -2947,7 +2947,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     dNeuAc_container.Visibility = Visibility.Visible;
@@ -2965,7 +2965,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     amNeuAc_container.Visibility = Visibility.Visible;
@@ -2982,7 +2982,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     Acetyl_container.Visibility = Visibility.Visible;
@@ -3000,7 +3000,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     lNeuGc_container.Visibility = Visibility.Visible;
@@ -3017,7 +3017,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     eNeuGc_container.Visibility = Visibility.Visible;
@@ -3035,7 +3035,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     dNeuGc_container.Visibility = Visibility.Visible;
@@ -3053,7 +3053,7 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
-                UpdateResultTextBox();
+                UpdateMonosaccharideTextBox();
                 if (toggleSwitch.IsOn == true)
                 {
                     amNeuGc_container.Visibility = Visibility.Visible;
@@ -3445,57 +3445,92 @@ namespace glycombo
             }
         }
 
-        private void UpdateResultTextBox()
+        private void UpdateMonosaccharideTextBox()
         {
-            var toggledSwitches = new StringBuilder();
-
+            var toggledMonoSwitches = new StringBuilder();
+            toggledMonoSwitches.Append("Monosaccharides: ");
             // Check the state of each ToggleSwitch and build the string accordingly
             if (HextoggleSwitch.IsOn)
-                toggledSwitches.Append("Hex, ");
+                toggledMonoSwitches.Append(" Hex("+HexMin.Text+"-"+HexMax.Text+"),");
             if (HexNActoggleSwitch.IsOn)
-                toggledSwitches.Append("HexNAc, ");
+                toggledMonoSwitches.Append(" HexNAc(" + HexNAcMin.Text + "-" + HexNAcMax.Text + "),");
             if (dHextoggleSwitch.IsOn)
-                toggledSwitches.Append("dHex, ");
+                toggledMonoSwitches.Append(" dHex(" + dHexMin.Text + "-" + dHexMax.Text + "),");
             if (Neu5ActoggleSwitch.IsOn)
-               toggledSwitches.Append("NeuAc, ");
+               toggledMonoSwitches.Append(" NeuAc(" + Neu5AcMin.Text + "-" + Neu5AcMax.Text + "),");
             if (Neu5GctoggleSwitch.IsOn)
-               toggledSwitches.Append("NeuGc \n");
+               toggledMonoSwitches.Append(" NeuGc(" + Neu5GcMin.Text + "-" + Neu5GcMax.Text + "),");
             if (HexNtoggleSwitch.IsOn)
-                toggledSwitches.Append("HexN, ");
+                toggledMonoSwitches.Append(" HexN(" + HexNMin.Text + "-" + HexNMax.Text + "),");
             if (HexAtoggleSwitch.IsOn)
-                toggledSwitches.Append("HexA, ");
+                toggledMonoSwitches.Append(" HexA(" + HexAMin.Text + "-" + HexAMax.Text + "),");
             if (dHexNActoggleSwitch.IsOn)
-                toggledSwitches.Append("dHexNAc, ");
+                toggledMonoSwitches.Append(" dHexNAc(" + dHexNAcMin.Text + "-" + dHexNAcMax.Text + "),");
             if (PenttoggleSwitch.IsOn)
-                toggledSwitches.Append("Pent, ");
+                toggledMonoSwitches.Append(" Pent(" + PentMin.Text + "-" + PentMax.Text + "),");
             if (KDNtoggleSwitch.IsOn)
-                toggledSwitches.Append("KDN, ");
+                toggledMonoSwitches.Append(" KDN(" + KDNMin.Text + "-" + KDNMax.Text + "),");
             if (PhostoggleSwitch.IsOn)
-                toggledSwitches.Append("Phos, ");
+                toggledMonoSwitches.Append(" Phos(" + PhosMin.Text + "-" + PhosMax.Text + "),");
             if (SulftoggleSwitch.IsOn)
-                toggledSwitches.Append("Sulf, ");
+                toggledMonoSwitches.Append(" Sulf(" + SulfMin.Text + "-" + SulfMax.Text + "),");
             if (lNeuActoggleSwitch.IsOn)
-                toggledSwitches.Append("L, ");
+                toggledMonoSwitches.Append(" L(" + lNeuAcMin.Text + "-" + lNeuAcMax.Text + "),");
             if (eNeuActoggleSwitch.IsOn)
-                toggledSwitches.Append("E, ");
+                toggledMonoSwitches.Append(" E(" + eeNeuAcMin.Text + "-" + eeNeuAcMax.Text + "),");
             if(dNeuActoggleSwitch.IsOn)
-                toggledSwitches.Append("D, ");
+                toggledMonoSwitches.Append(" D(" + dNeuAcMin.Text + "-" + dNeuAcMax.Text + "),");
             if (amNeuActoggleSwitch.IsOn)
-                toggledSwitches.Append("Am, ");
+                toggledMonoSwitches.Append(" Am(" + amNeuAcMin.Text + "-" + amNeuAcMax.Text + "),");
             if (AcetyltoggleSwitch.IsOn)
-                toggledSwitches.Append("Acetyl, ");
+                toggledMonoSwitches.Append(" Acetyl(" + AcetylMin.Text + "-" + AcetylMax.Text + "),");
             if (lNeuGctoggleSwitch.IsOn)
-                toggledSwitches.Append("LG, ");
+                toggledMonoSwitches.Append(" LG(" + lNeuGcMin.Text + "-" + lNeuGcMax.Text + "),");
             if (eNeuGctoggleSwitch.IsOn)
-                toggledSwitches.Append("EG, ");
+                toggledMonoSwitches.Append(" EG(" + eeNeuGcMin.Text + "-" + eeNeuGcMax.Text + "),");
             if (dNeuGctoggleSwitch.IsOn)
-                toggledSwitches.Append("DG, ");
+                toggledMonoSwitches.Append(" DG(" + dNeuGcMin.Text + "-" + dNeuGcMax.Text + "),");
             if (amNeuGctoggleSwitch.IsOn)
-                toggledSwitches.Append("AmG \n");
-            if (customMonoCheck1.IsChecked == true | customMonoCheck2.IsChecked == true | customMonoCheck3.IsChecked == true | customMonoCheck4.IsChecked == true | customMonoCheck5.IsChecked == true)
-                toggledSwitches.Append("Custom Monosaccharide");
+                toggledMonoSwitches.Append(" AmG(" + amNeuGcMin.Text + "-" + amNeuGcMax.Text + "),");
+            if (customMonoCheck1.IsChecked == true )
+                toggledMonoSwitches.Append(" " + customMonoNameBox1.Text+ "(" + customMonoMinBox1.Text + " - " + customMonoMaxBox1.Text + "), ");
+            if (customMonoCheck2.IsChecked == true)
+                toggledMonoSwitches.Append(" " + customMonoNameBox2.Text + "(" + customMonoMinBox2.Text + " - " + customMonoMaxBox2.Text + "), ");
+            if (customMonoCheck3.IsChecked == true)
+                toggledMonoSwitches.Append(" " + customMonoNameBox3.Text + "(" + customMonoMinBox3.Text + " - " + customMonoMaxBox3.Text + "), ");
+            if (customMonoCheck4.IsChecked == true)
+                toggledMonoSwitches.Append(" " + customMonoNameBox4.Text + "(" + customMonoMinBox4.Text + " - " + customMonoMaxBox4.Text + "), ");
+            if (customMonoCheck5.IsChecked == true)
+                toggledMonoSwitches.Append(" " + customMonoNameBox5.Text + "(" + customMonoMinBox5.Text + " - " + customMonoMaxBox5.Text + "), ");
+            currentMonosaccharideSelectionInfo.Text = toggledMonoSwitches.ToString().TrimEnd(',');
+        }
 
-            ResultLabel.Content = toggledSwitches.ToString().Trim();
+        private void UpdateAdductTextBox()
+        {
+            var toggledAdducts = new StringBuilder();
+            toggledAdducts.Append("Adducts: ");
+            // Check the state of each Adduct Checkbox and build the string accordingly
+            if (neutralMCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M],");
+            if (negativeMHCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M-H⁻],");
+            if (positiveMHCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+H]⁺,");
+            if (negativeMFACheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+COO]⁻,");
+            if (positiveMNaCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+Na]⁺,");
+            if (negativeMAACheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+CH₃COO]⁻,");
+            if (positiveMKCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+K]⁺,");
+            if (negativeMTFACheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+TFA-H]⁻,");
+            if (positiveMNH4CheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+NH₄]⁺,");
+            if (customAdductCheckBox.IsChecked == true)
+                toggledAdducts.Append(" Custom [M+" + customAdductMassText.Text + "],");
+            currentAdductSelectionInfo.Text = toggledAdducts.ToString().TrimEnd(',');
         }
 
         private void customAdductCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -3544,6 +3579,12 @@ namespace glycombo
             customReducingHBox.Visibility = Visibility.Collapsed;
             customReducingNBox.Visibility = Visibility.Collapsed;
             customReducingOBox.Visibility = Visibility.Collapsed;
+        }
+
+        private void startTab_GotFocus(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            UpdateAdductTextBox();
         }
     }
 }

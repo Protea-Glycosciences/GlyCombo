@@ -12,10 +12,10 @@
 
     <Grid Margin="3,3,7,0" RenderTransformOrigin="0,0" Height="484" VerticalAlignment="Top">
         <TabControl Height="508" VerticalAlignment="Top" Margin="-3,-12,-7,0" HorizontalContentAlignment="Center">
-            <TabItem Header="Start">
+            <TabItem Header="Start" GotFocus="startTab_GotFocus">
                 <Grid Background="#FFE5E5E5" Height="459" VerticalAlignment="Top">
-                    <Image Source="/Final Logo.png" RenderTransformOrigin="1.183,-0.166" HorizontalAlignment="Left" Width="76" Height="78" VerticalAlignment="Top" Margin="410,323,0,0"/>
-                    <TextBlock Margin="418,402,311,0" FontSize="16" FontWeight="Bold" Height="36" VerticalAlignment="Top">
+                    <Image Source="/Final Logo.png" RenderTransformOrigin="1.183,-0.166" HorizontalAlignment="Left" Width="76" Height="78" VerticalAlignment="Top" Margin="526,343,0,0"/>
+                    <TextBlock Margin="534,422,195,0" FontSize="16" FontWeight="Bold" Height="36" VerticalAlignment="Top">
             <Hyperlink NavigateUri="https://github.com/Protea-Glycosciences/GlyCombo" RequestNavigate="Hyperlink_RequestNavigate">
         Support
             </Hyperlink>
@@ -72,11 +72,10 @@
                         <RadioButton GroupName="State" Name="Permeth" Grid.Row="3" Grid.Column="1" >Permethylated</RadioButton>
                         <RadioButton GroupName="State" Name="Peracetyl" Grid.Row="3" Grid.Column="1" >Peracetylated</RadioButton>
                     </StackPanel>
-                    <Label  Style="{StaticResource heading}" Height="34" Width="300" Content="Current Monosaccharide Selection" Margin="339,227,161,198"/>
-                    <Label x:Name="ResultLabel" Style="{StaticResource monosaccharides}" Margin="339,261,42,141" Height="60" Width="400"></Label>
-                    <Button x:Name="submitbutton" Content="Submit" MinWidth="175" IsEnabled="True" Click="Button1_Click" Margin="525,333,0,0" VerticalAlignment="Top" Height="31" Width="175"/>
-                    <ProgressBar x:Name="ProgressBarSubmit" Visibility="Collapsed" IsIndeterminate="True" HorizontalAlignment="Left" Height="8" Margin="525,325,0,0" Width="175" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top"/>
-                    <Button x:Name="resetbutton" Content="Reset" MinWidth="175" IsEnabled="False" Click="Reset_Click" Margin="525,387,0,0" Height="32" Width="175" VerticalAlignment="Top"/>
+                    <Label  Style="{StaticResource heading}" Height="34" Width="300" Content="Settings summary" Margin="339,162,161,263"/>
+                    <Button x:Name="submitbutton" Content="Submit" MinWidth="150" IsEnabled="True" Click="Button1_Click" Margin="628,353,0,0" VerticalAlignment="Top" Height="31" Width="149"/>
+                    <ProgressBar x:Name="ProgressBarSubmit" Visibility="Collapsed" IsIndeterminate="True" HorizontalAlignment="Left" Height="13" Margin="628,392,0,0" Width="149" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top"/>
+                    <Button x:Name="resetbutton" Content="Reset" MinWidth="150" IsEnabled="False" Click="Reset_Click" Margin="628,407,0,0" Height="32" Width="139" VerticalAlignment="Top"/>
                     <ui:LayoutPanel x:Name="Hex_container" Grid.Row="0" Margin="340,31,10,401" Visibility="Collapsed">
                         <TextBox x:Name="HexMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2"  VerticalAlignment="Center" Margin="284,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left"/>
                         <TextBox x:Name="HexMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Center" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left" Margin="354,0,0,0"/>
@@ -154,6 +153,10 @@
                     </StackPanel>
                     <Button x:Name="browseButton" Content="Browse text" Margin="15,84,0,0" Click="UploadButton_Click" Visibility="Visible" VerticalAlignment="Top"/>
                     <Label Name="inputOrLabel" Margin="107,84,0,0" Style="{StaticResource heading}" Content="OR" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Button x:Name="customSettingsSave" Content="Export settings" Margin="348,407,0,0" VerticalAlignment="Top" Click="customSettingsSave_Click" Width="152"/>
+                    <Button x:Name="customSettingsLoad" Content="Import settings" Margin="348,353,0,0" VerticalAlignment="Top" Click="customSettingsLoad_Click" Width="152" RenderTransformOrigin="0.449,-0.416"/>
+                    <TextBlock x:Name="currentMonosaccharideSelectionInfo" Margin="346,201,0,0" TextWrapping="Wrap" Text="Monosaccharides:" MaxHeight="100" HorizontalAlignment="Left" Width="432" Height="79" VerticalAlignment="Top"/>
+                    <TextBlock x:Name="currentAdductSelectionInfo" Margin="346,285,0,0" TextWrapping="Wrap" Text="Adducts:" MaxHeight="100" HorizontalAlignment="Left" Width="432" Height="52" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Advanced">
@@ -287,6 +290,8 @@
                     <CheckBox x:Name="positiveMKCheckBox" Content="[M+K]⁺" Margin="693,119,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
                     <CheckBox x:Name="negativeMTFACheckBox" Content="[M+TFA-H]⁻" Margin="553,151,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
                     <CheckBox x:Name="positiveMNH4CheckBox" Content="[M+NH₄]⁺" Margin="693,151,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
+                    <Label Content="Advanced searching" HorizontalAlignment="Left" Margin="489,330,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <TextBlock x:Name="advancedSearchingText" Margin="489,349,0,0" TextWrapping="Wrap" Text="Searches the mass list twice: once for the correct monoisotopic mass, and once for the M+1. Doubles search time." MaxHeight="100" HorizontalAlignment="Left" Width="293" Height="58" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Custom">
@@ -303,8 +308,6 @@
                     <Label Content="Custom Name" HorizontalAlignment="Left" Margin="62,90,0,0" VerticalAlignment="Top"/>
                     <TextBox x:Name="customMonoMassBox1" local:NumericInputBehavior.IsNumericInput="True" Margin="229,114,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" Width="124" Height="32" VerticalAlignment="Top" FontSize="12"  Text="0"/>
                     <Label Content="Monoisotopic mass" HorizontalAlignment="Left" Margin="231,90,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="customSettingsSave" Content="Export settings" Margin="470,411,0,0" VerticalAlignment="Top" Click="customSettingsSave_Click" Width="149"/>
-                    <Button x:Name="customSettingsLoad" Content="Import settings" Margin="636,411,0,0" VerticalAlignment="Top" Click="customSettingsLoad_Click" Width="151" RenderTransformOrigin="0.449,-0.416"/>
                     <Label Content="Chemical formula" Margin="362,70,0,0" FontWeight="Bold" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="116"/>
                     <TextBox x:Name="customMonoCBox1" Margin="362,114,0,0" local:NumericInputBehavior.IsNumericInput="True" MinWidth="62" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="66" FontSize="12" Padding="5,5,0,6" Text="0"/>
                     <Label Content="C" Margin="362,90,0,0" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="9"/>
