@@ -49,8 +49,8 @@
                             </ui:LayoutPanel.Style>
                             <TextBox x:Name="ppmError" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="1" Grid.ColumnSpan="2" Text="50" HorizontalAlignment="Left" TextAlignment="Right" Width="175"/>
                         </ui:LayoutPanel>
-                        <RadioButton GroupName="Error" x:Name="Da" Grid.Row="1" Grid.Column="1" IsChecked="True" Content="Da"/>
-                        <RadioButton GroupName="Error" x:Name="ppm" Grid.Row="1" Grid.Column="1" Content="ppm"/>
+                        <RadioButton GroupName="Error" x:Name="Da" Grid.Row="1" Grid.Column="1" IsChecked="True" Content="Da" Checked="Da_Checked"/>
+                        <RadioButton GroupName="Error" x:Name="ppm" Grid.Row="1" Grid.Column="1" Content="ppm" Checked="ppm_Checked"/>
                     </StackPanel>
                     <Label Margin="10,305,688,0" Style="{StaticResource heading}" Height="32" VerticalAlignment="Top">Reducing End:</Label>
                     <StackPanel  Margin="137,305,467,0" Height="32" VerticalAlignment="Top">
@@ -68,9 +68,9 @@
                     </StackPanel>
                     <Label Margin="10,354,688,0" Style="{StaticResource heading}" Height="64" VerticalAlignment="Top">Glycan State:</Label>
                     <StackPanel Margin="137,354,488,0" Height="95" VerticalAlignment="Top">
-                        <RadioButton GroupName="State" Name="Native" Grid.Row="3" Grid.Column="1" IsChecked="True">Native</RadioButton>
-                        <RadioButton GroupName="State" Name="Permeth" Grid.Row="3" Grid.Column="1" >Permethylated</RadioButton>
-                        <RadioButton GroupName="State" Name="Peracetyl" Grid.Row="3" Grid.Column="1" >Peracetylated</RadioButton>
+                        <RadioButton GroupName="State" Name="Native" Grid.Row="3" Grid.Column="1" IsChecked="True" Checked="Native_Checked">Native</RadioButton>
+                        <RadioButton GroupName="State" Name="Permeth" Grid.Row="3" Grid.Column="1" Checked="Permeth_Checked" >Permethylated</RadioButton>
+                        <RadioButton GroupName="State" Name="Peracetyl" Grid.Row="3" Grid.Column="1" Checked="Peracetyl_Checked" >Peracetylated</RadioButton>
                     </StackPanel>
                     <Label  Style="{StaticResource heading}" Height="34" Width="300" Content="Settings summary" Margin="339,162,161,263"/>
                     <Button x:Name="submitbutton" Content="Submit" MinWidth="150" IsEnabled="True" Click="Button1_Click" Margin="628,353,0,0" VerticalAlignment="Top" Height="31" Width="149"/>

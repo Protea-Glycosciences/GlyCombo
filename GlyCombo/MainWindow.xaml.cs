@@ -43,6 +43,7 @@ namespace glycombo
         private string reducedEnd;
         private decimal observedMass;
         private decimal theoreticalMass;
+        private string massErrorType;
         private decimal error;
         // Monosaccharides
         private decimal dhex;
@@ -138,78 +139,25 @@ namespace glycombo
         List<decimal> targets = [];
         List<string> targetStrings = [];
         // Parameter report variables
-        private bool monoHex = false;
-        private bool monoHexA = false;
-        private bool monodHex = false;
-        private bool monoHexNAc = false;
-        private bool monoHexN = false;
-        private bool monodHexNAc = false;
-        private bool monoPent = false;
-        private bool monoKDN = false;
-        private bool monoNeu5Ac = false;
-        private bool monoNeu5Gc = false;
-        private bool monoPhos = false;
-        private bool monoSulf = false;
-        private bool monolNeuAc = false;
-        private bool monoeeNeuAc = false;
-        private bool monodNeuAc = false;
-        private bool monoamNeuAc = false;
-        private bool monoAcetyl = false;
-        private bool monolNeuGc = false;
-        private bool monoeeNeuGc = false;
-        private bool monodNeuGc = false;
-        private bool monoamNeuGc = false;
         private bool monoCustom1 = false;
         private bool monoCustom2 = false;
         private bool monoCustom3 = false;
         private bool monoCustom4 = false;
         private bool monoCustom5 = false;
-        private string errorType;
         private string derivatisation;
-        private string param_adductSummary;
-        private bool param_adductposH;
-        private bool param_adductposNa;
-        private bool param_adductposK;
-        private bool param_adductposNH4;
-        private bool param_adductNeutral;
-        private bool param_adductnegH;
-        private bool param_adductnegFA;
-        private bool param_adductnegAA;
-        private bool param_adductnegTFA;
-        private bool param_adductCustom;
-        private string param_customReducingEnd;
-        private string param_monoHex;
-        private string param_monoHexA;
-        private string param_monodHex;
-        private string param_monoHexNAc;
-        private string param_monoHexN;
-        private string param_monodHexNAc;
-        private string param_monoPent;
-        private string param_monoKDN;
-        private string param_monoNeu5Ac;
-        private string param_monoNeu5Gc;
-        private string param_monoSulf;
-        private string param_monoPhos;
-        private string param_monolNeuAc;
-        private string param_monoeeNeuAc;
-        private string param_monodNeuAc;
-        private string param_monoamNeuAc;
-        private string param_monoAcetyl;
-        private string param_monolNeuGc;
-        private string param_monoeeNeuGc;
-        private string param_monodNeuGc;
-        private string param_monoamNeuGc;
         private string param_monoCustom1;
         private string param_monoCustom2;
         private string param_monoCustom3;
         private string param_monoCustom4;
         private string param_monoCustom5;
+        private string currentMonosaccharideSelection;
+        private string currentAdductSelection;
         private string filePath;
         private string inputParameters;
         private float ElapsedMSec;
         // For multiple tasks, enabling progress bar
         private bool DaChecked;
-        private bool TextChecked;
+        private string inputChecked = "Text";
         private bool offByOneChecked;
         int customMono = 0;
         private string customContent = "Overview:" + Environment.NewLine +
@@ -256,6 +204,13 @@ namespace glycombo
         decimal customMono5Mass = 0;
         int customMono5Min = 0;
         int customMono5Max = 0;
+        int customReducingCCount = 0;
+        int customReducingHCount = 0;
+        int customReducingNCount = 0;
+        int customReducingOCount = 0;
+        decimal customReducingMass = 0;
+        string customReducingName = "null";
+        string customReducedMassOutput = "null";
 
         public MainViewModel ViewModel { get; set; }
 
@@ -317,6 +272,7 @@ namespace glycombo
         public void customMonoCheck1_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox1.Visibility = Visibility.Visible;
             customMonoMassBox1.Visibility = Visibility.Visible;
             customMonoCBox1.Visibility = Visibility.Visible;
@@ -333,6 +289,7 @@ namespace glycombo
         public void customMonoCheck1_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox1.Visibility = Visibility.Collapsed;
             customMonoMassBox1.Visibility = Visibility.Collapsed;
             customMonoCBox1.Visibility = Visibility.Collapsed;
@@ -348,39 +305,57 @@ namespace glycombo
 
         private void customSettingsSave_Click(object sender, RoutedEventArgs e)
         {
-
-            string SaveOutput = "## GlyCombo Custom Monosaccharide Settings" + Environment.NewLine + "## <CustomMono#>, Custom Name, Custom Mass, # of Carbons, # of Hydrogens, # of Nitrogens, # of Oxygens, Minimum count, Maximum count" + Environment.NewLine;
-            if (customMonoCheck1.IsChecked == true)
+            UpdateMonosaccharideTextBox();
+            string saveOutput = "## GlyCombo v0.7 search settings" + Environment.NewLine;
+            saveOutput += "<Input> " + inputChecked + Environment.NewLine;
+            saveOutput += "<Error tolerance> " + DaError.Text + "," + massErrorType + Environment.NewLine;
+            saveOutput += "<Reducing end> " + reducingEndBox.Text + Environment.NewLine;
+            if (reducingEndBox.Text == "Custom" && customReducingCheck.IsChecked == true)
             {
-                SaveOutput += "<CustomMono1>" + "," + customMonoNameBox1.Text + "," + customMonoMassBox1.Text + "," + customMonoCBox1.Text + "," + customMonoHBox1.Text + "," + customMonoNBox1.Text + "," + customMonoOBox1.Text + "," + customMonoMinBox1.Text + "," + customMonoMaxBox1.Text + Environment.NewLine;
+                saveOutput += "## Custom reducing end: Name, Mass, #C, #H, #N, #O" + Environment.NewLine;
+                saveOutput += "<Custom reducing end> " + customReducingNameBox.Text + "," + customReducingMassBox.Text + "," + customReducingCBox.Text + "," + customReducingHBox.Text + "," + customReducingOBox.Text + "," + customReducingNBox.Text + Environment.NewLine;
             }
-            if (customMonoCheck2.IsChecked == true)
+            saveOutput += "<Derivatisation> " + derivatisation + Environment.NewLine;
+            saveOutput += "<OffByOne enabled> " + offByOneChecked + Environment.NewLine;
+            saveOutput += "## Monosaccharides: Monosaccharide1(Min-Max), Monosaccharide2(Min-Max)" + Environment.NewLine;
+            saveOutput += currentMonosaccharideSelection + Environment.NewLine;
+            if (customMonoCheck1.IsChecked == true || customMonoCheck2.IsChecked == true || customMonoCheck3.IsChecked == true || customMonoCheck4.IsChecked == true || customMonoCheck5.IsChecked == true )
             {
-                SaveOutput += "<CustomMono2>" + "," + customMonoNameBox2.Text + "," + customMonoMassBox2.Text + "," + customMonoCBox2.Text + "," + customMonoHBox2.Text + "," + customMonoNBox2.Text + "," + customMonoOBox2.Text + "," + customMonoMinBox2.Text + "," + customMonoMaxBox2.Text + Environment.NewLine;
+                saveOutput += "## CustomMono#: Name, Mass, #C, #H, #N, #O, Min., Max." + Environment.NewLine;
+                if (customMonoCheck1.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono1> " + customMonoNameBox1.Text + "," + customMonoMassBox1.Text + "," + customMonoCBox1.Text + "," + customMonoHBox1.Text + "," + customMonoNBox1.Text + "," + customMonoOBox1.Text + "," + customMonoMinBox1.Text + "," + customMonoMaxBox1.Text + Environment.NewLine;
+                }
+                if (customMonoCheck2.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono2> " + customMonoNameBox2.Text + "," + customMonoMassBox2.Text + "," + customMonoCBox2.Text + "," + customMonoHBox2.Text + "," + customMonoNBox2.Text + "," + customMonoOBox2.Text + "," + customMonoMinBox2.Text + "," + customMonoMaxBox2.Text + Environment.NewLine;
+                }
+                if (customMonoCheck3.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono3> " + customMonoNameBox3.Text + "," + customMonoMassBox3.Text + "," + customMonoCBox3.Text + "," + customMonoHBox3.Text + "," + customMonoNBox3.Text + "," + customMonoOBox3.Text + "," + customMonoMinBox3.Text + "," + customMonoMaxBox3.Text + Environment.NewLine;
+                }
+                if (customMonoCheck4.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono4> " + customMonoNameBox4.Text + "," + customMonoMassBox4.Text + "," + customMonoCBox4.Text + "," + customMonoHBox4.Text + "," + customMonoNBox4.Text + "," + customMonoOBox4.Text + "," + customMonoMinBox4.Text + "," + customMonoMaxBox4.Text + Environment.NewLine;
+                }
+                if (customMonoCheck5.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono5> " + customMonoNameBox5.Text + "," + customMonoMassBox5.Text + "," + customMonoCBox5.Text + "," + customMonoHBox5.Text + "," + customMonoNBox5.Text + "," + customMonoOBox5.Text + "," + customMonoMinBox5.Text + "," + customMonoMaxBox5.Text + Environment.NewLine;
+                }
             }
-            if (customMonoCheck3.IsChecked == true)
-            {
-                SaveOutput += "<CustomMono3>" + "," + customMonoNameBox3.Text + "," + customMonoMassBox3.Text + "," + customMonoCBox3.Text + "," + customMonoHBox3.Text + "," + customMonoNBox3.Text + "," + customMonoOBox3.Text + "," + customMonoMinBox3.Text + "," + customMonoMaxBox3.Text + Environment.NewLine;
-            }
-            if (customMonoCheck4.IsChecked == true)
-            {
-                SaveOutput += "<CustomMono4>" + "," + customMonoNameBox4.Text + "," + customMonoMassBox4.Text + "," + customMonoCBox4.Text + "," + customMonoHBox4.Text + "," + customMonoNBox4.Text + "," + customMonoOBox4.Text + "," + customMonoMinBox4.Text + "," + customMonoMaxBox4.Text + Environment.NewLine;
-            }
-            if (customMonoCheck5.IsChecked == true)
-            {
-                SaveOutput += "<CustomMono5>" + "," + customMonoNameBox5.Text + "," + customMonoMassBox5.Text + "," + customMonoCBox5.Text + "," + customMonoHBox5.Text + "," + customMonoNBox5.Text + "," + customMonoOBox5.Text + "," + customMonoMinBox5.Text + "," + customMonoMaxBox5.Text + Environment.NewLine;
-            }
+            saveOutput += "## Adducts: Adduct1, Adduct2" + Environment.NewLine;
+            saveOutput += currentAdductSelection + Environment.NewLine;
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = "Text file (*.txt)|*.txt",
-                DefaultExt = "txt",
+                DefaultExt = "parameters.txt",
                 Title = "Save Text File"
             };
             // Show dialog and check if the result is OK
             if (saveFileDialog.ShowDialog() == true)
             {
                 // Write the content to the selected file
-                File.WriteAllText(saveFileDialog.FileName, SaveOutput);
+                File.WriteAllText(saveFileDialog.FileName, saveOutput);
             }
         }
 
@@ -402,69 +377,195 @@ namespace glycombo
                     line = reader.ReadLine();
                     if (line != null)
                     {
+                        if (line.Contains("<Input>"))
+                        {
+                            string result = line.Replace("<Input> ", string.Empty);
+                            if (result == "Text") { TextRadioButton.IsChecked = true; }
+                            else { MzmlRadioButton.IsChecked = true; }
+                        }
+                        if (line.Contains ("<Error tolerance>"))
+                        {
+                            string result = line.Replace("<Error tolerance> ", string.Empty);
+                            string[] errorToleranceLine = result.Split(',');
+                            DaError.Text = errorToleranceLine[0];
+                            if (errorToleranceLine[1] == "Da") { Da.IsChecked = true; }
+                            else { ppm.IsChecked = true; }
+                        }
+                        if (line.Contains("<Reducing end>"))
+                        {
+                            string result = line.Replace("<Reducing end> ", string.Empty);
+                            switch (result)
+                            {
+                                case "Free":
+                                    // Handle Free case
+                                    reducingEndBox.Text = "Free";
+                                    break;
+                                case "Reduced":
+                                    // Handle Reduced case
+                                    reducingEndBox.Text = "Reduced";
+                                    break;
+                                case "InstantPC":
+                                    // Handle InstantPC case
+                                    reducingEndBox.Text = "InstantPC";
+                                    break;
+                                case "Rapifluor-MS":
+                                    // Handle Rapifluor-MS case
+                                    reducingEndBox.Text = "Rapifluor-MS";
+                                    break;
+                                case "2-aminobenzoic acid":
+                                    // Handle 2-aminobenzoic acid case
+                                    reducingEndBox.Text = "2-aminobenzoic acid";
+                                    break;
+                                case "2-aminobenzamide":
+                                    // Handle 2-aminobenzamide case
+                                    reducingEndBox.Text = "2-aminobenzamide";
+                                    break;
+                                case "Procainamide":
+                                    // Handle Procainamide case
+                                    reducingEndBox.Text = "Procainamide";
+                                    break;
+                                case "Girard's reagent P":
+                                    // Handle Girard's reagent P case
+                                    reducingEndBox.Text = "Girard's reagent P";
+                                    break;
+                                case "Custom":
+                                    // Handle Custom case
+                                    reducingEndBox.Text = "Custom";
+                                    break;
+                                default:
+                                    // Handle default case
+                                    reducingEndBox.Text = "";
+                                    break;
+                            }
+                        }
+                        if (line.Contains("<Custom reducing end>"))
+                        {
+                            string result = line.Replace("<Custom reducing end> ", string.Empty);
+                            string[] customReducingEndLine = result.Split(',');
+                            customReducingNameBox.Text = customReducingEndLine[0];
+                            customReducingMassBox.Text = customReducingEndLine[1];
+                            customReducingCBox.Text = customReducingEndLine[2];
+                            customReducingHBox.Text = customReducingEndLine[3];
+                            customReducingNBox.Text = customReducingEndLine[4];
+                            customReducingOBox.Text = customReducingEndLine[5];
+                        }
+                        if (line.Contains("<Derivatisation>"))
+                        {
+                            string result = line.Replace("<Derivatisation> ", string.Empty);
+                            switch (result)
+                            {
+                                case "Native":
+                                    Native.IsChecked = true;
+                                    break;
+                                case "Permethylated":
+                                    Permeth.IsChecked = true;
+                                    break;
+                                case "Peracetylated":
+                                    Peracetyl.IsChecked = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        if (line.Contains("<OffByOne enabled>"))
+                        {
+                            string result = line.Replace("<OffByOne enabled> ", string.Empty);
+                            if (result == "True") { OffByOne.IsChecked = true; }
+                            else { OffByOne.IsChecked = false; }
+                        }
+                        if (line.Contains("<Monosaccharides>"))
+                        {
+                            string result = line.Replace("<Monosaccharides> ", string.Empty);
+                            string[] monosaccharideLine = result.Split(',');
+                            // Look through each , string section for a monosaccharide.
+                            // e.g. Hex(1-12),HexNAc(2-8)
+                            // Extract out the monosaccharide (Hex), the minimum (1), and the maximum (12) and set them to the respective sections
+                            // So if Hex seen, enabled the Hex toggle, then parse the min and the max
+                            foreach (string item in monosaccharideLine)
+                            {
+                                string trimmedItem = item.Trim();
+                                // Need to work on this regex to split each string into 3
+                                var match = Regex.Match(trimmedItem, @"(\w+)\((\d+)-(\d+)\)");
+                                    string z = match.Groups[1].Value;
+                                    int x = int.Parse(match.Groups[2].Value);
+                                    int y = int.Parse(match.Groups[3].Value);
+                                    if (z == "Hex")
+                                    {
+                                        HextoggleSwitch.IsOn = true;
+                                        HexMin.Text = Convert.ToString(x);
+                                        HexMax.Text = Convert.ToString(y);
+                                    }
+                                MessageBox.Show(z);
+                            }
+                        }
                         if (line.Contains("<CustomMono1>"))
                         {
-                            string[] MonoSplitLine1 = line.Split(',');
-                            customMonoNameBox1.Text = MonoSplitLine1[1];
-                            customMonoMassBox1.Text = MonoSplitLine1[2];
-                            customMonoCBox1.Text = MonoSplitLine1[3];
-                            customMonoHBox1.Text = MonoSplitLine1[4];
-                            customMonoNBox1.Text = MonoSplitLine1[5];
-                            customMonoOBox1.Text = MonoSplitLine1[6];
-                            customMonoMinBox1.Text = MonoSplitLine1[7];
-                            customMonoMaxBox1.Text = MonoSplitLine1[8];
+                            string result = line.Replace("<CustomMono1> ", string.Empty);
+                            string[] MonoSplitLine1 = result.Split(',');
+                            customMonoNameBox1.Text = MonoSplitLine1[0];
+                            customMonoMassBox1.Text = MonoSplitLine1[1];
+                            customMonoCBox1.Text = MonoSplitLine1[2];
+                            customMonoHBox1.Text = MonoSplitLine1[3];
+                            customMonoNBox1.Text = MonoSplitLine1[4];
+                            customMonoOBox1.Text = MonoSplitLine1[5];
+                            customMonoMinBox1.Text = MonoSplitLine1[6];
+                            customMonoMaxBox1.Text = MonoSplitLine1[7];
                             customMonoCheck1.IsChecked = true;
                         }
                         if (line.Contains("<CustomMono2>"))
                         {
-                            string[] MonoSplitLine2 = line.Split(',');
-                            customMonoNameBox2.Text = MonoSplitLine2[1];
+                            string result = line.Replace("<CustomMono2> ", string.Empty);
+                            string[] MonoSplitLine2 = result.Split(',');
+                            customMonoNameBox2.Text = MonoSplitLine2[0];
                             customMonoMassBox2.Text = MonoSplitLine2[2];
-                            customMonoCBox2.Text = MonoSplitLine2[3];
-                            customMonoHBox2.Text = MonoSplitLine2[4];
-                            customMonoNBox2.Text = MonoSplitLine2[5];
-                            customMonoOBox2.Text = MonoSplitLine2[6];
-                            customMonoMinBox2.Text = MonoSplitLine2[7];
-                            customMonoMaxBox2.Text = MonoSplitLine2[8];
+                            customMonoCBox2.Text = MonoSplitLine2[2];
+                            customMonoHBox2.Text = MonoSplitLine2[3];
+                            customMonoNBox2.Text = MonoSplitLine2[4];
+                            customMonoOBox2.Text = MonoSplitLine2[5];
+                            customMonoMinBox2.Text = MonoSplitLine2[6];
+                            customMonoMaxBox2.Text = MonoSplitLine2[7];
                             customMonoCheck2.IsChecked = true;
                         }
                         if (line.Contains("<CustomMono3>"))
                         {
-                            string[] MonoSplitLine3 = line.Split(',');
-                            customMonoNameBox3.Text = MonoSplitLine3[1];
-                            customMonoMassBox3.Text = MonoSplitLine3[2];
-                            customMonoCBox3.Text = MonoSplitLine3[3];
-                            customMonoHBox3.Text = MonoSplitLine3[4];
-                            customMonoNBox3.Text = MonoSplitLine3[5];
-                            customMonoOBox3.Text = MonoSplitLine3[6];
-                            customMonoMinBox3.Text = MonoSplitLine3[7];
-                            customMonoMaxBox3.Text = MonoSplitLine3[8];
+                            string result = line.Replace("<CustomMono3> ", string.Empty);
+                            string[] MonoSplitLine3 = result.Split(',');
+                            customMonoNameBox3.Text = MonoSplitLine3[0];
+                            customMonoMassBox3.Text = MonoSplitLine3[1];
+                            customMonoCBox3.Text = MonoSplitLine3[2];
+                            customMonoHBox3.Text = MonoSplitLine3[3];
+                            customMonoNBox3.Text = MonoSplitLine3[4];
+                            customMonoOBox3.Text = MonoSplitLine3[5];
+                            customMonoMinBox3.Text = MonoSplitLine3[6];
+                            customMonoMaxBox3.Text = MonoSplitLine3[7];
                             customMonoCheck3.IsChecked = true;
                         }
                         if (line.Contains("<CustomMono4>"))
                         {
-                            string[] MonoSplitLine4 = line.Split(',');
-                            customMonoNameBox4.Text = MonoSplitLine4[1];
-                            customMonoMassBox4.Text = MonoSplitLine4[2];
-                            customMonoCBox4.Text = MonoSplitLine4[3];
-                            customMonoHBox4.Text = MonoSplitLine4[4];
-                            customMonoNBox4.Text = MonoSplitLine4[5];
-                            customMonoOBox4.Text = MonoSplitLine4[6];
-                            customMonoMinBox4.Text = MonoSplitLine4[7];
-                            customMonoMaxBox4.Text = MonoSplitLine4[8];
+                            string result = line.Replace("<CustomMono4> ", string.Empty);
+                            string[] MonoSplitLine4 = result.Split(',');
+                            customMonoNameBox4.Text = MonoSplitLine4[0];
+                            customMonoMassBox4.Text = MonoSplitLine4[1];
+                            customMonoCBox4.Text = MonoSplitLine4[2];
+                            customMonoHBox4.Text = MonoSplitLine4[3];
+                            customMonoNBox4.Text = MonoSplitLine4[4];
+                            customMonoOBox4.Text = MonoSplitLine4[5];
+                            customMonoMinBox4.Text = MonoSplitLine4[6];
+                            customMonoMaxBox4.Text = MonoSplitLine4[7];
                             customMonoCheck4.IsChecked = true;
                         }
                         if (line.Contains("<CustomMono5>"))
                         {
-                            string[] MonoSplitLine5 = line.Split(',');
-                            customMonoNameBox5.Text = MonoSplitLine5[1];
-                            customMonoMassBox5.Text = MonoSplitLine5[2];
-                            customMonoCBox5.Text = MonoSplitLine5[3];
-                            customMonoHBox5.Text = MonoSplitLine5[4];
-                            customMonoNBox5.Text = MonoSplitLine5[5];
-                            customMonoOBox5.Text = MonoSplitLine5[6];
-                            customMonoMinBox5.Text = MonoSplitLine5[7];
-                            customMonoMaxBox5.Text = MonoSplitLine5[8];
+                            string result = line.Replace("<CustomMono5> ", string.Empty);
+                            string[] MonoSplitLine5 = result.Split(',');
+                            customMonoNameBox5.Text = MonoSplitLine5[0];
+                            customMonoMassBox5.Text = MonoSplitLine5[1];
+                            customMonoCBox5.Text = MonoSplitLine5[2];
+                            customMonoHBox5.Text = MonoSplitLine5[3];
+                            customMonoNBox5.Text = MonoSplitLine5[4];
+                            customMonoOBox5.Text = MonoSplitLine5[5];
+                            customMonoMinBox5.Text = MonoSplitLine5[6];
+                            customMonoMaxBox5.Text = MonoSplitLine5[7];
                             customMonoCheck5.IsChecked = true;
                         }
                     }
@@ -481,6 +582,7 @@ namespace glycombo
         public void customMonoCheck3_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox3.Visibility = Visibility.Collapsed;
             customMonoMassBox3.Visibility = Visibility.Collapsed;
             customMonoCBox3.Visibility = Visibility.Collapsed;
@@ -497,6 +599,7 @@ namespace glycombo
         public void customMonoCheck2_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox2.Visibility = Visibility.Collapsed;
             customMonoMassBox2.Visibility = Visibility.Collapsed;
             customMonoCBox2.Visibility = Visibility.Collapsed;
@@ -513,6 +616,7 @@ namespace glycombo
         public void customMonoCheck4_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox4.Visibility = Visibility.Collapsed;
             customMonoMassBox4.Visibility = Visibility.Collapsed;
             customMonoCBox4.Visibility = Visibility.Collapsed;
@@ -529,6 +633,7 @@ namespace glycombo
         public void customMonoCheck5_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox5.Visibility = Visibility.Collapsed;
             customMonoMassBox5.Visibility = Visibility.Collapsed;
             customMonoCBox5.Visibility = Visibility.Collapsed;
@@ -545,6 +650,7 @@ namespace glycombo
         public void customMonoCheck2_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox2.Visibility = Visibility.Visible;
             customMonoMassBox2.Visibility = Visibility.Visible;
             customMonoCBox2.Visibility = Visibility.Visible;
@@ -561,6 +667,7 @@ namespace glycombo
         public void customMonoCheck3_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox3.Visibility = Visibility.Visible;
             customMonoMassBox3.Visibility = Visibility.Visible;
             customMonoCBox3.Visibility = Visibility.Visible;
@@ -577,6 +684,7 @@ namespace glycombo
         public void customMonoCheck4_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox4.Visibility = Visibility.Visible;
             customMonoMassBox4.Visibility = Visibility.Visible;
             customMonoCBox4.Visibility = Visibility.Visible;
@@ -593,6 +701,7 @@ namespace glycombo
         public void customMonoCheck5_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             customMonoNameBox5.Visibility = Visibility.Visible;
             customMonoMassBox5.Visibility = Visibility.Visible;
             customMonoCBox5.Visibility = Visibility.Visible;
@@ -867,67 +976,73 @@ namespace glycombo
         // Execution of the combinatorial analysis
         private async void Button1_Click(object sender, RoutedEventArgs e)
         {
-                // Determine if the customMonoCheckbox is checked for each checkbox
-                if (customMonoCheck1.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 1
-                    customMono1Name = customMonoNameBox1.Text;
-                    customMono1Mass = decimal.Parse(customMonoMassBox1.Text);
-                    customMono1CCount = int.Parse(customMonoCBox1.Text);
-                    customMono1HCount = int.Parse(customMonoHBox1.Text);
-                    customMono1NCount = int.Parse(customMonoNBox1.Text);
-                    customMono1OCount = int.Parse(customMonoOBox1.Text);
-                    customMono1Min = int.Parse(customMonoMinBox1.Text);
-                    customMono1Max = int.Parse(customMonoMaxBox1.Text);
-                }
-                if (customMonoCheck2.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 2
-                    customMono2Name = customMonoNameBox2.Text;
-                    customMono2Mass = decimal.Parse(customMonoMassBox2.Text);
-                    customMono2CCount = int.Parse(customMonoCBox2.Text);
-                    customMono2HCount = int.Parse(customMonoHBox2.Text);
-                    customMono2NCount = int.Parse(customMonoNBox2.Text);
-                    customMono2OCount = int.Parse(customMonoOBox2.Text);
-                    customMono2Max = int.Parse(customMonoMaxBox2.Text);
-                    customMono2Min = int.Parse(customMonoMinBox2.Text);
-                }
-                if (customMonoCheck3.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 3
-                    customMono3Name = customMonoNameBox3.Text;
-                    customMono3Mass = decimal.Parse(customMonoMassBox3.Text);
-                    customMono3CCount = int.Parse(customMonoCBox3.Text);
-                    customMono3HCount = int.Parse(customMonoHBox3.Text);
-                    customMono3NCount = int.Parse(customMonoNBox3.Text);
-                    customMono3OCount = int.Parse(customMonoOBox3.Text);
-                    customMono3Max = int.Parse(customMonoMaxBox3.Text);
-                    customMono3Min = int.Parse(customMonoMinBox3.Text);
-                }
-                if (customMonoCheck4.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 4
-                    customMono4Name = customMonoNameBox4.Text;
-                    customMono4Mass = decimal.Parse(customMonoMassBox4.Text);
-                    customMono4CCount = int.Parse(customMonoCBox4.Text);
-                    customMono4HCount = int.Parse(customMonoHBox4.Text);
-                    customMono4NCount = int.Parse(customMonoNBox4.Text);
-                    customMono4OCount = int.Parse(customMonoOBox4.Text);
-                    customMono4Max = int.Parse(customMonoMaxBox4.Text);
-                    customMono4Min = int.Parse(customMonoMinBox4.Text);
-                }
-                if (customMonoCheck5.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 5
-                    customMono5Name = customMonoNameBox5.Text;
-                    customMono5Mass = decimal.Parse(customMonoMassBox5.Text);
-                    customMono5CCount = int.Parse(customMonoCBox5.Text);
-                    customMono5HCount = int.Parse(customMonoHBox5.Text);
-                    customMono5NCount = int.Parse(customMonoNBox5.Text);
-                    customMono5OCount = int.Parse(customMonoOBox5.Text);
-                    customMono5Max = int.Parse(customMonoMaxBox5.Text);
-                    customMono5Min = int.Parse(customMonoMinBox5.Text);
-                }
+            // Determine if the customReducedCheckbox is checked
+            if (customReducingCheck.IsChecked == true)
+            {
+                customReducingName = customReducingNameBox.Text;
+                customReducedMassOutput = customReducingMassBox.Text;
+            }
+            // Determine if the customMonoCheckbox is checked for each checkbox
+            if (customMonoCheck1.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 1
+                customMono1Name = customMonoNameBox1.Text;
+                customMono1Mass = decimal.Parse(customMonoMassBox1.Text);
+                customMono1CCount = int.Parse(customMonoCBox1.Text);
+                customMono1HCount = int.Parse(customMonoHBox1.Text);
+                customMono1NCount = int.Parse(customMonoNBox1.Text);
+                customMono1OCount = int.Parse(customMonoOBox1.Text);
+                customMono1Min = int.Parse(customMonoMinBox1.Text);
+                customMono1Max = int.Parse(customMonoMaxBox1.Text);
+            }
+            if (customMonoCheck2.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 2
+                customMono2Name = customMonoNameBox2.Text;
+                customMono2Mass = decimal.Parse(customMonoMassBox2.Text);
+                customMono2CCount = int.Parse(customMonoCBox2.Text);
+                customMono2HCount = int.Parse(customMonoHBox2.Text);
+                customMono2NCount = int.Parse(customMonoNBox2.Text);
+                customMono2OCount = int.Parse(customMonoOBox2.Text);
+                customMono2Max = int.Parse(customMonoMaxBox2.Text);
+                customMono2Min = int.Parse(customMonoMinBox2.Text);
+            }
+            if (customMonoCheck3.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 3
+                customMono3Name = customMonoNameBox3.Text;
+                customMono3Mass = decimal.Parse(customMonoMassBox3.Text);
+                customMono3CCount = int.Parse(customMonoCBox3.Text);
+                customMono3HCount = int.Parse(customMonoHBox3.Text);
+                customMono3NCount = int.Parse(customMonoNBox3.Text);
+                customMono3OCount = int.Parse(customMonoOBox3.Text);
+                customMono3Max = int.Parse(customMonoMaxBox3.Text);
+                customMono3Min = int.Parse(customMonoMinBox3.Text);
+            }
+            if (customMonoCheck4.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 4
+                customMono4Name = customMonoNameBox4.Text;
+                customMono4Mass = decimal.Parse(customMonoMassBox4.Text);
+                customMono4CCount = int.Parse(customMonoCBox4.Text);
+                customMono4HCount = int.Parse(customMonoHBox4.Text);
+                customMono4NCount = int.Parse(customMonoNBox4.Text);
+                customMono4OCount = int.Parse(customMonoOBox4.Text);
+                customMono4Max = int.Parse(customMonoMaxBox4.Text);
+                customMono4Min = int.Parse(customMonoMinBox4.Text);
+            }
+            if (customMonoCheck5.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 5
+                customMono5Name = customMonoNameBox5.Text;
+                customMono5Mass = decimal.Parse(customMonoMassBox5.Text);
+                customMono5CCount = int.Parse(customMonoCBox5.Text);
+                customMono5HCount = int.Parse(customMonoHBox5.Text);
+                customMono5NCount = int.Parse(customMonoNBox5.Text);
+                customMono5OCount = int.Parse(customMonoOBox5.Text);
+                customMono5Max = int.Parse(customMonoMaxBox5.Text);
+                customMono5Min = int.Parse(customMonoMinBox5.Text);
+            }
             try
             {
                 solutionMultiples = "";
@@ -999,108 +1114,87 @@ namespace glycombo
                 if (HextoggleSwitch.IsOn == true)
                 {
                     numbers.Add(hex);
-                    monoHex = true;
                 }
 
                 if (HexAtoggleSwitch.IsOn == true)
                 {
                     numbers.Add(hexa);
-                    monoHexA = true;
                 }
                 if (dHextoggleSwitch.IsOn == true)
                 {
                     numbers.Add(dhex);
-                    monodHex = true;
                 }
                 if (HexNActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(hexnac);
-                    monoHexNAc = true;
                 }
                 if (HexNtoggleSwitch.IsOn == true)
                 {
                     numbers.Add(hexn);
-                    monoHexN = true;
                 }
                 if (dHexNActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(dhexnac);
-                    monodHexNAc = true;
                 }
                 if (PenttoggleSwitch.IsOn == true)
                 {
                     numbers.Add(pent);
-                    monoPent = true;
                 }
                 if (KDNtoggleSwitch.IsOn == true)
                 {
                     numbers.Add(kdn);
-                    monoKDN = true;
                 }
                 if (Neu5ActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(neuac);
-                    monoNeu5Ac = true;
                 }
                 if (Neu5GctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(neugc);
-                    monoNeu5Gc = true;
                 }
                 if (PhostoggleSwitch.IsOn == true)
                 {
                     numbers.Add(phos);
-                    monoPhos = true;
                 }
                 if (SulftoggleSwitch.IsOn == true)
                 {
                     numbers.Add(sulf);
-                    monoSulf = true;
                 }
                 if (lNeuActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(lneuac);
-                    monolNeuAc = true;
                 }
                 if (eNeuActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(eeneuac);
-                    monoeeNeuAc = true;
                 }
                 if (dNeuActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(dneuac);
-                    monodNeuAc = true;
                 }
                 if (amNeuActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(amneuac);
-                    monoamNeuAc = true;
                 }
                 if (AcetyltoggleSwitch.IsOn == true)
                 {
                     numbers.Add(acetyl);
-                    monoAcetyl = true;
                 }
                 if (lNeuGctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(lneugc);
-                    monolNeuGc = true;
                 }
                 if (eNeuGctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(eeneugc);
-                    monoeeNeuGc = true;
                 }
                 if (dNeuGctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(dneugc);
-                    monodNeuGc = true;
                 }
                 if (amNeuGctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(amneugc);
-                    monoamNeuGc = true;
                 }
                 if (customMonoCheck1.IsChecked == true)
                 {
@@ -1173,7 +1267,6 @@ namespace glycombo
                         if (negativeMHCheckBox.IsChecked == true || neutralMCheckBox.IsChecked == true || positiveMHCheckBox.IsChecked == true)
                         {
                             searchRepeats += 1;
-                            param_adductNeutral = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1184,7 +1277,6 @@ namespace glycombo
                         if (negativeMFACheckBox.IsChecked == true)
                         {
                             searchRepeats += 1;
-                            param_adductnegFA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1195,7 +1287,6 @@ namespace glycombo
                         if (negativeMAACheckBox.IsChecked == true)
                         {
                             searchRepeats += 1;
-                            param_adductnegAA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1206,7 +1297,6 @@ namespace glycombo
                         if (negativeMTFACheckBox.IsChecked == true)
                         {
                             searchRepeats += 1;
-                            param_adductnegTFA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1217,7 +1307,6 @@ namespace glycombo
                         if (positiveMNaCheckBox.IsChecked == true)
                         {
                             searchRepeats += 1;
-                            param_adductposNa = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1228,7 +1317,6 @@ namespace glycombo
                         if (positiveMKCheckBox.IsChecked == true)
                         {
                             searchRepeats += 1;
-                            param_adductposK = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1239,7 +1327,6 @@ namespace glycombo
                         if (positiveMNH4CheckBox.IsChecked == true)
                         {
                             searchRepeats += 1;
-                            param_adductposNH4 = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1250,7 +1337,6 @@ namespace glycombo
                         if (customAdductCheckBox.IsChecked == true)
                         {
                             searchRepeats += 1;
-                            param_adductCustom = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             // Processing of customAdductMassText to account for mzML assuming a protonated/deprotonated precursor
                             if (customAdductPolarity.SelectedIndex == 0) // Protonated
@@ -1278,7 +1364,6 @@ namespace glycombo
                         // Subtracting H- from all targets and saving that as a new list
                         if (negativeMHCheckBox.IsChecked == true)
                         {
-                            param_adductposH = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1288,7 +1373,6 @@ namespace glycombo
                         // Appending the list with the original text if the user has M selected
                         if (neutralMCheckBox.IsChecked == true)
                         {
-                            param_adductNeutral = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1298,7 +1382,6 @@ namespace glycombo
                         // M+COOH adduct calculation
                         if (negativeMFACheckBox.IsChecked == true)
                         {
-                            param_adductnegFA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1308,7 +1391,6 @@ namespace glycombo
                         // M+acetic acid adduct calculation
                         if (negativeMAACheckBox.IsChecked == true)
                         {
-                            param_adductnegAA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1318,7 +1400,6 @@ namespace glycombo
                         // M+TFA adduct calculation
                         if (negativeMTFACheckBox.IsChecked == true)
                         {
-                            param_adductnegTFA = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1328,7 +1409,6 @@ namespace glycombo
                         // M+H adduct calculation
                         if (positiveMHCheckBox.IsChecked == true)
                         {
-                            param_adductposH = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1338,7 +1418,6 @@ namespace glycombo
                         // M+Na adduct calculation
                         if (positiveMNaCheckBox.IsChecked == true)
                         {
-                            param_adductposNa = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1348,7 +1427,6 @@ namespace glycombo
                         // M+K adduct calculation
                         if (positiveMKCheckBox.IsChecked == true)
                         {
-                            param_adductposK = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1358,7 +1436,6 @@ namespace glycombo
                         // M+NH4 adduct calculation
                         if (positiveMNH4CheckBox.IsChecked == true)
                         {
-                            param_adductposNH4 = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
@@ -1368,11 +1445,10 @@ namespace glycombo
                         // Custom adduct calculcation
                         if (customAdductCheckBox.IsChecked == true)
                         {
-                            param_adductCustom = true;
                             targetsToAdd = targetAdductsProcessing.Count;
                             for (int o = 0; o < targetsToAdd; o++)
                             {
-                                targetAdducts.Add(targetAdductsProcessing[o] - Convert.ToDecimal(customAdductMassText));
+                                targetAdducts.Add(targetAdductsProcessing[o] - Convert.ToDecimal(customAdductMassText.Text));
                             }
                         }
                         targets = targetAdducts;
@@ -1431,8 +1507,8 @@ namespace glycombo
                             break;
                         case 8:
                             reducedEnd = "Custom";
-                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox))).ToList();
-                            param_customReducingEnd = "Mass: " + customReducingMassBox + " Chemical formula: C" + customReducingCBox + "H" + customReducingHBox + "N" + customReducingNBox + "O" + customReducingOBox;
+                            customReducingMass = Convert.ToDecimal(customReducingMassBox.Text);
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox.Text))).ToList();
                             break;
                         default:
                             break;
@@ -1451,9 +1527,9 @@ namespace glycombo
                             targets = targets.Select(z => z - (20.026195m + 42.046950m)).ToList();
                             break;
                         case 8:
+                            customReducingMass = Convert.ToDecimal(customReducingMassBox.Text);
                             reducedEnd = "Custom";
-                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox))).ToList();
-                            param_customReducingEnd = "Mass: " + customReducingMassBox + " Chemical formula: C" + customReducingCBox + "H" + customReducingHBox + "N" + customReducingNBox + "O" + customReducingOBox;
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox.Text))).ToList();
                             break;
                         default:
                             break;
@@ -1472,9 +1548,9 @@ namespace glycombo
                             targets = targets.Select(z => z - (20.026195m + 126.031694m)).ToList();
                             break;
                         case 8:
+                            customReducingMass = Convert.ToDecimal(customReducingMassBox.Text);
                             reducedEnd = "Custom";
-                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox))).ToList();
-                            param_customReducingEnd = "Mass: " + customReducingMassBox + " Chemical formula: C" + customReducingCBox + "H" + customReducingHBox + "N" + customReducingNBox + "O" + customReducingOBox;
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox.Text))).ToList();
                             break;
                         default:
                             break;
@@ -1536,7 +1612,13 @@ namespace glycombo
                 dNeuGcMax_int = int.Parse(dNeuGcMax.Text);
                 amNeuGcMin_int = int.Parse(amNeuGcMin.Text);
                 amNeuGcMax_int = int.Parse(amNeuGcMax.Text);
-
+                if (customReducingCheck.IsChecked == true)
+                    {
+                    customReducingCCount = Convert.ToInt16(customReducingCBox.Text);
+                    customReducingHCount = Convert.ToInt16(customReducingHBox.Text);
+                    customReducingNCount = Convert.ToInt16(customReducingNBox.Text);
+                    customReducingOCount = Convert.ToInt16(customReducingOBox.Text);
+                }
                 // Running the mzML formatting in a different thread so we can give a status update
                 await Task.Run(() => glyComboProcess());
             }
@@ -1584,13 +1666,11 @@ namespace glycombo
                 // Define the upper and lower error tolerances for search
                 if (DaChecked == true)
                 {
-                    errorType = "Da";
                     targetLow = targets[i] - errorTol;
                     targetHigh = targets[i] + errorTol;
                 }
                 else
                 {
-                    errorType = "ppm";
                     targetLow = targets[i] - (targets[i] * (errorTol / 1000000));
                     targetHigh = targets[i] + (targets[i] * (errorTol / 1000000));
                 }
@@ -1603,7 +1683,7 @@ namespace glycombo
             string skylineSolutionHeader = "";
             string skylineSolutionMultiplesPreTrim = "";
             string skylineSolutionMultiples = "";
-            if (TextChecked == false)
+            if (inputChecked == "Text")
             {
                 solutionHeader = "Composition,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC,File Name";
                 skylineSolutionHeader = "Molecule List Name,Molecule Name,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC,Note";
@@ -1620,102 +1700,6 @@ namespace glycombo
             File.WriteAllText(saveFileDialog1.FileName, solutionHeader + Environment.NewLine + solutionMultiples);
 
             // Prepare the parameter report for the search used
-            param_adductSummary = Environment.NewLine + "Adducts: ";
-            if (param_adductNeutral == true) { param_adductSummary += "[M] "; }
-            if (param_adductnegH == true) { param_adductSummary += "[M-H]- "; }
-            if (param_adductnegFA == true) { param_adductSummary += "[M+COO]- "; }
-            if (param_adductnegAA == true) { param_adductSummary += "[M+CH3COO]- "; }
-            if (param_adductnegTFA == true) { param_adductSummary += "[M+TFA-H]- "; }
-            if (param_adductposH == true) { param_adductSummary += "[M+H]+ "; }
-            if (param_adductposNa == true) { param_adductSummary += "[M+Na]+ "; }
-            if (param_adductposK == true) { param_adductSummary += "[M+K]+ "; }
-            if (param_adductposNH4 == true) { param_adductSummary += "[M+NH4]+ "; }
-            if (param_adductCustom == true) { param_adductSummary += "[M+" + customAdductMassText + "]" + customAdductPolarity.Text; }
-
-            if (monoHex == true)
-            {
-                param_monoHex = Environment.NewLine + "Hex (" + HexMin_int.ToString() + "-" + HexMax_int.ToString() + ")";
-            }
-            if (monoHexA == true)
-            {
-                param_monoHexA = Environment.NewLine + "HexA (" + HexAMin_int.ToString() + "-" + HexAMax_int.ToString() + ")";
-            }
-            if (monodHex == true)
-            {
-                param_monodHex = Environment.NewLine + "dHex (" + dHexMin_int.ToString() + "-" + dHexMax_int.ToString() + ")";
-            }
-            if (monoHexNAc == true)
-            {
-                param_monoHexNAc = Environment.NewLine + "HexNAc (" + HexNAcMin_int.ToString() + "-" + HexNAcMax_int.ToString() + ")";
-            }
-            if (monoHexN == true)
-            {
-                param_monoHexN = Environment.NewLine + "HexN (" + HexNMin_int.ToString() + "-" + HexNMax_int.ToString() + ")";
-            }
-            if (monodHexNAc == true)
-            {
-                param_monodHexNAc = Environment.NewLine + "dHexNAc (" + dHexNAcMin_int.ToString() + "-" + dHexNAcMax_int.ToString() + ")";
-            }
-            if (monoPent == true)
-            {
-                param_monoPent = Environment.NewLine + "Pent (" + PentMin_int.ToString() + "-" + PentMax_int.ToString() + ")";
-            }
-            if (monoKDN == true)
-            {
-                param_monoKDN = Environment.NewLine + "KDN (" + KDNMin_int.ToString() + "-" + KDNMax_int.ToString() + ")";
-            }
-            if (monoNeu5Ac == true)
-            {
-                param_monoNeu5Ac = Environment.NewLine + "Neu5Ac (" + Neu5AcMin_int.ToString() + "-" + Neu5AcMax_int.ToString() + ")";
-            }
-            if (monoNeu5Gc == true)
-            {
-                param_monoNeu5Gc = Environment.NewLine + "Neu5Gc (" + Neu5GcMin_int.ToString() + "-" + Neu5GcMax_int.ToString() + ")";
-            }
-            if (monoPhos == true)
-            {
-                param_monoPhos = Environment.NewLine + "Phos (" + PhosMin_int.ToString() + "-" + PhosMax_int.ToString() + ")";
-            }
-            if (monoSulf == true)
-            {
-                param_monoSulf = Environment.NewLine + "Sulf (" + SulfMin_int.ToString() + "-" + SulfMax_int.ToString() + ")";
-            }
-            if (monolNeuAc == true)
-            {
-                param_monolNeuAc = Environment.NewLine + "lNeuAc (" + lNeuAcMin_int.ToString() + "-" + lNeuAcMax_int.ToString() + ")";
-            }
-            if (monoeeNeuAc == true)
-            {
-                param_monoeeNeuAc = Environment.NewLine + "eNeuAc (" + eeNeuAcMin_int.ToString() + "-" + eeNeuAcMax_int.ToString() + ")";
-            }
-            if (monodNeuAc == true)
-            {
-                param_monodNeuAc = Environment.NewLine + "dNeuAc (" + dNeuAcMin_int.ToString() + "-" + dNeuAcMax_int.ToString() + ")";
-            }
-            if (monoamNeuAc == true)
-            {
-                param_monoamNeuAc = Environment.NewLine + "amNeuAc (" + amNeuAcMin_int.ToString() + "-" + amNeuAcMax_int.ToString() + ")";
-            }
-            if (monoAcetyl == true)
-            {
-                param_monoAcetyl = Environment.NewLine + "Acetyl (" + acetylMin_int.ToString() + "-" + acetylMax_int.ToString() + ")";
-            }
-            if (monolNeuGc == true)
-            {
-                param_monolNeuGc = Environment.NewLine + "lNeuGc (" + lNeuGcMin_int.ToString() + "-" + lNeuGcMax_int.ToString() + ")";
-            }
-            if (monoeeNeuGc == true)
-            {
-                param_monoeeNeuGc = Environment.NewLine + "eNeuGc (" + eeNeuGcMin_int.ToString() + "-" + eeNeuGcMax_int.ToString() + ")";
-            }
-            if (monodNeuGc == true)
-            {
-                param_monodNeuGc = Environment.NewLine + "dNeuGc (" + dNeuGcMin_int.ToString() + "-" + dNeuGcMax_int.ToString() + ")";
-            }
-            if (monoamNeuGc == true)
-            {
-                param_monoamNeuGc = Environment.NewLine + "amNeuGc (" + amNeuGcMin_int.ToString() + "-" + amNeuGcMax_int.ToString() + ")";
-            }
             if (monoCustom1 == true)
             {
                 param_monoCustom1 = Environment.NewLine + customMono1Name + " (" + customMono1Min.ToString() + "-" + customMono1Max.ToString() + ")";
@@ -1739,55 +1723,50 @@ namespace glycombo
 
             // Converting precursor list to series of strings for subsequent confirmation
             string combinedTargets = string.Join(Environment.NewLine, targets.ToArray());
+            string submitOutput = "## GlyCombo v0.7 search output" + Environment.NewLine;
+            submitOutput += "<Input> " + inputChecked + Environment.NewLine;
+            submitOutput += "<Error tolerance> " + errorTol + "," + massErrorType + Environment.NewLine;
+            submitOutput += "<Reducing end> " + reducedEnd.ToString() + Environment.NewLine;
+            if (reducedEnd.ToString() == "Custom")
+            {
+                submitOutput += "## Custom reducing end: Name, Mass, #C, #H, #N, #O" + Environment.NewLine;
+                submitOutput += "<Custom reducing end> " + customReducingName + "," + customReducedMassOutput + "," + customReducingCCount + "," + customReducingHCount + "," + customReducingOCount + "," + customReducingNCount + Environment.NewLine;
+            }
+            submitOutput += "<Derivatisation> " + derivatisation + Environment.NewLine;
+            submitOutput += "<OffByOne enabled> " + offByOneChecked + Environment.NewLine;
+            submitOutput += "## Monosaccharides: Monosaccharide1(Min-Max), Monosaccharide2(Min-Max)" + Environment.NewLine;
+            submitOutput += currentMonosaccharideSelection + Environment.NewLine;
+            if (monoCustom1 == true || monoCustom2 == true || monoCustom3 == true || monoCustom4 == true || monoCustom5 == true)
+            {
+                submitOutput += "## CustomMono#: Name, Mass, #C, #H, #N, #O, Min., Max." + Environment.NewLine;
+                if (monoCustom1 == true)
+                {
+                    submitOutput += "<CustomMono1> " + customMono1Name + "," + customMono1Mass + "," + customMono1CCount + "," + customMono1HCount + "," + customMono1NCount + "," + customMono1OCount + "," + customMono1Min + "," + customMono1Max + Environment.NewLine;
+                }
+                if (monoCustom2 == true)
+                {
+                    submitOutput += "<CustomMono2> " + customMono2Name + "," + customMono2Mass + "," + customMono2CCount + "," + customMono2HCount + "," + customMono2NCount + "," + customMono2OCount + "," + customMono2Min + "," + customMono2Max + Environment.NewLine;
+                }
+                if (monoCustom3 == true)
+                {
+                    submitOutput += "<CustomMono3> " + customMono3Name + "," + customMono3Mass + "," + customMono3CCount + "," + customMono3HCount + "," + customMono3NCount + "," + customMono3OCount + "," + customMono3Min + "," + customMono3Max + Environment.NewLine;
+                }
+                if (monoCustom4 == true)
+                {
+                    submitOutput += "<CustomMono4> " + customMono4Name + "," + customMono4Mass + "," + customMono4CCount + "," + customMono4HCount + "," + customMono4NCount + "," + customMono4OCount + "," + customMono4Min + "," + customMono4Max + Environment.NewLine;
+                }
+                if (monoCustom5 == true)
+                {
+                    submitOutput += "<CustomMono5> " + customMono5Name + "," + customMono5Mass + "," + customMono5CCount + "," + customMono5HCount + "," + customMono5NCount + "," + customMono5OCount + "," + customMono5Min + "," + customMono5Max + Environment.NewLine;
+                }
+            }
+            submitOutput += "## Adducts: Adduct1, Adduct2" + Environment.NewLine;
+            submitOutput += currentAdductSelection + Environment.NewLine;
             File.WriteAllText(string.Concat(saveFileDialog1.FileName.AsSpan(0, saveFileDialog1.FileName.Length - 4), "_parameters.txt"),
-                "GlyCombo Search Parameters"
+                submitOutput
+                + "<Precursor targets>"
                 + Environment.NewLine
-                + inputParameters
-                + Environment.NewLine
-                + "Error tolerance: "
-                + errorTol + " " + errorType
-                + Environment.NewLine
-                + "Derivatisation: "
-                + derivatisation.ToString()
-                + Environment.NewLine
-                + "Reducing end: "
-                + reducedEnd.ToString()
-                + param_customReducingEnd
-                + Environment.NewLine
-                + param_adductSummary
-                + Environment.NewLine
-                + "Monosaccharide ranges"
-                + Environment.NewLine
-                + param_monoHex
-                + param_monoHexA
-                + param_monodHex
-                + param_monoHexNAc
-                + param_monoHexN
-                + param_monodHexNAc
-                + param_monoPent
-                + param_monoKDN
-                + param_monoNeu5Ac
-                + param_monoNeu5Gc
-                + param_monoPhos
-                + param_monoSulf
-                + param_monolNeuAc
-                + param_monoeeNeuAc
-                + param_monodNeuAc
-                + param_monoamNeuAc
-                + param_monoAcetyl
-                + param_monolNeuGc
-                + param_monoeeNeuGc
-                + param_monodNeuGc
-                + param_monoamNeuGc
-                + param_monoCustom1
-                + param_monoCustom2
-                + param_monoCustom3
-                + param_monoCustom4
-                + param_monoCustom5
-                + Environment.NewLine
-                + "Precursor targets"
-                + Environment.NewLine
-                + neutralPrecursorListmzml);
+                + targetString);
         }
 
         public void Sum_up_recursive(List<decimal> numbers, decimal target, List<decimal> partial, bool targetFound, int i)
@@ -2083,10 +2062,10 @@ namespace glycombo
                             chemicalFormulaeO += 1;
                             break;
                         case "Custom":
-                            chemicalFormulaeC += Convert.ToInt16(customReducingCBox.Text);
-                            chemicalFormulaeH += Convert.ToInt16(customReducingHBox.Text);
-                            chemicalFormulaeN += Convert.ToInt16(customReducingNBox.Text);
-                            chemicalFormulaeO += Convert.ToInt16(customReducingOBox.Text);
+                            chemicalFormulaeC += customReducingCCount;
+                            chemicalFormulaeH += customReducingHCount;
+                            chemicalFormulaeN += customReducingNCount;
+                            chemicalFormulaeO += customReducingOCount;
                             break;
                         default:
                             break;
@@ -2212,10 +2191,10 @@ namespace glycombo
                             chemicalFormulaeO += 1;
                             break;
                         case "Custom":
-                            chemicalFormulaeC += Convert.ToInt16(customReducingCBox.Text);
-                            chemicalFormulaeH += Convert.ToInt16(customReducingHBox.Text);
-                            chemicalFormulaeN += Convert.ToInt16(customReducingNBox.Text);
-                            chemicalFormulaeO += Convert.ToInt16(customReducingOBox.Text);
+                            chemicalFormulaeC += customReducingCCount;
+                            chemicalFormulaeH += customReducingHCount;
+                            chemicalFormulaeN += customReducingNCount;
+                            chemicalFormulaeO += customReducingOCount;
                             break;
                         default:
                             break;
@@ -2341,10 +2320,10 @@ namespace glycombo
                             chemicalFormulaeO += 4;
                             break;
                         case "Custom":
-                            chemicalFormulaeC += Convert.ToInt16(customReducingCBox.Text);
-                            chemicalFormulaeH += Convert.ToInt16(customReducingHBox.Text);
-                            chemicalFormulaeN += Convert.ToInt16(customReducingNBox.Text);
-                            chemicalFormulaeO += Convert.ToInt16(customReducingOBox.Text);
+                            chemicalFormulaeC += customReducingCCount;
+                            chemicalFormulaeH += customReducingHCount;
+                            chemicalFormulaeN += customReducingNCount;
+                            chemicalFormulaeO += customReducingOCount;
                             break;
                         default:
                             break;
@@ -2440,8 +2419,8 @@ namespace glycombo
                             theoreticalMass = target + 18.010565m + 134.06405m;
                             break;
                         case "Custom":
-                            observedMass = s + 18.010565m + Convert.ToDecimal(customReducingMassBox);
-                            theoreticalMass = target + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            observedMass = s + 18.010565m + customReducingMass;
+                            theoreticalMass = target + 18.010565m + customReducingMass;
                             break;
                         default:
                             break;
@@ -2461,8 +2440,8 @@ namespace glycombo
                             theoreticalMass = target + 20.026195m + 42.046950m;
                             break;
                         case "Custom":
-                            observedMass = s + 18.010565m + Convert.ToDecimal(customReducingMassBox);
-                            theoreticalMass = target + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            observedMass = s + 18.010565m + customReducingMass;
+                            theoreticalMass = target + 18.010565m + customReducingMass;
                             break;
                         default:
                             break;
@@ -2482,20 +2461,20 @@ namespace glycombo
                             theoreticalMass = target + 20.026195m + 126.031694m;
                             break;
                         case "Custom":
-                            observedMass = s + 18.010565m + Convert.ToDecimal(customReducingMassBox);
-                            theoreticalMass = target + 18.010565m + Convert.ToDecimal(customReducingMassBox);
+                            observedMass = s + 18.010565m + customReducingMass;
+                            theoreticalMass = target + 18.010565m + customReducingMass;
                             break;
                         default:
                             break;
                     }
                 }
 
-                // Calculation for error
+                // Calculation for mass error
                 error = observedMass - theoreticalMass;
 
                 // Calculation of scan number and charge state to be represented later
                 targetIndex.Add(i);
-                if (TextChecked == false)
+                if (inputChecked == "mzML")
                 {
                     string scanNumberForOutput = "";
                     string chargeForOutput = "";
@@ -2708,6 +2687,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Hex_container.Visibility = Visibility.Visible;
@@ -2725,6 +2705,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     HexNAc_container.Visibility = Visibility.Visible;
@@ -2742,6 +2723,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     dHex_container.Visibility = Visibility.Visible;
@@ -2759,6 +2741,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     NeuAc_container.Visibility = Visibility.Visible;
@@ -2776,6 +2759,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     NeuGc_container.Visibility = Visibility.Visible;
@@ -2793,6 +2777,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     HexN_container.Visibility = Visibility.Visible;
@@ -2810,6 +2795,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     HexA_container.Visibility = Visibility.Visible;
@@ -2827,6 +2813,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     dHexNAc_container.Visibility = Visibility.Visible;
@@ -2844,6 +2831,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Pent_container.Visibility = Visibility.Visible;
@@ -2861,6 +2849,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     KDN_container.Visibility = Visibility.Visible;
@@ -2878,6 +2867,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Phos_container.Visibility = Visibility.Visible;
@@ -2895,6 +2885,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Sulf_container.Visibility = Visibility.Visible;
@@ -2913,6 +2904,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     lNeuAc_container.Visibility = Visibility.Visible;
@@ -2930,6 +2922,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     eNeuAc_container.Visibility = Visibility.Visible;
@@ -2948,6 +2941,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     dNeuAc_container.Visibility = Visibility.Visible;
@@ -2966,6 +2960,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     amNeuAc_container.Visibility = Visibility.Visible;
@@ -2983,6 +2978,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Acetyl_container.Visibility = Visibility.Visible;
@@ -3001,6 +2997,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     lNeuGc_container.Visibility = Visibility.Visible;
@@ -3018,6 +3015,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     eNeuGc_container.Visibility = Visibility.Visible;
@@ -3036,6 +3034,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     dNeuGc_container.Visibility = Visibility.Visible;
@@ -3054,6 +3053,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     amNeuGc_container.Visibility = Visibility.Visible;
@@ -3076,7 +3076,7 @@ namespace glycombo
             offByOneChecked = false;
             derivatisation = "";
             DaChecked = false;
-            TextChecked = false;
+            inputChecked = "Text";
             submitbutton.IsEnabled = false;
         }
 
@@ -3098,7 +3098,7 @@ namespace glycombo
                 Console.WriteLine("browseButton is null");
             }
             submitbutton.IsEnabled = false;
-            TextChecked = false;
+            inputChecked = "mzML";
             inputOrLabel.Visibility = Visibility.Collapsed;
             InputMasses.Visibility = Visibility.Collapsed;
             positiveMHCheckBox.IsEnabled = false;
@@ -3416,7 +3416,7 @@ namespace glycombo
 
         private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            TextChecked = true;
+            inputChecked = "Text";
             if (customAdductPolarity != null)
             {
                 customAdductPolarity.IsEnabled = false;
@@ -3448,10 +3448,10 @@ namespace glycombo
         private void UpdateMonosaccharideTextBox()
         {
             var toggledMonoSwitches = new StringBuilder();
-            toggledMonoSwitches.Append("Monosaccharides: ");
+            toggledMonoSwitches.Append("<Monosaccharides>");
             // Check the state of each ToggleSwitch and build the string accordingly
             if (HextoggleSwitch.IsOn)
-                toggledMonoSwitches.Append(" Hex("+HexMin.Text+"-"+HexMax.Text+"),");
+                toggledMonoSwitches.Append(" Hex(" + HexMin.Text + "-" + HexMax.Text + "),");
             if (HexNActoggleSwitch.IsOn)
                 toggledMonoSwitches.Append(" HexNAc(" + HexNAcMin.Text + "-" + HexNAcMax.Text + "),");
             if (dHextoggleSwitch.IsOn)
@@ -3493,27 +3493,27 @@ namespace glycombo
             if (amNeuGctoggleSwitch.IsOn)
                 toggledMonoSwitches.Append(" AmG(" + amNeuGcMin.Text + "-" + amNeuGcMax.Text + "),");
             if (customMonoCheck1.IsChecked == true )
-                toggledMonoSwitches.Append(" " + customMonoNameBox1.Text+ "(" + customMonoMinBox1.Text + " - " + customMonoMaxBox1.Text + "), ");
+                toggledMonoSwitches.Append(" " + customMonoNameBox1.Text+ "(" + customMonoMinBox1.Text + "-" + customMonoMaxBox1.Text + "),");
             if (customMonoCheck2.IsChecked == true)
-                toggledMonoSwitches.Append(" " + customMonoNameBox2.Text + "(" + customMonoMinBox2.Text + " - " + customMonoMaxBox2.Text + "), ");
+                toggledMonoSwitches.Append(" " + customMonoNameBox2.Text + "(" + customMonoMinBox2.Text + "-" + customMonoMaxBox2.Text + "),");
             if (customMonoCheck3.IsChecked == true)
-                toggledMonoSwitches.Append(" " + customMonoNameBox3.Text + "(" + customMonoMinBox3.Text + " - " + customMonoMaxBox3.Text + "), ");
+                toggledMonoSwitches.Append(" " + customMonoNameBox3.Text + "(" + customMonoMinBox3.Text + "-" + customMonoMaxBox3.Text + "),");
             if (customMonoCheck4.IsChecked == true)
-                toggledMonoSwitches.Append(" " + customMonoNameBox4.Text + "(" + customMonoMinBox4.Text + " - " + customMonoMaxBox4.Text + "), ");
+                toggledMonoSwitches.Append(" " + customMonoNameBox4.Text + "(" + customMonoMinBox4.Text + "-" + customMonoMaxBox4.Text + "),");
             if (customMonoCheck5.IsChecked == true)
-                toggledMonoSwitches.Append(" " + customMonoNameBox5.Text + "(" + customMonoMinBox5.Text + " - " + customMonoMaxBox5.Text + "), ");
-            currentMonosaccharideSelectionInfo.Text = toggledMonoSwitches.ToString().TrimEnd(',');
+                toggledMonoSwitches.Append(" " + customMonoNameBox5.Text + "(" + customMonoMinBox5.Text + "-" + customMonoMaxBox5.Text + "),");
+            currentMonosaccharideSelection = toggledMonoSwitches.ToString().TrimEnd(',');
         }
 
         private void UpdateAdductTextBox()
         {
             var toggledAdducts = new StringBuilder();
-            toggledAdducts.Append("Adducts: ");
+            toggledAdducts.Append("<Adducts>");
             // Check the state of each Adduct Checkbox and build the string accordingly
             if (neutralMCheckBox.IsChecked == true)
                 toggledAdducts.Append(" [M],");
             if (negativeMHCheckBox.IsChecked == true)
-                toggledAdducts.Append(" [M-H⁻],");
+                toggledAdducts.Append(" [M-H⁻]⁻,");
             if (positiveMHCheckBox.IsChecked == true)
                 toggledAdducts.Append(" [M+H]⁺,");
             if (negativeMFACheckBox.IsChecked == true)
@@ -3529,8 +3529,8 @@ namespace glycombo
             if (positiveMNH4CheckBox.IsChecked == true)
                 toggledAdducts.Append(" [M+NH₄]⁺,");
             if (customAdductCheckBox.IsChecked == true)
-                toggledAdducts.Append(" Custom [M+" + customAdductMassText.Text + "],");
-            currentAdductSelectionInfo.Text = toggledAdducts.ToString().TrimEnd(',');
+                toggledAdducts.Append(" Custom[M+" + customAdductMassText.Text + "]" + customAdductPolarity.Text + ",");
+            currentAdductSelection = toggledAdducts.ToString().TrimEnd(',');
         }
 
         private void customAdductCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -3584,7 +3584,36 @@ namespace glycombo
         private void startTab_GotFocus(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
             UpdateAdductTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
+            if (OffByOne.IsChecked == true) {offByOneChecked = true;}    
+            else {offByOneChecked = false;}
+        }
+
+        private void Da_Checked(object sender, RoutedEventArgs e)
+        {
+            massErrorType = "Da";
+        }
+
+        private void ppm_Checked(object sender, RoutedEventArgs e)
+        {
+            massErrorType = "ppm";
+        }
+
+        private void Native_Checked(object sender, RoutedEventArgs e)
+        {
+            derivatisation = "Native";
+        }
+
+        private void Permeth_Checked(object sender, RoutedEventArgs e)
+        {
+            derivatisation = "Permethylated";
+        }
+
+        private void Peracetyl_Checked(object sender, RoutedEventArgs e)
+        {
+            derivatisation = "Peracetylated";
         }
     }
 }
