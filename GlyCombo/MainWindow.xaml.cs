@@ -306,6 +306,9 @@ namespace glycombo
         private void customSettingsSave_Click(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
+            UpdateAdductTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
             string saveOutput = "## GlyCombo v0.7 search settings" + Environment.NewLine;
             saveOutput += "<Input> " + inputChecked + Environment.NewLine;
             saveOutput += "<Error tolerance> " + DaError.Text + "," + massErrorType + Environment.NewLine;
@@ -361,6 +364,8 @@ namespace glycombo
 
         private void customSettingsLoad_Click(object sender, RoutedEventArgs e)
         {
+            // Need to reset all the options so that we can then check boxes or select items where appropriate
+            Reset_Click(sender, e);
             // Ask the user which text file they want to return settings from
             OpenFileDialog openFileDialogCustom = new()
             {
@@ -552,12 +557,12 @@ namespace glycombo
                         foreach (string item in monosaccharideLine)
                         {
                             string trimmedItem = item.Trim();
-                            MessageBox.Show(trimmedItem);
                             // Need to work on this regex to split each string into 3
                             var match = Regex.Match(trimmedItem, @"(\w+)\((\d+)-(\d+)\)");
                                 string z = match.Groups[1].Value;
-                                int x = int.Parse(match.Groups[2].Value);
-                                int y = int.Parse(match.Groups[3].Value);
+                            if (match.Groups[2].Value == "") { break; }
+                            int x = int.Parse(match.Groups[2].Value);
+                            int y = int.Parse(match.Groups[3].Value);
                             switch (z)
                             {
                                 case "Hex":
@@ -665,17 +670,81 @@ namespace glycombo
                                     amNeuGcMin.Text = Convert.ToString(x);
                                     amNeuGcMax.Text = Convert.ToString(y);
                                     break;
+                                default:
+                                    break;
                             }
                         }
                     }
                     // Adduct extraction
+                    if (line.Contains("<Adducts>"))
+                    {
+                        string result = line.Replace("<Adducts> ", string.Empty);
+                        string[] adductLine = result.Split(',');
+                        // Look through each , string section for an adduct, very similar to what we do for monosaccharides
+                        // Custom adducts don't matter as they're parsed in the above section
+                        foreach (string item in adductLine)
+                        {
+                            string trimmedItem = item.Trim();
+                            // This regex splits all the adducts into their constitutive  
+                            var match = Regex.Match(trimmedItem, @"(\[M[-+A-Za-z0-9₃₄⁺⁻]*\](?:[-⁻⁺+])?)|Custom\[M\+([^]]+)\](.*)");
+                            if (match.Groups[0].Value.StartsWith("Custom"))
+                            {
+                                customAdductCheckBox.IsChecked = true;
+                                string customAdductMassImport = match.Groups[2].Value;
+                                string customAdductPolarityImport = match.Groups[3].Value;
+                                customAdductMassText.Text = customAdductMassImport;
+                                customAdductPolarity.Text = customAdductPolarityImport;
+                            }
+                            else
+                            {
+                                string z = match.Groups[0].Value;
+                                switch (z)
+                                {
+                                    case "[M]":
+                                        neutralMCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M-H⁻]⁻":
+                                        negativeMHCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+H]⁺":
+                                        positiveMHCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+COO]⁻":
+                                        negativeMFACheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+Na]⁺":
+                                        positiveMNaCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+CH₃COO]⁻":
+                                        negativeMAACheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+K]⁺":
+                                        positiveMKCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+TFA-H]⁻":
+                                        negativeMTFACheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+NH₄]⁺":
+                                        positiveMNH4CheckBox.IsChecked = true;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    UpdateAdductTextBox();
+                    currentAdductSelectionInfo.Text = currentAdductSelection;
                 }
             }
             else
             {
                 return;
             }
-
+            UpdateAdductTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
         }
 
         public void customMonoCheck3_Unchecked(object sender, RoutedEventArgs e)
@@ -3173,10 +3242,34 @@ namespace glycombo
             InputMasses.Text = "";
             filePath = "";
             offByOneChecked = false;
+            OffByOne.IsChecked = false;
             derivatisation = "";
-            DaChecked = false;
             inputChecked = "Text";
+            InputMasses.Text = "";
+            DaChecked = false;
+            Da.IsChecked = true;
+            DaError.Text = "0.6";
+            reducingEndBox.Text = "Free";
+            Native.IsChecked = true;
+            PresetCombo.SelectedIndex = 1;
+            PresetCombo.SelectedIndex = 0;
+            customReducingCheck.IsChecked = false;
+            customAdductCheckBox.IsChecked = false;
             submitbutton.IsEnabled = false;
+            neutralMCheckBox.IsChecked = true;
+            negativeMHCheckBox.IsChecked = false;
+            negativeMFACheckBox.IsChecked = false;
+            negativeMAACheckBox.IsChecked = false;
+            negativeMTFACheckBox.IsChecked = false;
+            positiveMHCheckBox.IsChecked = false;
+            positiveMKCheckBox.IsChecked = false;
+            positiveMNaCheckBox.IsChecked = false;
+            positiveMNH4CheckBox.IsChecked = false;
+            resetbutton.IsEnabled = true;
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            UpdateAdductTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
         }
 
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
@@ -3243,6 +3336,11 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
+                    customMonoCheck1.IsChecked = false;
+                    customMonoCheck2.IsChecked = false;
+                    customMonoCheck3.IsChecked = false;
+                    customMonoCheck4.IsChecked = false;
+                    customMonoCheck5.IsChecked = false;
                     break;
 
                 case 1: // Mammal NG
@@ -3526,11 +3624,6 @@ namespace glycombo
                 browseButton.IsEnabled = true;
                 browseButton.Content = "Browse txt";
             }
-            submitbutton = (Button)FindName("submitbutton");
-            if (submitbutton != null)
-            {
-                submitbutton.IsEnabled = true;
-            }
             if (inputOrLabel != null && InputMasses != null)
             {
                 inputOrLabel.Visibility = Visibility.Visible;
@@ -3713,6 +3806,23 @@ namespace glycombo
         private void Peracetyl_Checked(object sender, RoutedEventArgs e)
         {
             derivatisation = "Peracetylated";
+        }
+
+        private void InputMasses_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (InputMasses.Text != "" || InputMasses.Text != null)
+            {
+                submitbutton.IsEnabled = true;
+            }    
+        }
+
+        private void executeExample_Click(object sender, RoutedEventArgs e)
+        {
+            Reset_Click(sender, e);
+            InputMasses.Text = "1683.63" + Environment.NewLine + "1318.50" + Environment.NewLine + "1236.4490" + Environment.NewLine + "1642.6078" + Environment.NewLine + "1521.58" + Environment.NewLine + "921.8363" + Environment.NewLine + "832.8125" + Environment.NewLine + "913.8389" + Environment.NewLine + "1140.4130" + Environment.NewLine + "739.2702" + Environment.NewLine + "994.8653" + Environment.NewLine + "965.8443" + Environment.NewLine + "731.2728" + Environment.NewLine + "812.2992";
+            PresetCombo.SelectedIndex = 1;
+            reducingEndBox.SelectedIndex = 1;
+            MessageBox.Show("Ready to submit!");
         }
     }
 }
