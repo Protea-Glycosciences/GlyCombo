@@ -3274,7 +3274,10 @@ namespace glycombo
 
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            executeExample.Visibility = Visibility.Collapsed;
+            if (executeExample != null)
+            {
+                executeExample.Visibility = Visibility.Collapsed;
+            }
             if (customAdductPolarity != null)
             {
                 customAdductPolarity.IsEnabled = true;
@@ -3614,7 +3617,10 @@ namespace glycombo
 
         private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            executeExample.Visibility = Visibility.Visible;
+            if (executeExample != null)
+            {
+                executeExample.Visibility = Visibility.Visible;
+            }
             inputChecked = "Text";
             if (customAdductPolarity != null)
             {
