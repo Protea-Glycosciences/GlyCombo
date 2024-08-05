@@ -157,7 +157,7 @@
                     <Button x:Name="customSettingsLoad" Content="Import settings" Margin="348,353,0,0" VerticalAlignment="Top" Click="customSettingsLoad_Click" Width="152" RenderTransformOrigin="0.449,-0.416"/>
                     <TextBlock x:Name="currentMonosaccharideSelectionInfo" Margin="346,201,0,0" TextWrapping="Wrap" Text="Monosaccharides:" MaxHeight="100" HorizontalAlignment="Left" Width="432" Height="79" VerticalAlignment="Top"/>
                     <TextBlock x:Name="currentAdductSelectionInfo" Margin="346,285,0,0" TextWrapping="Wrap" Text="Adducts:" MaxHeight="100" HorizontalAlignment="Left" Width="432" Height="52" VerticalAlignment="Top"/>
-                    <Button x:Name="executeExample" Content="Example" Margin="15,37,0,0" Visibility="Visible" VerticalAlignment="Top" Click="executeExample_Click"/>
+                    <Button x:Name="executeExample" Content="Example" Margin="15,37,0,0" Visibility="Visible" VerticalAlignment="Top" Click="executeExample_Click" Background="#87bd81"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Advanced">
