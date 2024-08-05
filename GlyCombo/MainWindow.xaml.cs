@@ -912,7 +912,7 @@ namespace glycombo
                 StreamReader sr = new(file);
 
                 // Parse each line of the mzml to extract important information from MS2 scans of the mzML (polarity, precursor m/z, charge state, scan # for given MS2)
-                while ((line = sr.ReadLine()) != null)
+                for (line = sr.ReadLine(); line != null; line = sr.ReadLine())
                 {
                     // Problem: Bruker and Thermo mzmls have all lines in different positions
                     // Thermo order: Spectrum index (including scan#), then "ms level" value="2", then "negative", then "selected ion m/z", then "charge state"
