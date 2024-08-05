@@ -372,7 +372,7 @@ namespace glycombo
                 //Open streamreader to read each line
                 StreamReader reader = new(openFileDialogCustom.FileName);
                 string line;
-                while ((line = reader.ReadLine()) != null)
+                for (line = reader.ReadLine(); line != null; line = reader.ReadLine())
                 {
                     if (line.Contains("<Input>"))
                     {
