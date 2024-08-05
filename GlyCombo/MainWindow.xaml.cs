@@ -3274,6 +3274,7 @@ namespace glycombo
 
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
         {
+            executeExample.Visibility = Visibility.Collapsed;
             if (customAdductPolarity != null)
             {
                 customAdductPolarity.IsEnabled = true;
@@ -3613,6 +3614,7 @@ namespace glycombo
 
         private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
         {
+            executeExample.Visibility = Visibility.Visible;
             inputChecked = "Text";
             if (customAdductPolarity != null)
             {
@@ -3819,7 +3821,7 @@ namespace glycombo
         private void executeExample_Click(object sender, RoutedEventArgs e)
         {
             Reset_Click(sender, e);
-            InputMasses.Text = "1683.63" + Environment.NewLine + "1318.50" + Environment.NewLine + "1236.4490" + Environment.NewLine + "1642.6078" + Environment.NewLine + "1521.58" + Environment.NewLine + "921.8363" + Environment.NewLine + "832.8125" + Environment.NewLine + "913.8389" + Environment.NewLine + "1140.4130" + Environment.NewLine + "739.2702" + Environment.NewLine + "994.8653" + Environment.NewLine + "965.8443" + Environment.NewLine + "731.2728" + Environment.NewLine + "812.2992";
+            InputMasses.Text = "1683.63" + Environment.NewLine + "1318.50" + Environment.NewLine + "1236.4490" + Environment.NewLine + "1642.6078" + Environment.NewLine + "1521.58" + Environment.NewLine + "1845.69" + Environment.NewLine + "1667.64" + Environment.NewLine + "1829.69" + Environment.NewLine + "2282.84" + Environment.NewLine + "1480.55" + Environment.NewLine + "1991.75" + Environment.NewLine + "1933.70" + Environment.NewLine + "1464.56" + Environment.NewLine + "1626.61";
             PresetCombo.SelectedIndex = 1;
             reducingEndBox.SelectedIndex = 1;
             MessageBox.Show("Ready to submit!");
