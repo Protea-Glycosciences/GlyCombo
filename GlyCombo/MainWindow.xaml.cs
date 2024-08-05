@@ -372,204 +372,303 @@ namespace glycombo
                 //Open streamreader to read each line
                 StreamReader reader = new(openFileDialogCustom.FileName);
                 string line;
-                for (int i = 0; i < 8; i++)
+                while ((line = reader.ReadLine()) != null)
                 {
-                    line = reader.ReadLine();
-                    if (line != null)
+                    if (line.Contains("<Input>"))
                     {
-                        if (line.Contains("<Input>"))
+                        string result = line.Replace("<Input> ", string.Empty);
+                        if (result == "Text") { TextRadioButton.IsChecked = true; }
+                        else { MzmlRadioButton.IsChecked = true; }
+                    }
+                    if (line.Contains ("<Error tolerance>"))
+                    {
+                        string result = line.Replace("<Error tolerance> ", string.Empty);
+                        string[] errorToleranceLine = result.Split(',');
+                        DaError.Text = errorToleranceLine[0];
+                        if (errorToleranceLine[1] == "Da") { Da.IsChecked = true; }
+                        else { ppm.IsChecked = true; }
+                    }
+                    if (line.Contains("<Reducing end>"))
+                    {
+                        string result = line.Replace("<Reducing end> ", string.Empty);
+                        switch (result)
                         {
-                            string result = line.Replace("<Input> ", string.Empty);
-                            if (result == "Text") { TextRadioButton.IsChecked = true; }
-                            else { MzmlRadioButton.IsChecked = true; }
-                        }
-                        if (line.Contains ("<Error tolerance>"))
-                        {
-                            string result = line.Replace("<Error tolerance> ", string.Empty);
-                            string[] errorToleranceLine = result.Split(',');
-                            DaError.Text = errorToleranceLine[0];
-                            if (errorToleranceLine[1] == "Da") { Da.IsChecked = true; }
-                            else { ppm.IsChecked = true; }
-                        }
-                        if (line.Contains("<Reducing end>"))
-                        {
-                            string result = line.Replace("<Reducing end> ", string.Empty);
-                            switch (result)
-                            {
-                                case "Free":
-                                    // Handle Free case
-                                    reducingEndBox.Text = "Free";
-                                    break;
-                                case "Reduced":
-                                    // Handle Reduced case
-                                    reducingEndBox.Text = "Reduced";
-                                    break;
-                                case "InstantPC":
-                                    // Handle InstantPC case
-                                    reducingEndBox.Text = "InstantPC";
-                                    break;
-                                case "Rapifluor-MS":
-                                    // Handle Rapifluor-MS case
-                                    reducingEndBox.Text = "Rapifluor-MS";
-                                    break;
-                                case "2-aminobenzoic acid":
-                                    // Handle 2-aminobenzoic acid case
-                                    reducingEndBox.Text = "2-aminobenzoic acid";
-                                    break;
-                                case "2-aminobenzamide":
-                                    // Handle 2-aminobenzamide case
-                                    reducingEndBox.Text = "2-aminobenzamide";
-                                    break;
-                                case "Procainamide":
-                                    // Handle Procainamide case
-                                    reducingEndBox.Text = "Procainamide";
-                                    break;
-                                case "Girard's reagent P":
-                                    // Handle Girard's reagent P case
-                                    reducingEndBox.Text = "Girard's reagent P";
-                                    break;
-                                case "Custom":
-                                    // Handle Custom case
-                                    reducingEndBox.Text = "Custom";
-                                    break;
-                                default:
-                                    // Handle default case
-                                    reducingEndBox.Text = "";
-                                    break;
-                            }
-                        }
-                        if (line.Contains("<Custom reducing end>"))
-                        {
-                            string result = line.Replace("<Custom reducing end> ", string.Empty);
-                            string[] customReducingEndLine = result.Split(',');
-                            customReducingNameBox.Text = customReducingEndLine[0];
-                            customReducingMassBox.Text = customReducingEndLine[1];
-                            customReducingCBox.Text = customReducingEndLine[2];
-                            customReducingHBox.Text = customReducingEndLine[3];
-                            customReducingNBox.Text = customReducingEndLine[4];
-                            customReducingOBox.Text = customReducingEndLine[5];
-                        }
-                        if (line.Contains("<Derivatisation>"))
-                        {
-                            string result = line.Replace("<Derivatisation> ", string.Empty);
-                            switch (result)
-                            {
-                                case "Native":
-                                    Native.IsChecked = true;
-                                    break;
-                                case "Permethylated":
-                                    Permeth.IsChecked = true;
-                                    break;
-                                case "Peracetylated":
-                                    Peracetyl.IsChecked = true;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        if (line.Contains("<OffByOne enabled>"))
-                        {
-                            string result = line.Replace("<OffByOne enabled> ", string.Empty);
-                            if (result == "True") { OffByOne.IsChecked = true; }
-                            else { OffByOne.IsChecked = false; }
-                        }
-                        if (line.Contains("<Monosaccharides>"))
-                        {
-                            string result = line.Replace("<Monosaccharides> ", string.Empty);
-                            string[] monosaccharideLine = result.Split(',');
-                            // Look through each , string section for a monosaccharide.
-                            // e.g. Hex(1-12),HexNAc(2-8)
-                            // Extract out the monosaccharide (Hex), the minimum (1), and the maximum (12) and set them to the respective sections
-                            // So if Hex seen, enabled the Hex toggle, then parse the min and the max
-                            foreach (string item in monosaccharideLine)
-                            {
-                                string trimmedItem = item.Trim();
-                                // Need to work on this regex to split each string into 3
-                                var match = Regex.Match(trimmedItem, @"(\w+)\((\d+)-(\d+)\)");
-                                    string z = match.Groups[1].Value;
-                                    int x = int.Parse(match.Groups[2].Value);
-                                    int y = int.Parse(match.Groups[3].Value);
-                                    if (z == "Hex")
-                                    {
-                                        HextoggleSwitch.IsOn = true;
-                                        HexMin.Text = Convert.ToString(x);
-                                        HexMax.Text = Convert.ToString(y);
-                                    }
-                                MessageBox.Show(z);
-                            }
-                        }
-                        if (line.Contains("<CustomMono1>"))
-                        {
-                            string result = line.Replace("<CustomMono1> ", string.Empty);
-                            string[] MonoSplitLine1 = result.Split(',');
-                            customMonoNameBox1.Text = MonoSplitLine1[0];
-                            customMonoMassBox1.Text = MonoSplitLine1[1];
-                            customMonoCBox1.Text = MonoSplitLine1[2];
-                            customMonoHBox1.Text = MonoSplitLine1[3];
-                            customMonoNBox1.Text = MonoSplitLine1[4];
-                            customMonoOBox1.Text = MonoSplitLine1[5];
-                            customMonoMinBox1.Text = MonoSplitLine1[6];
-                            customMonoMaxBox1.Text = MonoSplitLine1[7];
-                            customMonoCheck1.IsChecked = true;
-                        }
-                        if (line.Contains("<CustomMono2>"))
-                        {
-                            string result = line.Replace("<CustomMono2> ", string.Empty);
-                            string[] MonoSplitLine2 = result.Split(',');
-                            customMonoNameBox2.Text = MonoSplitLine2[0];
-                            customMonoMassBox2.Text = MonoSplitLine2[2];
-                            customMonoCBox2.Text = MonoSplitLine2[2];
-                            customMonoHBox2.Text = MonoSplitLine2[3];
-                            customMonoNBox2.Text = MonoSplitLine2[4];
-                            customMonoOBox2.Text = MonoSplitLine2[5];
-                            customMonoMinBox2.Text = MonoSplitLine2[6];
-                            customMonoMaxBox2.Text = MonoSplitLine2[7];
-                            customMonoCheck2.IsChecked = true;
-                        }
-                        if (line.Contains("<CustomMono3>"))
-                        {
-                            string result = line.Replace("<CustomMono3> ", string.Empty);
-                            string[] MonoSplitLine3 = result.Split(',');
-                            customMonoNameBox3.Text = MonoSplitLine3[0];
-                            customMonoMassBox3.Text = MonoSplitLine3[1];
-                            customMonoCBox3.Text = MonoSplitLine3[2];
-                            customMonoHBox3.Text = MonoSplitLine3[3];
-                            customMonoNBox3.Text = MonoSplitLine3[4];
-                            customMonoOBox3.Text = MonoSplitLine3[5];
-                            customMonoMinBox3.Text = MonoSplitLine3[6];
-                            customMonoMaxBox3.Text = MonoSplitLine3[7];
-                            customMonoCheck3.IsChecked = true;
-                        }
-                        if (line.Contains("<CustomMono4>"))
-                        {
-                            string result = line.Replace("<CustomMono4> ", string.Empty);
-                            string[] MonoSplitLine4 = result.Split(',');
-                            customMonoNameBox4.Text = MonoSplitLine4[0];
-                            customMonoMassBox4.Text = MonoSplitLine4[1];
-                            customMonoCBox4.Text = MonoSplitLine4[2];
-                            customMonoHBox4.Text = MonoSplitLine4[3];
-                            customMonoNBox4.Text = MonoSplitLine4[4];
-                            customMonoOBox4.Text = MonoSplitLine4[5];
-                            customMonoMinBox4.Text = MonoSplitLine4[6];
-                            customMonoMaxBox4.Text = MonoSplitLine4[7];
-                            customMonoCheck4.IsChecked = true;
-                        }
-                        if (line.Contains("<CustomMono5>"))
-                        {
-                            string result = line.Replace("<CustomMono5> ", string.Empty);
-                            string[] MonoSplitLine5 = result.Split(',');
-                            customMonoNameBox5.Text = MonoSplitLine5[0];
-                            customMonoMassBox5.Text = MonoSplitLine5[1];
-                            customMonoCBox5.Text = MonoSplitLine5[2];
-                            customMonoHBox5.Text = MonoSplitLine5[3];
-                            customMonoNBox5.Text = MonoSplitLine5[4];
-                            customMonoOBox5.Text = MonoSplitLine5[5];
-                            customMonoMinBox5.Text = MonoSplitLine5[6];
-                            customMonoMaxBox5.Text = MonoSplitLine5[7];
-                            customMonoCheck5.IsChecked = true;
+                            case "Free":
+                                // Handle Free case
+                                reducingEndBox.Text = "Free";
+                                break;
+                            case "Reduced":
+                                // Handle Reduced case
+                                reducingEndBox.Text = "Reduced";
+                                break;
+                            case "InstantPC":
+                                // Handle InstantPC case
+                                reducingEndBox.Text = "InstantPC";
+                                break;
+                            case "Rapifluor-MS":
+                                // Handle Rapifluor-MS case
+                                reducingEndBox.Text = "Rapifluor-MS";
+                                break;
+                            case "2-aminobenzoic acid":
+                                // Handle 2-aminobenzoic acid case
+                                reducingEndBox.Text = "2-aminobenzoic acid";
+                                break;
+                            case "2-aminobenzamide":
+                                // Handle 2-aminobenzamide case
+                                reducingEndBox.Text = "2-aminobenzamide";
+                                break;
+                            case "Procainamide":
+                                // Handle Procainamide case
+                                reducingEndBox.Text = "Procainamide";
+                                break;
+                            case "Girard's reagent P":
+                                // Handle Girard's reagent P case
+                                reducingEndBox.Text = "Girard's reagent P";
+                                break;
+                            case "Custom":
+                                // Handle Custom case
+                                reducingEndBox.Text = "Custom";
+                                break;
+                            default:
+                                // Handle default case
+                                reducingEndBox.Text = "";
+                                break;
                         }
                     }
-                    else { return; }
+                    if (line.Contains("<Custom reducing end>"))
+                    {
+                        string result = line.Replace("<Custom reducing end> ", string.Empty);
+                        string[] customReducingEndLine = result.Split(',');
+                        customReducingNameBox.Text = customReducingEndLine[0];
+                        customReducingMassBox.Text = customReducingEndLine[1];
+                        customReducingCBox.Text = customReducingEndLine[2];
+                        customReducingHBox.Text = customReducingEndLine[3];
+                        customReducingNBox.Text = customReducingEndLine[4];
+                        customReducingOBox.Text = customReducingEndLine[5];
+                    }
+                    if (line.Contains("<Derivatisation>"))
+                    {
+                        string result = line.Replace("<Derivatisation> ", string.Empty);
+                        switch (result)
+                        {
+                            case "Native":
+                                Native.IsChecked = true;
+                                break;
+                            case "Permethylated":
+                                Permeth.IsChecked = true;
+                                break;
+                            case "Peracetylated":
+                                Peracetyl.IsChecked = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    if (line.Contains("<OffByOne enabled>"))
+                    {
+                        string result = line.Replace("<OffByOne enabled> ", string.Empty);
+                        if (result == "True") { OffByOne.IsChecked = true; }
+                        else { OffByOne.IsChecked = false; }
+                    }
+                    if (line.Contains("<CustomMono1>"))
+                    {
+                        string result = line.Replace("<CustomMono1> ", string.Empty);
+                        string[] MonoSplitLine1 = result.Split(',');
+                        customMonoNameBox1.Text = MonoSplitLine1[0];
+                        customMonoMassBox1.Text = MonoSplitLine1[1];
+                        customMonoCBox1.Text = MonoSplitLine1[2];
+                        customMonoHBox1.Text = MonoSplitLine1[3];
+                        customMonoNBox1.Text = MonoSplitLine1[4];
+                        customMonoOBox1.Text = MonoSplitLine1[5];
+                        customMonoMinBox1.Text = MonoSplitLine1[6];
+                        customMonoMaxBox1.Text = MonoSplitLine1[7];
+                        customMonoCheck1.IsChecked = true;
+                    }
+                    if (line.Contains("<CustomMono2>"))
+                    {
+                        string result = line.Replace("<CustomMono2> ", string.Empty);
+                        string[] MonoSplitLine2 = result.Split(',');
+                        customMonoNameBox2.Text = MonoSplitLine2[0];
+                        customMonoMassBox2.Text = MonoSplitLine2[2];
+                        customMonoCBox2.Text = MonoSplitLine2[2];
+                        customMonoHBox2.Text = MonoSplitLine2[3];
+                        customMonoNBox2.Text = MonoSplitLine2[4];
+                        customMonoOBox2.Text = MonoSplitLine2[5];
+                        customMonoMinBox2.Text = MonoSplitLine2[6];
+                        customMonoMaxBox2.Text = MonoSplitLine2[7];
+                        customMonoCheck2.IsChecked = true;
+                    }
+                    if (line.Contains("<CustomMono3>"))
+                    {
+                        string result = line.Replace("<CustomMono3> ", string.Empty);
+                        string[] MonoSplitLine3 = result.Split(',');
+                        customMonoNameBox3.Text = MonoSplitLine3[0];
+                        customMonoMassBox3.Text = MonoSplitLine3[1];
+                        customMonoCBox3.Text = MonoSplitLine3[2];
+                        customMonoHBox3.Text = MonoSplitLine3[3];
+                        customMonoNBox3.Text = MonoSplitLine3[4];
+                        customMonoOBox3.Text = MonoSplitLine3[5];
+                        customMonoMinBox3.Text = MonoSplitLine3[6];
+                        customMonoMaxBox3.Text = MonoSplitLine3[7];
+                        customMonoCheck3.IsChecked = true;
+                    }
+                    if (line.Contains("<CustomMono4>"))
+                    {
+                        string result = line.Replace("<CustomMono4> ", string.Empty);
+                        string[] MonoSplitLine4 = result.Split(',');
+                        customMonoNameBox4.Text = MonoSplitLine4[0];
+                        customMonoMassBox4.Text = MonoSplitLine4[1];
+                        customMonoCBox4.Text = MonoSplitLine4[2];
+                        customMonoHBox4.Text = MonoSplitLine4[3];
+                        customMonoNBox4.Text = MonoSplitLine4[4];
+                        customMonoOBox4.Text = MonoSplitLine4[5];
+                        customMonoMinBox4.Text = MonoSplitLine4[6];
+                        customMonoMaxBox4.Text = MonoSplitLine4[7];
+                        customMonoCheck4.IsChecked = true;
+                    }
+                    if (line.Contains("<CustomMono5>"))
+                    {
+                        string result = line.Replace("<CustomMono5> ", string.Empty);
+                        string[] MonoSplitLine5 = result.Split(',');
+                        customMonoNameBox5.Text = MonoSplitLine5[0];
+                        customMonoMassBox5.Text = MonoSplitLine5[1];
+                        customMonoCBox5.Text = MonoSplitLine5[2];
+                        customMonoHBox5.Text = MonoSplitLine5[3];
+                        customMonoNBox5.Text = MonoSplitLine5[4];
+                        customMonoOBox5.Text = MonoSplitLine5[5];
+                        customMonoMinBox5.Text = MonoSplitLine5[6];
+                        customMonoMaxBox5.Text = MonoSplitLine5[7];
+                        customMonoCheck5.IsChecked = true;
+                    }
+                    if (line.Contains("<Monosaccharides>"))
+                    {
+                        string result = line.Replace("<Monosaccharides> ", string.Empty);
+                        string[] monosaccharideLine = result.Split(',');
+                        // Look through each , string section for a monosaccharide.
+                        // e.g. Hex(1-12),HexNAc(2-8)
+                        // Extract out the monosaccharide (Hex), the minimum (1), and the maximum (12) and set them to the respective sections
+                        // So if Hex seen, enabled the Hex toggle, then parse the min and the max
+                        // Custom monosaccharides don't matter as they're parsed in the above section
+                        foreach (string item in monosaccharideLine)
+                        {
+                            string trimmedItem = item.Trim();
+                            MessageBox.Show(trimmedItem);
+                            // Need to work on this regex to split each string into 3
+                            var match = Regex.Match(trimmedItem, @"(\w+)\((\d+)-(\d+)\)");
+                                string z = match.Groups[1].Value;
+                                int x = int.Parse(match.Groups[2].Value);
+                                int y = int.Parse(match.Groups[3].Value);
+                            switch (z)
+                            {
+                                case "Hex":
+                                    HextoggleSwitch.IsOn = true;
+                                    HexMin.Text = Convert.ToString(x);
+                                    HexMax.Text = Convert.ToString(y);
+                                    break;
+                                case "HexNAc":
+                                    HexNActoggleSwitch.IsOn = true;
+                                    HexNAcMin.Text = Convert.ToString(x);
+                                    HexNAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "dHex":
+                                    dHextoggleSwitch.IsOn = true;
+                                    dHexMin.Text = Convert.ToString(x);
+                                    dHexMax.Text = Convert.ToString(y);
+                                    break;
+                                case "NeuAc":
+                                    Neu5ActoggleSwitch.IsOn = true;
+                                    Neu5AcMin.Text = Convert.ToString(x);
+                                    Neu5AcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "NeuGc":
+                                    Neu5GctoggleSwitch.IsOn = true;
+                                    Neu5GcMin.Text = Convert.ToString(x);
+                                    Neu5GcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "HexN":
+                                    HexNtoggleSwitch.IsOn = true;
+                                    HexNMin.Text = Convert.ToString(x);
+                                    HexNMax.Text = Convert.ToString(y);
+                                    break;
+                                case "HexA":
+                                    HexAtoggleSwitch.IsOn = true;
+                                    HexAMin.Text = Convert.ToString(x);
+                                    HexAMax.Text = Convert.ToString(y);
+                                    break;
+                                case "dHexNAc":
+                                    dHexNActoggleSwitch.IsOn = true;
+                                    dHexNAcMin.Text = Convert.ToString(x);
+                                    dHexNAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Pent":
+                                    PenttoggleSwitch.IsOn = true;
+                                    PentMin.Text = Convert.ToString(x);
+                                    PentMax.Text = Convert.ToString(y);
+                                    break;
+                                case "KDN":
+                                    KDNtoggleSwitch.IsOn = true;
+                                    KDNMin.Text = Convert.ToString(x);
+                                    KDNMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Phos":
+                                    PhostoggleSwitch.IsOn = true;
+                                    PhosMin.Text = Convert.ToString(x);
+                                    PhosMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Sulf":
+                                    SulftoggleSwitch.IsOn = true;
+                                    SulfMin.Text = Convert.ToString(x);
+                                    SulfMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Acetyl":
+                                    AcetyltoggleSwitch.IsOn = true;
+                                    AcetylMin.Text = Convert.ToString(x);
+                                    AcetylMax.Text = Convert.ToString(y);
+                                    break;
+                                case "L":
+                                    lNeuActoggleSwitch.IsOn = true;
+                                    lNeuAcMin.Text = Convert.ToString(x);
+                                    lNeuAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "E":
+                                    eNeuActoggleSwitch.IsOn = true;
+                                    eeNeuAcMin.Text = Convert.ToString(x);
+                                    eeNeuAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "D":
+                                    dNeuActoggleSwitch.IsOn = true;
+                                    dNeuAcMin.Text = Convert.ToString(x);
+                                    dNeuAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Am":
+                                    amNeuActoggleSwitch.IsOn = true;
+                                    amNeuAcMin.Text = Convert.ToString(x);
+                                    amNeuAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "LG":
+                                    lNeuGctoggleSwitch.IsOn = true;
+                                    lNeuGcMin.Text = Convert.ToString(x);
+                                    lNeuGcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "EG":
+                                    eNeuGctoggleSwitch.IsOn = true;
+                                    eeNeuGcMin.Text = Convert.ToString(x);
+                                    eeNeuGcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "DG":
+                                    dNeuGctoggleSwitch.IsOn = true;
+                                    dNeuGcMin.Text = Convert.ToString(x);
+                                    dNeuGcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "AmG":
+                                    amNeuGctoggleSwitch.IsOn = true;
+                                    amNeuGcMin.Text = Convert.ToString(x);
+                                    amNeuGcMax.Text = Convert.ToString(y);
+                                    break;
+                            }
+                        }
+                    }
+                    // Adduct extraction
                 }
             }
             else
