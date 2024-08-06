@@ -1798,13 +1798,10 @@ namespace glycombo
         
         private void glyComboProcess()
         {
-            var watch = Stopwatch.StartNew();
             iterations = 0;
             Sum_up(numbers, targets);
             solutions = "";
             // Pop-up to let the user know the search has finished
-            watch.Stop();
-            ElapsedMSec = watch.ElapsedMilliseconds;
             new Thread(() => { MessageBox.Show("GlyCombo has finished running." + Environment.NewLine + ((solutionMultiples.Length - solutionMultiples.Replace(Environment.NewLine, string.Empty).Length)/2) + " monosaccharide combinations identified over " + iterations + " iterations." + Environment.NewLine + "Total search time: " + ElapsedMSec/1000 + " seconds."); }).Start();
             solutionProcess = "";
         }
@@ -1824,6 +1821,8 @@ namespace glycombo
                 MessageBox.Show("Please type in file name for export and click OK");
                 saveFileDialog1.ShowDialog();
             }
+            ElapsedMSec = 0;
+            var watch = Stopwatch.StartNew();
             // Pop-up to let the user know the search is running
             new Thread(() => { MessageBox.Show("Search started." + Environment.NewLine + "Processing " + targets.Count + " precursors." + Environment.NewLine + "Please wait for the search to complete."); }).Start();
 
@@ -1935,6 +1934,8 @@ namespace glycombo
                 + "<Precursor targets>"
                 + Environment.NewLine
                 + targetString);
+            watch.Stop();
+            ElapsedMSec = watch.ElapsedMilliseconds;
         }
 
         public void Sum_up_recursive(List<decimal> numbers, decimal target, List<decimal> partial, bool targetFound, int i)

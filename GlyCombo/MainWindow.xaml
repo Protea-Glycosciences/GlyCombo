@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:glycombo"
         mc:Ignorable="d"
-        Title="GlyCombo 0.6.1 - Protea Glycosciences" Height="517" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="320" MinWidth="800">
+        Title="GlyCombo 0.7 - Protea Glycosciences" Height="517" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="320" MinWidth="800">
 
 
     <Grid Margin="3,3,7,0" RenderTransformOrigin="0,0" Height="484" VerticalAlignment="Top">
@@ -66,7 +66,7 @@
                             <ComboBoxItem Content="Custom"/>
                         </ComboBox>
                     </StackPanel>
-                    <Label Margin="10,354,688,0" Style="{StaticResource heading}" Height="64" VerticalAlignment="Top">Glycan State:</Label>
+                    <Label Margin="10,354,678,0" Style="{StaticResource heading}" Height="64" VerticalAlignment="Top">Derivatisation:</Label>
                     <StackPanel Margin="137,354,488,0" Height="95" VerticalAlignment="Top">
                         <RadioButton GroupName="State" Name="Native" Grid.Row="3" Grid.Column="1" IsChecked="True" Checked="Native_Checked">Native</RadioButton>
                         <RadioButton GroupName="State" Name="Permeth" Grid.Row="3" Grid.Column="1" Checked="Permeth_Checked" >Permethylated</RadioButton>
@@ -112,7 +112,7 @@
                     <ui:ToggleSwitch x:Name="Neu5GctoggleSwitch" Margin="339,131,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="Neu5GctoggleSwitch_Toggled" Width="50" Height="32"/>
                     <Label Margin="389,137,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-glycolyl-neuraminic acid (NeuGc)"/>
 
-                    <ComboBox x:Name="PresetCombo" Margin="588,164,42,0" ui:ControlHelper.PlaceholderText="Presets" FontSize="12" SelectionChanged="PresetCombo_SelectionChanged" Height="27" HorizontalAlignment="Stretch">
+                    <ComboBox x:Name="PresetCombo" Margin="570,164,42,0" ui:ControlHelper.PlaceholderText="Monosaccharide Presets" FontSize="12" SelectionChanged="PresetCombo_SelectionChanged" Height="27" HorizontalAlignment="Stretch">
                         <ComboBoxItem Content="N/A" FontSize="12"/>
                         <ComboBoxItem Content="Mammal 𝑁-glycan" FontSize="12"/>
                         <ComboBoxItem Content="Mammal 𝑂-glycan" FontSize="12"/>
@@ -291,8 +291,8 @@
                     <CheckBox x:Name="positiveMKCheckBox" Content="[M+K]⁺" Margin="693,119,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
                     <CheckBox x:Name="negativeMTFACheckBox" Content="[M+TFA-H]⁻" Margin="553,151,0,0" VerticalAlignment="Top" Width="106" MinWidth="40"/>
                     <CheckBox x:Name="positiveMNH4CheckBox" Content="[M+NH₄]⁺" Margin="693,151,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
-                    <Label Content="Advanced searching" HorizontalAlignment="Left" Margin="489,330,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <TextBlock x:Name="advancedSearchingText" Margin="489,349,0,0" TextWrapping="Wrap" Text="Searches the mass list twice: once for the correct monoisotopic mass, and once for the M+1. Doubles search time." MaxHeight="100" HorizontalAlignment="Left" Width="293" Height="58" VerticalAlignment="Top"/>
+                    <Label Content="Advanced searching" HorizontalAlignment="Left" Margin="489,316,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <TextBlock x:Name="advancedSearchingText" Margin="489,335,0,0" TextWrapping="Wrap" Text="Searches the mass list twice: once for the correct monoisotopic mass, and once for the M+1. (e.g. the case of 1x NeuAc vs 2x Fucose). Doubles search time." MaxHeight="100" HorizontalAlignment="Left" Width="293" Height="82" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Custom">
