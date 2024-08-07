@@ -129,6 +129,7 @@ namespace glycombo
         private string[] scanLine;
         private decimal TIC;
         private string[] TICLine;
+        private string allFiles;
         List<decimal> numbers = [];
         List<decimal> scans = [];
         List<int> charges = [];
@@ -382,8 +383,14 @@ namespace glycombo
                     if (line.Contains("<Input>"))
                     {
                         string result = line.Replace("<Input> ", string.Empty);
-                        if (result == "Text") { TextRadioButton.IsChecked = true; }
-                        else { MzmlRadioButton.IsChecked = true; }
+                        if (result.Contains("Text") == true) {
+                            TextRadioButton.IsChecked = true;
+                            inputChecked = "Text";
+                        }
+                        else {
+                            MzmlRadioButton.IsChecked = true;
+                            inputChecked = "mzML";
+                        }
                     }
                     if (line.Contains ("<Error tolerance>"))
                     {
@@ -745,6 +752,14 @@ namespace glycombo
             currentAdductSelectionInfo.Text = currentAdductSelection;
             UpdateMonosaccharideTextBox();
             currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            if (mzMLFileNamesBlock.Text.Contains("mzML") == true)
+            {
+                submitbutton.IsEnabled = true;
+            }
+            else
+            {
+                submitbutton.IsEnabled = false;
+            }
         }
 
         public void customMonoCheck3_Unchecked(object sender, RoutedEventArgs e)
@@ -892,6 +907,8 @@ namespace glycombo
                 if (TextRadioButton.IsChecked != true)
                 {
                     await Task.Run(() => mzMLProcess());
+                    mzMLFileNamesBlock.Text = "mzML files: ";
+                    mzMLFileNamesBlock.Text += allFiles.Replace(", ", "," + Environment.NewLine);
                 }
                 else
                 {
@@ -975,7 +992,7 @@ namespace glycombo
             polarity = "";
             List<decimal> precursors = [];
                 foreach (String file in openFileDialog.FileNames)
-            {
+                {
                 // Going to process each file one at a time using this section of the code.
                 // Read each line from the given file
                 StreamReader sr = new(file);
@@ -1121,7 +1138,7 @@ namespace glycombo
             else
             {
                 // Provide list of all filenames provided in the openFileDialog, without the directory name
-                string allFiles = string.Join(", ", openFileDialog.FileNames.Select(System.IO.Path.GetFileName));
+                allFiles = string.Join(", ", openFileDialog.FileNames.Select(System.IO.Path.GetFileName));
                 // Provide number of scans for each filename
                 MessageBox.Show("Files " + allFiles + " have completed uploading with a total number of " + scans.Count + " MS2 scans identified.");
             }
@@ -1850,7 +1867,7 @@ namespace glycombo
             string skylineSolutionHeader = "";
             string skylineSolutionMultiplesPreTrim = "";
             string skylineSolutionMultiples = "";
-            if (inputChecked == "Text")
+            if (inputChecked == "mzML")
             {
                 solutionHeader = "Composition,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC,File Name";
                 skylineSolutionHeader = "Molecule List Name,Molecule Name,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC,Note";
@@ -3294,14 +3311,22 @@ namespace glycombo
                 // Handle the null case
                 Console.WriteLine("browseButton is null");
             }
-            submitbutton.IsEnabled = false;
             inputChecked = "mzML";
+            mzMLFileNamesBlock.Visibility = Visibility.Visible;
             inputOrLabel.Visibility = Visibility.Collapsed;
             InputMasses.Visibility = Visibility.Collapsed;
             positiveMHCheckBox.IsEnabled = false;
             negativeMHCheckBox.IsEnabled = false;
             positiveMHCheckBox.IsChecked = true;
             negativeMHCheckBox.IsChecked = true;
+            if (mzMLFileNamesBlock.Text.Contains("mzML") == true)
+            {
+                submitbutton.IsEnabled = true;
+            }
+            else
+            {
+                submitbutton.IsEnabled = false;
+            }
         }
 
         private void PresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -3618,6 +3643,10 @@ namespace glycombo
 
         private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
         {
+            if (mzMLFileNamesBlock != null)
+            {
+                mzMLFileNamesBlock.Visibility = Visibility.Collapsed;
+            }
             if (executeExample != null)
             {
                 executeExample.Visibility = Visibility.Visible;
