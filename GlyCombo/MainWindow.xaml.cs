@@ -207,14 +207,9 @@ namespace glycombo
         string customReducingName = "null";
         string customReducedMassOutput = "null";
 
-        public MainViewModel ViewModel { get; set; }
-
         public MainWindow()
         {
             InitializeComponent();
-            ViewModel = new MainViewModel();
-            ViewModel.ButtonText = "Custom";
-            DataContext = ViewModel;
             customText.Text = customContent;
             customMonoNameBox1.Visibility = Visibility.Collapsed;
             customMonoMassBox1.Visibility = Visibility.Collapsed;
@@ -277,8 +272,6 @@ namespace glycombo
             customMonoMinBox1.Visibility = Visibility.Visible;
             customMonoMaxBox1.Visibility = Visibility.Visible;
             customMono += 1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         public void customMonoCheck1_Unchecked(object sender, RoutedEventArgs e)
@@ -294,8 +287,6 @@ namespace glycombo
             customMonoMinBox1.Visibility = Visibility.Collapsed;
             customMonoMaxBox1.Visibility = Visibility.Collapsed;
             customMono += -1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         private void customSettingsSave_Click(object sender, RoutedEventArgs e)
@@ -397,49 +388,19 @@ namespace glycombo
                     if (line.Contains("<Reducing end>"))
                     {
                         string result = line.Replace("<Reducing end> ", string.Empty);
-                        switch (result)
+                        reducingEndBox.Text = result switch
                         {
-                            case "Free":
-                                // Handle Free case
-                                reducingEndBox.Text = "Free";
-                                break;
-                            case "Reduced":
-                                // Handle Reduced case
-                                reducingEndBox.Text = "Reduced";
-                                break;
-                            case "InstantPC":
-                                // Handle InstantPC case
-                                reducingEndBox.Text = "InstantPC";
-                                break;
-                            case "Rapifluor-MS":
-                                // Handle Rapifluor-MS case
-                                reducingEndBox.Text = "Rapifluor-MS";
-                                break;
-                            case "2-aminobenzoic acid":
-                                // Handle 2-aminobenzoic acid case
-                                reducingEndBox.Text = "2-aminobenzoic acid";
-                                break;
-                            case "2-aminobenzamide":
-                                // Handle 2-aminobenzamide case
-                                reducingEndBox.Text = "2-aminobenzamide";
-                                break;
-                            case "Procainamide":
-                                // Handle Procainamide case
-                                reducingEndBox.Text = "Procainamide";
-                                break;
-                            case "Girard's reagent P":
-                                // Handle Girard's reagent P case
-                                reducingEndBox.Text = "Girard's reagent P";
-                                break;
-                            case "Custom":
-                                // Handle Custom case
-                                reducingEndBox.Text = "Custom";
-                                break;
-                            default:
-                                // Handle default case
-                                reducingEndBox.Text = "";
-                                break;
-                        }
+                            "Free" => "Free",// Handle Free case
+                            "Reduced" => "Reduced",// Handle Reduced case
+                            "InstantPC" => "InstantPC",// Handle InstantPC case
+                            "Rapifluor-MS" => "Rapifluor-MS",// Handle Rapifluor-MS case
+                            "2-aminobenzoic acid" => "2-aminobenzoic acid",// Handle 2-aminobenzoic acid case
+                            "2-aminobenzamide" => "2-aminobenzamide",// Handle 2-aminobenzamide case
+                            "Procainamide" => "Procainamide",// Handle Procainamide case
+                            "Girard's reagent P" => "Girard's reagent P",// Handle Girard's reagent P case
+                            "Custom" => "Custom",// Handle Custom case
+                            _ => "",// Handle default case
+                        };
                     }
                     if (line.Contains("<Custom reducing end>"))
                     {
@@ -766,9 +727,6 @@ namespace glycombo
             customMonoOBox3.Visibility = Visibility.Collapsed;
             customMonoMinBox3.Visibility = Visibility.Collapsed;
             customMonoMaxBox3.Visibility = Visibility.Collapsed;
-            customMono += -1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         public void customMonoCheck2_Unchecked(object sender, RoutedEventArgs e)
@@ -783,9 +741,6 @@ namespace glycombo
             customMonoOBox2.Visibility = Visibility.Collapsed;
             customMonoMinBox2.Visibility = Visibility.Collapsed;
             customMonoMaxBox2.Visibility = Visibility.Collapsed;
-            customMono += -1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         public void customMonoCheck4_Unchecked(object sender, RoutedEventArgs e)
@@ -800,9 +755,6 @@ namespace glycombo
             customMonoOBox4.Visibility = Visibility.Collapsed;
             customMonoMinBox4.Visibility = Visibility.Collapsed;
             customMonoMaxBox4.Visibility = Visibility.Collapsed;
-            customMono += -1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         public void customMonoCheck5_Unchecked(object sender, RoutedEventArgs e)
@@ -817,9 +769,6 @@ namespace glycombo
             customMonoOBox5.Visibility = Visibility.Collapsed;
             customMonoMinBox5.Visibility = Visibility.Collapsed;
             customMonoMaxBox5.Visibility = Visibility.Collapsed;
-            customMono += -1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         public void customMonoCheck2_Checked(object sender, RoutedEventArgs e)
@@ -834,9 +783,6 @@ namespace glycombo
             customMonoOBox2.Visibility = Visibility.Visible;
             customMonoMinBox2.Visibility = Visibility.Visible;
             customMonoMaxBox2.Visibility = Visibility.Visible;
-            customMono += 1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         public void customMonoCheck3_Checked(object sender, RoutedEventArgs e)
@@ -851,9 +797,6 @@ namespace glycombo
             customMonoOBox3.Visibility = Visibility.Visible;
             customMonoMinBox3.Visibility = Visibility.Visible;
             customMonoMaxBox3.Visibility = Visibility.Visible;
-            customMono += 1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         public void customMonoCheck4_Checked(object sender, RoutedEventArgs e)
@@ -868,9 +811,6 @@ namespace glycombo
             customMonoOBox4.Visibility = Visibility.Visible;
             customMonoMinBox4.Visibility = Visibility.Visible;
             customMonoMaxBox4.Visibility = Visibility.Visible;
-            customMono += 1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         public void customMonoCheck5_Checked(object sender, RoutedEventArgs e)
@@ -885,9 +825,6 @@ namespace glycombo
             customMonoOBox5.Visibility = Visibility.Visible;
             customMonoMinBox5.Visibility = Visibility.Visible;
             customMonoMaxBox5.Visibility = Visibility.Visible;
-            customMono += 1;
-            if (customMono > 0) { ViewModel.ButtonText = "Custom (Enabled)"; }
-            else { ViewModel.ButtonText = "Custom"; }
         }
 
         private async void UploadButton_Click(object sender, RoutedEventArgs e)
@@ -952,7 +889,7 @@ namespace glycombo
             {
                 ProgressBarMZML.Visibility = Visibility.Collapsed;
                 // Let the user now start the processing. Without this step, the user may crash the program by starting the processing before the mzml info is extracted
-                if (scans.Any())
+                if (scans.Count != 0)
                 {
                     submitbutton.IsEnabled = IsEnabled;
                 }
@@ -1123,7 +1060,7 @@ namespace glycombo
                 }
                 string fileNameOutput = file.Substring(file.LastIndexOf('\\') + 1);
             }
-            if (!scans.Any())
+            if (scans.Count == 0)
             {
                 MessageBox.Show("No MS2 found in the given mzML file. Please confirm the selected file has MS2 scans, or select a different file.");
             }
@@ -1967,11 +1904,11 @@ namespace glycombo
                 int eeNeuGcCount = 0;
                 int dNeuGcCount = 0;
                 int amNeuGcCount = 0;
-                int customMono1Count = 0;
-                int customMono2Count = 0;
-                int customMono3Count = 0;
-                int customMono4Count = 0;
-                int customMono5Count = 0;
+                int customMono1Count;
+                int customMono2Count;
+                int customMono3Count;
+                int customMono4Count;
+                int customMono5Count;
 
                 // This replaces all the masses with their respective monosaccharide identities
                 switch (derivatisation)
