@@ -16,8 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="AGS_composition_to_MS.tiff" />
     <None Remove="Composition_to_MS.png" />
+    <None Remove="Composition_to_MS.tiff" />
     <None Remove="Final Logo.png" />
     <None Remove="GlyCombo_Logo_Final.png" />
   </ItemGroup>
@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="AGS_composition_to_MS.tiff">
+    <Resource Include="Composition_to_MS.tiff">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Final Logo.png" />

@@ -276,7 +276,7 @@ namespace glycombo
         public void customMonoCheck1_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox1.Visibility = Visibility.Visible;
             customMonoMassBox1.Visibility = Visibility.Visible;
             customMonoCBox1.Visibility = Visibility.Visible;
@@ -291,7 +291,7 @@ namespace glycombo
         public void customMonoCheck1_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox1.Visibility = Visibility.Collapsed;
             customMonoMassBox1.Visibility = Visibility.Collapsed;
             customMonoCBox1.Visibility = Visibility.Collapsed;
@@ -306,9 +306,9 @@ namespace glycombo
         private void customSettingsSave_Click(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentAdductSelectionInfo.Text = currentAdductSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             UpdateAdductTextBox();
-            currentAdductSelectionInfo.Text = currentAdductSelection;
+            currentAdductSelectionInfo.Text = currentAdductSelection.Replace("<", "").Replace(">", ":");
             string saveOutput = "## GlyCombo v0.7 search settings" + Environment.NewLine;
             saveOutput += "<Input> " + inputChecked + Environment.NewLine;
             saveOutput += "<Error tolerance> " + DaError.Text + "," + massErrorType + Environment.NewLine;
@@ -716,9 +716,9 @@ namespace glycombo
                 return;
             }
             UpdateAdductTextBox();
-            currentAdductSelectionInfo.Text = currentAdductSelection;
+            currentAdductSelectionInfo.Text = currentAdductSelection.Replace("<", "").Replace(">", ":");
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             if (mzMLFileNamesBlock.Text.Contains("mzML") == true)
             {
                 submitbutton.IsEnabled = true;
@@ -732,7 +732,7 @@ namespace glycombo
         public void customMonoCheck3_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox3.Visibility = Visibility.Collapsed;
             customMonoMassBox3.Visibility = Visibility.Collapsed;
             customMonoCBox3.Visibility = Visibility.Collapsed;
@@ -746,7 +746,7 @@ namespace glycombo
         public void customMonoCheck2_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox2.Visibility = Visibility.Collapsed;
             customMonoMassBox2.Visibility = Visibility.Collapsed;
             customMonoCBox2.Visibility = Visibility.Collapsed;
@@ -760,7 +760,7 @@ namespace glycombo
         public void customMonoCheck4_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox4.Visibility = Visibility.Collapsed;
             customMonoMassBox4.Visibility = Visibility.Collapsed;
             customMonoCBox4.Visibility = Visibility.Collapsed;
@@ -774,7 +774,7 @@ namespace glycombo
         public void customMonoCheck5_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox5.Visibility = Visibility.Collapsed;
             customMonoMassBox5.Visibility = Visibility.Collapsed;
             customMonoCBox5.Visibility = Visibility.Collapsed;
@@ -788,7 +788,7 @@ namespace glycombo
         public void customMonoCheck2_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox2.Visibility = Visibility.Visible;
             customMonoMassBox2.Visibility = Visibility.Visible;
             customMonoCBox2.Visibility = Visibility.Visible;
@@ -802,7 +802,7 @@ namespace glycombo
         public void customMonoCheck3_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox3.Visibility = Visibility.Visible;
             customMonoMassBox3.Visibility = Visibility.Visible;
             customMonoCBox3.Visibility = Visibility.Visible;
@@ -816,7 +816,7 @@ namespace glycombo
         public void customMonoCheck4_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox4.Visibility = Visibility.Visible;
             customMonoMassBox4.Visibility = Visibility.Visible;
             customMonoCBox4.Visibility = Visibility.Visible;
@@ -830,7 +830,7 @@ namespace glycombo
         public void customMonoCheck5_Checked(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             customMonoNameBox5.Visibility = Visibility.Visible;
             customMonoMassBox5.Visibility = Visibility.Visible;
             customMonoCBox5.Visibility = Visibility.Visible;
@@ -2772,7 +2772,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     Hex_container.Visibility = Visibility.Visible;
@@ -2790,7 +2790,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     HexNAc_container.Visibility = Visibility.Visible;
@@ -2808,7 +2808,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     dHex_container.Visibility = Visibility.Visible;
@@ -2826,7 +2826,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     NeuAc_container.Visibility = Visibility.Visible;
@@ -2844,7 +2844,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     NeuGc_container.Visibility = Visibility.Visible;
@@ -2862,7 +2862,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     HexN_container.Visibility = Visibility.Visible;
@@ -2880,7 +2880,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     HexA_container.Visibility = Visibility.Visible;
@@ -2898,7 +2898,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     dHexNAc_container.Visibility = Visibility.Visible;
@@ -2916,7 +2916,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     Pent_container.Visibility = Visibility.Visible;
@@ -2934,7 +2934,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     KDN_container.Visibility = Visibility.Visible;
@@ -2952,7 +2952,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     Phos_container.Visibility = Visibility.Visible;
@@ -2970,7 +2970,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     Sulf_container.Visibility = Visibility.Visible;
@@ -2989,7 +2989,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     lNeuAc_container.Visibility = Visibility.Visible;
@@ -3007,7 +3007,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     eNeuAc_container.Visibility = Visibility.Visible;
@@ -3026,7 +3026,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     dNeuAc_container.Visibility = Visibility.Visible;
@@ -3045,7 +3045,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     amNeuAc_container.Visibility = Visibility.Visible;
@@ -3063,7 +3063,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     Acetyl_container.Visibility = Visibility.Visible;
@@ -3082,7 +3082,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     lNeuGc_container.Visibility = Visibility.Visible;
@@ -3100,7 +3100,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     eNeuGc_container.Visibility = Visibility.Visible;
@@ -3119,7 +3119,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     dNeuGc_container.Visibility = Visibility.Visible;
@@ -3138,7 +3138,7 @@ namespace glycombo
             if (toggleSwitch != null)
             {
                 UpdateMonosaccharideTextBox();
-                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
                 if (toggleSwitch.IsOn == true)
                 {
                     amNeuGc_container.Visibility = Visibility.Visible;
@@ -3184,9 +3184,9 @@ namespace glycombo
             positiveMNH4CheckBox.IsChecked = false;
             resetbutton.IsEnabled = true;
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             UpdateAdductTextBox();
-            currentAdductSelectionInfo.Text = currentAdductSelection;
+            currentAdductSelectionInfo.Text = currentAdductSelection.Replace("<", "").Replace(">", ":");
         }
 
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
@@ -3713,9 +3713,9 @@ namespace glycombo
         private void startTab_GotFocus(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
-            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             UpdateAdductTextBox();
-            currentAdductSelectionInfo.Text = currentAdductSelection;
+            currentAdductSelectionInfo.Text = currentAdductSelection.Replace("<", "").Replace(">", ":");
             if (OffByOne.IsChecked == true) {offByOneChecked = true;}    
             else {offByOneChecked = false;}
         }
