@@ -22,6 +22,8 @@ using Windows.Media.Capture;
 using System.Collections.Generic;
 using GlyCombo;
 using System.Reflection.Metadata;
+using System.Collections;
+using System.Security.Policy;
 
 namespace glycombo
 {
@@ -41,7 +43,9 @@ namespace glycombo
         private string reducedEnd;
         private decimal observedMass;
         private decimal theoreticalMass;
+        private string massErrorType;
         private decimal error;
+        // Monosaccharides
         private decimal dhex;
         private decimal hex;
         private decimal hexnac;
@@ -62,6 +66,13 @@ namespace glycombo
         private decimal eeneugc;
         private decimal dneugc;
         private decimal amneugc;
+        private decimal sulf;
+        // Adducts
+        private decimal adductCustom;
+        private int searchRepeats;
+        List<decimal> targetAdducts;
+        List<decimal> targetAdductsProcessing;
+        // Monoaccharide ranges
         private int HexMin_int;
         private int HexMax_int;
         private int HexNAcMin_int;
@@ -118,6 +129,7 @@ namespace glycombo
         private string[] scanLine;
         private decimal TIC;
         private string[] TICLine;
+        private string allFiles;
         List<decimal> numbers = [];
         List<decimal> scans = [];
         List<int> charges = [];
@@ -128,74 +140,37 @@ namespace glycombo
         List<decimal> targets = [];
         List<string> targetStrings = [];
         // Parameter report variables
-        private bool monoHex = false;
-        private bool monoHexA = false;
-        private bool monodHex = false;
-        private bool monoHexNAc = false;
-        private bool monoHexN = false;
-        private bool monodHexNAc = false;
-        private bool monoPent = false;
-        private bool monoKDN = false;
-        private bool monoNeu5Ac = false;
-        private bool monoNeu5Gc = false;
-        private bool monoPhos = false;
-        private bool monoSulf = false;
-        private bool monolNeuAc = false;
-        private bool monoeeNeuAc = false;
-        private bool monodNeuAc = false;
-        private bool monoamNeuAc = false;
-        private bool monoAcetyl = false;
-        private bool monolNeuGc = false;
-        private bool monoeeNeuGc = false;
-        private bool monodNeuGc = false;
-        private bool monoamNeuGc = false;
         private bool monoCustom1 = false;
         private bool monoCustom2 = false;
         private bool monoCustom3 = false;
         private bool monoCustom4 = false;
         private bool monoCustom5 = false;
-        private string errorType;
         private string derivatisation;
-        private string param_monoHex;
-        private string param_monoHexA;
-        private string param_monodHex;
-        private string param_monoHexNAc;
-        private string param_monoHexN;
-        private string param_monodHexNAc;
-        private string param_monoPent;
-        private string param_monoKDN;
-        private string param_monoNeu5Ac;
-        private string param_monoNeu5Gc;
-        private string param_monoSulf;
-        private string param_monoPhos;
-        private string param_monolNeuAc;
-        private string param_monoeeNeuAc;
-        private string param_monodNeuAc;
-        private string param_monoamNeuAc;
-        private string param_monoAcetyl;
-        private string param_monolNeuGc;
-        private string param_monoeeNeuGc;
-        private string param_monodNeuGc;
-        private string param_monoamNeuGc;
-        private string param_monoCustom1;
-        private string param_monoCustom2;
-        private string param_monoCustom3;
-        private string param_monoCustom4;
-        private string param_monoCustom5;
+        private string currentMonosaccharideSelection;
+        private string currentAdductSelection;
         private string filePath;
-        private string inputParameters;
         private float ElapsedMSec;
         // For multiple tasks, enabling progress bar
         private bool DaChecked;
-        private bool TextChecked;
-        private bool nativeChecked;
+        private string inputChecked = "Text";
         private bool offByOneChecked;
+        int customMono = 0;
+        private string customContent = "Monosaccharides: dehydrated monoisotopic mass/chemical formula (e.g. Glc is 162.0528 and C6H10O5)" + Environment.NewLine
+            + "Reducing ends: mass addition to the dehydrated monosaccharides (e.g. Free +18 (H2O), InstantPC +279)" + Environment.NewLine
+            + "Adducts: described as their monoisotopic exact mass (e.g. M+Na+ = 23, M+TFA- = 113, M-H = -1)";
+        private string docuContent = "     GlyCombo is designed to assign all possible monosaccharide compositions of a glycan to experimentally determined masses. These assignments are based on real-time matched combinations of a monosaccharide list, with monosaccharide counts constrained by user input."
+            + Environment.NewLine + Environment.NewLine
+            + "     We recommend mzML input to take full advantage of GlyCombo's features which streamline downstream data analysis steps like quantitation (Skyline-compatible output), and MS2 annotation (scan numbers provided for those with matched glycans for GlycoWorkBench). Other metadata are also provided including precursor charge state, retention time, and summed ion intensity for the given MS2 scan.";
+        private string docuContent2 = "     As MS can generate varying charge states and adducts, as well as be prepared derivatives (reducing end tags, and derivatisation), we have provided parameters to be completed by the user:"
+    + Environment.NewLine + "     -> Start Tab: Reducing End, Derivatisation"
+    + Environment.NewLine + "     -> Advanced tab: Adducts (intervention not needed unless interested in adducts before M+H/M-H)"
+    + Environment.NewLine + "     -> Custom tab: Custom monosaccharides, reducing end, and adducts.";
 
 
-        // Custom Monosaccharide Input
-        private CustomForm customInfoForm;
+
+
+
         // Custom Monosaccharide enabled checker
-        public int customMono = 0;
         string customMono1Name = "null";
         int customMono1CCount = 0;
         int customMono1HCount = 0;
@@ -236,23 +211,635 @@ namespace glycombo
         decimal customMono5Mass = 0;
         int customMono5Min = 0;
         int customMono5Max = 0;
-
-        public MainViewModel ViewModel { get; set; }
+        int customReducingCCount = 0;
+        int customReducingHCount = 0;
+        int customReducingNCount = 0;
+        int customReducingOCount = 0;
+        decimal customReducingMass = 0;
+        string customReducingName = "null";
+        string customReducedMassOutput = "null";
 
         public MainWindow()
         {
             InitializeComponent();
-            ViewModel = new MainViewModel();
-            ViewModel.ButtonText = "Custom";
-            DataContext = ViewModel;
+            customText.Text = customContent;
+            documentationText.Text = docuContent;
+            documentationText2.Text = docuContent2;
+            customMonoNameBox1.Visibility = Visibility.Collapsed;
+            customMonoMassBox1.Visibility = Visibility.Collapsed;
+            customMonoCBox1.Visibility = Visibility.Collapsed;
+            customMonoHBox1.Visibility = Visibility.Collapsed;
+            customMonoNBox1.Visibility = Visibility.Collapsed;
+            customMonoOBox1.Visibility = Visibility.Collapsed;
+            customMonoMinBox1.Visibility = Visibility.Collapsed;
+            customMonoMaxBox1.Visibility = Visibility.Collapsed;
+            customMonoNameBox2.Visibility = Visibility.Collapsed;
+            customMonoMassBox2.Visibility = Visibility.Collapsed;
+            customMonoCBox2.Visibility = Visibility.Collapsed;
+            customMonoHBox2.Visibility = Visibility.Collapsed;
+            customMonoNBox2.Visibility = Visibility.Collapsed;
+            customMonoOBox2.Visibility = Visibility.Collapsed;
+            customMonoMinBox2.Visibility = Visibility.Collapsed;
+            customMonoMaxBox2.Visibility = Visibility.Collapsed;
+            customMonoNameBox3.Visibility = Visibility.Collapsed;
+            customMonoMassBox3.Visibility = Visibility.Collapsed;
+            customMonoCBox3.Visibility = Visibility.Collapsed;
+            customMonoHBox3.Visibility = Visibility.Collapsed;
+            customMonoNBox3.Visibility = Visibility.Collapsed;
+            customMonoOBox3.Visibility = Visibility.Collapsed;
+            customMonoMinBox3.Visibility = Visibility.Collapsed;
+            customMonoMaxBox3.Visibility = Visibility.Collapsed;
+            customMonoNameBox4.Visibility = Visibility.Collapsed;
+            customMonoMassBox4.Visibility = Visibility.Collapsed;
+            customMonoCBox4.Visibility = Visibility.Collapsed;
+            customMonoHBox4.Visibility = Visibility.Collapsed;
+            customMonoNBox4.Visibility = Visibility.Collapsed;
+            customMonoOBox4.Visibility = Visibility.Collapsed;
+            customMonoMinBox4.Visibility = Visibility.Collapsed;
+            customMonoMaxBox4.Visibility = Visibility.Collapsed;
+            customMonoNameBox5.Visibility = Visibility.Collapsed;
+            customMonoMassBox5.Visibility = Visibility.Collapsed;
+            customMonoCBox5.Visibility = Visibility.Collapsed;
+            customMonoHBox5.Visibility = Visibility.Collapsed;
+            customMonoNBox5.Visibility = Visibility.Collapsed;
+            customMonoOBox5.Visibility = Visibility.Collapsed;
+            customMonoMinBox5.Visibility = Visibility.Collapsed;
+            customMonoMaxBox5.Visibility = Visibility.Collapsed;
         }
 
-            private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             // Taking user to the Github website for support
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
         }
 
+        public void customMonoCheck1_Checked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox1.Visibility = Visibility.Visible;
+            customMonoMassBox1.Visibility = Visibility.Visible;
+            customMonoCBox1.Visibility = Visibility.Visible;
+            customMonoHBox1.Visibility = Visibility.Visible;
+            customMonoNBox1.Visibility = Visibility.Visible;
+            customMonoOBox1.Visibility = Visibility.Visible;
+            customMonoMinBox1.Visibility = Visibility.Visible;
+            customMonoMaxBox1.Visibility = Visibility.Visible;
+            customMono += 1;
+        }
+
+        public void customMonoCheck1_Unchecked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox1.Visibility = Visibility.Collapsed;
+            customMonoMassBox1.Visibility = Visibility.Collapsed;
+            customMonoCBox1.Visibility = Visibility.Collapsed;
+            customMonoHBox1.Visibility = Visibility.Collapsed;
+            customMonoNBox1.Visibility = Visibility.Collapsed;
+            customMonoOBox1.Visibility = Visibility.Collapsed;
+            customMonoMinBox1.Visibility = Visibility.Collapsed;
+            customMonoMaxBox1.Visibility = Visibility.Collapsed;
+            customMono += -1;
+        }
+
+        private void customSettingsSave_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
+            UpdateAdductTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
+            string saveOutput = "## GlyCombo v0.7 search settings" + Environment.NewLine;
+            saveOutput += "<Input> " + inputChecked + Environment.NewLine;
+            saveOutput += "<Error tolerance> " + DaError.Text + "," + massErrorType + Environment.NewLine;
+            saveOutput += "<Reducing end> " + reducingEndBox.Text + Environment.NewLine;
+            if (reducingEndBox.Text == "Custom" && customReducingCheck.IsChecked == true)
+            {
+                saveOutput += "## Custom reducing end: Name, Mass, #C, #H, #N, #O" + Environment.NewLine;
+                saveOutput += "<Custom reducing end> " + customReducingNameBox.Text + "," + customReducingMassBox.Text + "," + customReducingCBox.Text + "," + customReducingHBox.Text + "," + customReducingOBox.Text + "," + customReducingNBox.Text + Environment.NewLine;
+            }
+            saveOutput += "<Derivatisation> " + derivatisation + Environment.NewLine;
+            saveOutput += "<OffByOne enabled> " + offByOneChecked + Environment.NewLine;
+            saveOutput += "## Monosaccharides: Monosaccharide1(Min-Max), Monosaccharide2(Min-Max)" + Environment.NewLine;
+            saveOutput += currentMonosaccharideSelection + Environment.NewLine;
+            if (customMonoCheck1.IsChecked == true || customMonoCheck2.IsChecked == true || customMonoCheck3.IsChecked == true || customMonoCheck4.IsChecked == true || customMonoCheck5.IsChecked == true )
+            {
+                saveOutput += "## CustomMono#: Name, Mass, #C, #H, #N, #O, Min., Max." + Environment.NewLine;
+                if (customMonoCheck1.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono1> " + customMonoNameBox1.Text + "," + customMonoMassBox1.Text + "," + customMonoCBox1.Text + "," + customMonoHBox1.Text + "," + customMonoNBox1.Text + "," + customMonoOBox1.Text + "," + customMonoMinBox1.Text + "," + customMonoMaxBox1.Text + Environment.NewLine;
+                }
+                if (customMonoCheck2.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono2> " + customMonoNameBox2.Text + "," + customMonoMassBox2.Text + "," + customMonoCBox2.Text + "," + customMonoHBox2.Text + "," + customMonoNBox2.Text + "," + customMonoOBox2.Text + "," + customMonoMinBox2.Text + "," + customMonoMaxBox2.Text + Environment.NewLine;
+                }
+                if (customMonoCheck3.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono3> " + customMonoNameBox3.Text + "," + customMonoMassBox3.Text + "," + customMonoCBox3.Text + "," + customMonoHBox3.Text + "," + customMonoNBox3.Text + "," + customMonoOBox3.Text + "," + customMonoMinBox3.Text + "," + customMonoMaxBox3.Text + Environment.NewLine;
+                }
+                if (customMonoCheck4.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono4> " + customMonoNameBox4.Text + "," + customMonoMassBox4.Text + "," + customMonoCBox4.Text + "," + customMonoHBox4.Text + "," + customMonoNBox4.Text + "," + customMonoOBox4.Text + "," + customMonoMinBox4.Text + "," + customMonoMaxBox4.Text + Environment.NewLine;
+                }
+                if (customMonoCheck5.IsChecked == true)
+                {
+                    saveOutput += "<CustomMono5> " + customMonoNameBox5.Text + "," + customMonoMassBox5.Text + "," + customMonoCBox5.Text + "," + customMonoHBox5.Text + "," + customMonoNBox5.Text + "," + customMonoOBox5.Text + "," + customMonoMinBox5.Text + "," + customMonoMaxBox5.Text + Environment.NewLine;
+                }
+            }
+            saveOutput += "## Adducts: Adduct1, Adduct2" + Environment.NewLine;
+            saveOutput += currentAdductSelection + Environment.NewLine;
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Text file (*.txt)|*.txt",
+                DefaultExt = "parameters.txt",
+                Title = "Save Text File"
+            };
+            // Show dialog and check if the result is OK
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                // Write the content to the selected file
+                File.WriteAllText(saveFileDialog.FileName, saveOutput);
+            }
+        }
+
+        private void customSettingsLoad_Click(object sender, RoutedEventArgs e)
+        {
+            // Need to reset all the options so that we can then check boxes or select items where appropriate
+            Reset_Click(sender, e);
+            // Ask the user which text file they want to return settings from
+            OpenFileDialog openFileDialogCustom = new()
+            {
+                Filter = "Text files (txt)|*.txt",
+            };
+
+            if (openFileDialogCustom.ShowDialog() == true)
+            {
+                //Open streamreader to read each line
+                StreamReader reader = new(openFileDialogCustom.FileName);
+                string line;
+                for (line = reader.ReadLine(); line != null; line = reader.ReadLine())
+                {
+                    if (line.Contains("<Input>"))
+                    {
+                        string result = line.Replace("<Input> ", string.Empty);
+                        if (result.Contains("Text") == true) {
+                            TextRadioButton.IsChecked = true;
+                            inputChecked = "Text";
+                        }
+                        else {
+                            MzmlRadioButton.IsChecked = true;
+                            inputChecked = "mzML";
+                        }
+                    }
+                    if (line.Contains ("<Error tolerance>"))
+                    {
+                        string result = line.Replace("<Error tolerance> ", string.Empty);
+                        string[] errorToleranceLine = result.Split(',');
+                        DaError.Text = errorToleranceLine[0];
+                        if (errorToleranceLine[1] == "Da") { Da.IsChecked = true; }
+                        else { ppm.IsChecked = true; }
+                    }
+                    if (line.Contains("<Reducing end>"))
+                    {
+                        string result = line.Replace("<Reducing end> ", string.Empty);
+                        reducingEndBox.Text = result switch
+                        {
+                            "Free" => "Free",// Handle Free case
+                            "Reduced" => "Reduced",// Handle Reduced case
+                            "InstantPC" => "InstantPC",// Handle InstantPC case
+                            "Rapifluor-MS" => "Rapifluor-MS",// Handle Rapifluor-MS case
+                            "2-aminobenzoic acid" => "2-aminobenzoic acid",// Handle 2-aminobenzoic acid case
+                            "2-aminobenzamide" => "2-aminobenzamide",// Handle 2-aminobenzamide case
+                            "Procainamide" => "Procainamide",// Handle Procainamide case
+                            "Girard's reagent P" => "Girard's reagent P",// Handle Girard's reagent P case
+                            "Custom" => "Custom",// Handle Custom case
+                            _ => "",// Handle default case
+                        };
+                    }
+                    if (line.Contains("<Custom reducing end>"))
+                    {
+                        string result = line.Replace("<Custom reducing end> ", string.Empty);
+                        string[] customReducingEndLine = result.Split(',');
+                        customReducingNameBox.Text = customReducingEndLine[0];
+                        customReducingMassBox.Text = customReducingEndLine[1];
+                        customReducingCBox.Text = customReducingEndLine[2];
+                        customReducingHBox.Text = customReducingEndLine[3];
+                        customReducingNBox.Text = customReducingEndLine[4];
+                        customReducingOBox.Text = customReducingEndLine[5];
+                    }
+                    if (line.Contains("<Derivatisation>"))
+                    {
+                        string result = line.Replace("<Derivatisation> ", string.Empty);
+                        switch (result)
+                        {
+                            case "Native":
+                                Native.IsChecked = true;
+                                break;
+                            case "Permethylated":
+                                Permeth.IsChecked = true;
+                                break;
+                            case "Peracetylated":
+                                Peracetyl.IsChecked = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    if (line.Contains("<OffByOne enabled>"))
+                    {
+                        string result = line.Replace("<OffByOne enabled> ", string.Empty);
+                        if (result == "True") { OffByOne.IsChecked = true; }
+                        else { OffByOne.IsChecked = false; }
+                    }
+                    if (line.Contains("<CustomMono1>"))
+                    {
+                        string result = line.Replace("<CustomMono1> ", string.Empty);
+                        string[] MonoSplitLine1 = result.Split(',');
+                        customMonoNameBox1.Text = MonoSplitLine1[0];
+                        customMonoMassBox1.Text = MonoSplitLine1[1];
+                        customMonoCBox1.Text = MonoSplitLine1[2];
+                        customMonoHBox1.Text = MonoSplitLine1[3];
+                        customMonoNBox1.Text = MonoSplitLine1[4];
+                        customMonoOBox1.Text = MonoSplitLine1[5];
+                        customMonoMinBox1.Text = MonoSplitLine1[6];
+                        customMonoMaxBox1.Text = MonoSplitLine1[7];
+                        customMonoCheck1.IsChecked = true;
+                    }
+                    if (line.Contains("<CustomMono2>"))
+                    {
+                        string result = line.Replace("<CustomMono2> ", string.Empty);
+                        string[] MonoSplitLine2 = result.Split(',');
+                        customMonoNameBox2.Text = MonoSplitLine2[0];
+                        customMonoMassBox2.Text = MonoSplitLine2[2];
+                        customMonoCBox2.Text = MonoSplitLine2[2];
+                        customMonoHBox2.Text = MonoSplitLine2[3];
+                        customMonoNBox2.Text = MonoSplitLine2[4];
+                        customMonoOBox2.Text = MonoSplitLine2[5];
+                        customMonoMinBox2.Text = MonoSplitLine2[6];
+                        customMonoMaxBox2.Text = MonoSplitLine2[7];
+                        customMonoCheck2.IsChecked = true;
+                    }
+                    if (line.Contains("<CustomMono3>"))
+                    {
+                        string result = line.Replace("<CustomMono3> ", string.Empty);
+                        string[] MonoSplitLine3 = result.Split(',');
+                        customMonoNameBox3.Text = MonoSplitLine3[0];
+                        customMonoMassBox3.Text = MonoSplitLine3[1];
+                        customMonoCBox3.Text = MonoSplitLine3[2];
+                        customMonoHBox3.Text = MonoSplitLine3[3];
+                        customMonoNBox3.Text = MonoSplitLine3[4];
+                        customMonoOBox3.Text = MonoSplitLine3[5];
+                        customMonoMinBox3.Text = MonoSplitLine3[6];
+                        customMonoMaxBox3.Text = MonoSplitLine3[7];
+                        customMonoCheck3.IsChecked = true;
+                    }
+                    if (line.Contains("<CustomMono4>"))
+                    {
+                        string result = line.Replace("<CustomMono4> ", string.Empty);
+                        string[] MonoSplitLine4 = result.Split(',');
+                        customMonoNameBox4.Text = MonoSplitLine4[0];
+                        customMonoMassBox4.Text = MonoSplitLine4[1];
+                        customMonoCBox4.Text = MonoSplitLine4[2];
+                        customMonoHBox4.Text = MonoSplitLine4[3];
+                        customMonoNBox4.Text = MonoSplitLine4[4];
+                        customMonoOBox4.Text = MonoSplitLine4[5];
+                        customMonoMinBox4.Text = MonoSplitLine4[6];
+                        customMonoMaxBox4.Text = MonoSplitLine4[7];
+                        customMonoCheck4.IsChecked = true;
+                    }
+                    if (line.Contains("<CustomMono5>"))
+                    {
+                        string result = line.Replace("<CustomMono5> ", string.Empty);
+                        string[] MonoSplitLine5 = result.Split(',');
+                        customMonoNameBox5.Text = MonoSplitLine5[0];
+                        customMonoMassBox5.Text = MonoSplitLine5[1];
+                        customMonoCBox5.Text = MonoSplitLine5[2];
+                        customMonoHBox5.Text = MonoSplitLine5[3];
+                        customMonoNBox5.Text = MonoSplitLine5[4];
+                        customMonoOBox5.Text = MonoSplitLine5[5];
+                        customMonoMinBox5.Text = MonoSplitLine5[6];
+                        customMonoMaxBox5.Text = MonoSplitLine5[7];
+                        customMonoCheck5.IsChecked = true;
+                    }
+                    if (line.Contains("<Monosaccharides>"))
+                    {
+                        string result = line.Replace("<Monosaccharides> ", string.Empty);
+                        string[] monosaccharideLine = result.Split(',');
+                        // Look through each , string section for a monosaccharide.
+                        // e.g. Hex(1-12),HexNAc(2-8)
+                        // Extract out the monosaccharide (Hex), the minimum (1), and the maximum (12) and set them to the respective sections
+                        // So if Hex seen, enabled the Hex toggle, then parse the min and the max
+                        // Custom monosaccharides don't matter as they're parsed in the above section
+                        foreach (string item in monosaccharideLine)
+                        {
+                            string trimmedItem = item.Trim();
+                            // Need to work on this regex to split each string into 3
+                            var match = Regex.Match(trimmedItem, @"(\w+)\((\d+)-(\d+)\)");
+                                string z = match.Groups[1].Value;
+                            if (match.Groups[2].Value == "") { break; }
+                            int x = int.Parse(match.Groups[2].Value);
+                            int y = int.Parse(match.Groups[3].Value);
+                            switch (z)
+                            {
+                                case "Hex":
+                                    HextoggleSwitch.IsOn = true;
+                                    HexMin.Text = Convert.ToString(x);
+                                    HexMax.Text = Convert.ToString(y);
+                                    break;
+                                case "HexNAc":
+                                    HexNActoggleSwitch.IsOn = true;
+                                    HexNAcMin.Text = Convert.ToString(x);
+                                    HexNAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "dHex":
+                                    dHextoggleSwitch.IsOn = true;
+                                    dHexMin.Text = Convert.ToString(x);
+                                    dHexMax.Text = Convert.ToString(y);
+                                    break;
+                                case "NeuAc":
+                                    Neu5ActoggleSwitch.IsOn = true;
+                                    Neu5AcMin.Text = Convert.ToString(x);
+                                    Neu5AcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "NeuGc":
+                                    Neu5GctoggleSwitch.IsOn = true;
+                                    Neu5GcMin.Text = Convert.ToString(x);
+                                    Neu5GcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "HexN":
+                                    HexNtoggleSwitch.IsOn = true;
+                                    HexNMin.Text = Convert.ToString(x);
+                                    HexNMax.Text = Convert.ToString(y);
+                                    break;
+                                case "HexA":
+                                    HexAtoggleSwitch.IsOn = true;
+                                    HexAMin.Text = Convert.ToString(x);
+                                    HexAMax.Text = Convert.ToString(y);
+                                    break;
+                                case "dHexNAc":
+                                    dHexNActoggleSwitch.IsOn = true;
+                                    dHexNAcMin.Text = Convert.ToString(x);
+                                    dHexNAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Pent":
+                                    PenttoggleSwitch.IsOn = true;
+                                    PentMin.Text = Convert.ToString(x);
+                                    PentMax.Text = Convert.ToString(y);
+                                    break;
+                                case "KDN":
+                                    KDNtoggleSwitch.IsOn = true;
+                                    KDNMin.Text = Convert.ToString(x);
+                                    KDNMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Phos":
+                                    PhostoggleSwitch.IsOn = true;
+                                    PhosMin.Text = Convert.ToString(x);
+                                    PhosMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Sulf":
+                                    SulftoggleSwitch.IsOn = true;
+                                    SulfMin.Text = Convert.ToString(x);
+                                    SulfMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Acetyl":
+                                    AcetyltoggleSwitch.IsOn = true;
+                                    AcetylMin.Text = Convert.ToString(x);
+                                    AcetylMax.Text = Convert.ToString(y);
+                                    break;
+                                case "L":
+                                    lNeuActoggleSwitch.IsOn = true;
+                                    lNeuAcMin.Text = Convert.ToString(x);
+                                    lNeuAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "E":
+                                    eNeuActoggleSwitch.IsOn = true;
+                                    eeNeuAcMin.Text = Convert.ToString(x);
+                                    eeNeuAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "D":
+                                    dNeuActoggleSwitch.IsOn = true;
+                                    dNeuAcMin.Text = Convert.ToString(x);
+                                    dNeuAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "Am":
+                                    amNeuActoggleSwitch.IsOn = true;
+                                    amNeuAcMin.Text = Convert.ToString(x);
+                                    amNeuAcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "LG":
+                                    lNeuGctoggleSwitch.IsOn = true;
+                                    lNeuGcMin.Text = Convert.ToString(x);
+                                    lNeuGcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "EG":
+                                    eNeuGctoggleSwitch.IsOn = true;
+                                    eeNeuGcMin.Text = Convert.ToString(x);
+                                    eeNeuGcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "DG":
+                                    dNeuGctoggleSwitch.IsOn = true;
+                                    dNeuGcMin.Text = Convert.ToString(x);
+                                    dNeuGcMax.Text = Convert.ToString(y);
+                                    break;
+                                case "AmG":
+                                    amNeuGctoggleSwitch.IsOn = true;
+                                    amNeuGcMin.Text = Convert.ToString(x);
+                                    amNeuGcMax.Text = Convert.ToString(y);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    // Adduct extraction
+                    if (line.Contains("<Adducts>"))
+                    {
+                        string result = line.Replace("<Adducts> ", string.Empty);
+                        string[] adductLine = result.Split(',');
+                        // Look through each , string section for an adduct, very similar to what we do for monosaccharides
+                        // Custom adducts don't matter as they're parsed in the above section
+                        foreach (string item in adductLine)
+                        {
+                            string trimmedItem = item.Trim();
+                            // This regex splits all the adducts into their constitutive  
+                            var match = Regex.Match(trimmedItem, @"(\[M[-+A-Za-z0-9₃₄⁺⁻]*\](?:[-⁻⁺+])?)|Custom\[M\+([^]]+)\](.*)");
+                            if (match.Groups[0].Value.StartsWith("Custom"))
+                            {
+                                customAdductCheckBox.IsChecked = true;
+                                string customAdductMassImport = match.Groups[2].Value;
+                                string customAdductPolarityImport = match.Groups[3].Value;
+                                customAdductMassText.Text = customAdductMassImport;
+                                customAdductPolarity.Text = customAdductPolarityImport;
+                            }
+                            else
+                            {
+                                string z = match.Groups[0].Value;
+                                switch (z)
+                                {
+                                    case "[M]":
+                                        neutralMCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M-H⁻]⁻":
+                                        negativeMHCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+H]⁺":
+                                        positiveMHCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+COO]⁻":
+                                        negativeMFACheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+Na]⁺":
+                                        positiveMNaCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+CH₃COO]⁻":
+                                        negativeMAACheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+K]⁺":
+                                        positiveMKCheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+TFA-H]⁻":
+                                        negativeMTFACheckBox.IsChecked = true;
+                                        break;
+                                    case "[M+NH₄]⁺":
+                                        positiveMNH4CheckBox.IsChecked = true;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return;
+            }
+            UpdateAdductTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            if (mzMLFileNamesBlock.Text.Contains("mzML") == true)
+            {
+                submitbutton.IsEnabled = true;
+            }
+            else
+            {
+                submitbutton.IsEnabled = false;
+            }
+        }
+
+        public void customMonoCheck3_Unchecked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox3.Visibility = Visibility.Collapsed;
+            customMonoMassBox3.Visibility = Visibility.Collapsed;
+            customMonoCBox3.Visibility = Visibility.Collapsed;
+            customMonoHBox3.Visibility = Visibility.Collapsed;
+            customMonoNBox3.Visibility = Visibility.Collapsed;
+            customMonoOBox3.Visibility = Visibility.Collapsed;
+            customMonoMinBox3.Visibility = Visibility.Collapsed;
+            customMonoMaxBox3.Visibility = Visibility.Collapsed;
+        }
+
+        public void customMonoCheck2_Unchecked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox2.Visibility = Visibility.Collapsed;
+            customMonoMassBox2.Visibility = Visibility.Collapsed;
+            customMonoCBox2.Visibility = Visibility.Collapsed;
+            customMonoHBox2.Visibility = Visibility.Collapsed;
+            customMonoNBox2.Visibility = Visibility.Collapsed;
+            customMonoOBox2.Visibility = Visibility.Collapsed;
+            customMonoMinBox2.Visibility = Visibility.Collapsed;
+            customMonoMaxBox2.Visibility = Visibility.Collapsed;
+        }
+
+        public void customMonoCheck4_Unchecked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox4.Visibility = Visibility.Collapsed;
+            customMonoMassBox4.Visibility = Visibility.Collapsed;
+            customMonoCBox4.Visibility = Visibility.Collapsed;
+            customMonoHBox4.Visibility = Visibility.Collapsed;
+            customMonoNBox4.Visibility = Visibility.Collapsed;
+            customMonoOBox4.Visibility = Visibility.Collapsed;
+            customMonoMinBox4.Visibility = Visibility.Collapsed;
+            customMonoMaxBox4.Visibility = Visibility.Collapsed;
+        }
+
+        public void customMonoCheck5_Unchecked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox5.Visibility = Visibility.Collapsed;
+            customMonoMassBox5.Visibility = Visibility.Collapsed;
+            customMonoCBox5.Visibility = Visibility.Collapsed;
+            customMonoHBox5.Visibility = Visibility.Collapsed;
+            customMonoNBox5.Visibility = Visibility.Collapsed;
+            customMonoOBox5.Visibility = Visibility.Collapsed;
+            customMonoMinBox5.Visibility = Visibility.Collapsed;
+            customMonoMaxBox5.Visibility = Visibility.Collapsed;
+        }
+
+        public void customMonoCheck2_Checked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox2.Visibility = Visibility.Visible;
+            customMonoMassBox2.Visibility = Visibility.Visible;
+            customMonoCBox2.Visibility = Visibility.Visible;
+            customMonoHBox2.Visibility = Visibility.Visible;
+            customMonoNBox2.Visibility = Visibility.Visible;
+            customMonoOBox2.Visibility = Visibility.Visible;
+            customMonoMinBox2.Visibility = Visibility.Visible;
+            customMonoMaxBox2.Visibility = Visibility.Visible;
+        }
+
+        public void customMonoCheck3_Checked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox3.Visibility = Visibility.Visible;
+            customMonoMassBox3.Visibility = Visibility.Visible;
+            customMonoCBox3.Visibility = Visibility.Visible;
+            customMonoHBox3.Visibility = Visibility.Visible;
+            customMonoNBox3.Visibility = Visibility.Visible;
+            customMonoOBox3.Visibility = Visibility.Visible;
+            customMonoMinBox3.Visibility = Visibility.Visible;
+            customMonoMaxBox3.Visibility = Visibility.Visible;
+        }
+
+        public void customMonoCheck4_Checked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox4.Visibility = Visibility.Visible;
+            customMonoMassBox4.Visibility = Visibility.Visible;
+            customMonoCBox4.Visibility = Visibility.Visible;
+            customMonoHBox4.Visibility = Visibility.Visible;
+            customMonoNBox4.Visibility = Visibility.Visible;
+            customMonoOBox4.Visibility = Visibility.Visible;
+            customMonoMinBox4.Visibility = Visibility.Visible;
+            customMonoMaxBox4.Visibility = Visibility.Visible;
+        }
+
+        public void customMonoCheck5_Checked(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            customMonoNameBox5.Visibility = Visibility.Visible;
+            customMonoMassBox5.Visibility = Visibility.Visible;
+            customMonoCBox5.Visibility = Visibility.Visible;
+            customMonoHBox5.Visibility = Visibility.Visible;
+            customMonoNBox5.Visibility = Visibility.Visible;
+            customMonoOBox5.Visibility = Visibility.Visible;
+            customMonoMinBox5.Visibility = Visibility.Visible;
+            customMonoMaxBox5.Visibility = Visibility.Visible;
+        }
 
         private async void UploadButton_Click(object sender, RoutedEventArgs e)
         {
@@ -260,13 +847,63 @@ namespace glycombo
             {
                 ProgressBarMZML.Visibility = Visibility.Visible;
                 // Running the mzML formatting in a different thread so we can give a status update
-                await Task.Run(() => mzMLProcess());
+                if (TextRadioButton.IsChecked != true)
+                {
+                    await Task.Run(() => mzMLProcess());
+                    mzMLFileNamesBlock.Text = "mzML files: ";
+                    mzMLFileNamesBlock.Text += allFiles.Replace(", ", "," + Environment.NewLine);
+                }
+                else
+                {
+                    // Ask the user which text or csv file they want to analyse. Also allow .csv input.
+                    OpenFileDialog openFileDialog = new()
+                    {
+                        Filter = "Text files (*.txt)|*.txt|CSV files (*.csv)|*.csv",
+                        Multiselect = true
+                    };
+
+                    if (openFileDialog.ShowDialog() == true)
+                    {
+
+                        // Get the selected file path
+                        filePath = openFileDialog.FileName;
+                    }
+                    else
+                    {
+                        return;
+                    }
+
+                    foreach (String file in openFileDialog.FileNames)
+                    {
+                        // File type specific processing
+                        string fileExtension = System.IO.Path.GetExtension(file).ToLower();
+                        string fileContent = "";
+
+                        if (fileExtension == ".txt")
+                        {
+                            // Process to make a string from the txt file
+                            fileContent = ReadMassFileWithSeparator(file, Environment.NewLine);
+
+                            // Replace text box with the individual mass values
+                            InputMasses.Text = fileContent;
+                        }
+                        else if (fileExtension == ".csv")
+                        {
+                            // Process to make a string from the csv
+                            fileContent = ReadMassFileWithSeparator(file, ",");
+
+                            // Replace text box with the individual mass values
+                            InputMasses.Text = fileContent;
+
+                        }
+                    }
+                }
             }
             finally
             {
                 ProgressBarMZML.Visibility = Visibility.Collapsed;
                 // Let the user now start the processing. Without this step, the user may crash the program by starting the processing before the mzml info is extracted
-                if (scans.Any())
+                if (scans.Count != 0)
                 {
                     submitbutton.IsEnabled = IsEnabled;
                 }
@@ -298,13 +935,13 @@ namespace glycombo
             polarity = "";
             List<decimal> precursors = [];
                 foreach (String file in openFileDialog.FileNames)
-            {
+                {
                 // Going to process each file one at a time using this section of the code.
                 // Read each line from the given file
                 StreamReader sr = new(file);
 
                 // Parse each line of the mzml to extract important information from MS2 scans of the mzML (polarity, precursor m/z, charge state, scan # for given MS2)
-                while ((line = sr.ReadLine()) != null)
+                for (line = sr.ReadLine(); line != null; line = sr.ReadLine())
                 {
                     // Problem: Bruker and Thermo mzmls have all lines in different positions
                     // Thermo order: Spectrum index (including scan#), then "ms level" value="2", then "negative", then "selected ion m/z", then "charge state"
@@ -437,93 +1074,109 @@ namespace glycombo
                 }
                 string fileNameOutput = file.Substring(file.LastIndexOf('\\') + 1);
             }
-            if (!scans.Any())
+            if (scans.Count == 0)
             {
                 MessageBox.Show("No MS2 found in the given mzML file. Please confirm the selected file has MS2 scans, or select a different file.");
             }
             else
             {
                 // Provide list of all filenames provided in the openFileDialog, without the directory name
-                string allFiles = string.Join(", ", openFileDialog.FileNames.Select(System.IO.Path.GetFileName));
+                allFiles = string.Join(", ", openFileDialog.FileNames.Select(System.IO.Path.GetFileName));
                 // Provide number of scans for each filename
                 MessageBox.Show("Files " + allFiles + " have completed uploading with a total number of " + scans.Count + " MS2 scans identified.");
             }
         }
 
+        static string ReadMassFileWithSeparator(string filePath, string separator)
+        {
+            // Processes the neutral mass input with separators
+            string[] lines = File.ReadAllLines(filePath);
+            if (separator == ",")
+            {
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    lines[i] = lines[i].Replace(",", Environment.NewLine);
+                }
+            }
+            return string.Join(separator, lines);
+        }
+
         // Execution of the combinatorial analysis
         private async void Button1_Click(object sender, RoutedEventArgs e)
         {
-            if (customInfoForm != null)
+            // Determine if the customReducedCheckbox is checked
+            if (customReducingCheck.IsChecked == true)
             {
-                // Determine if the customMonoCheckbox is checked for each checkbox
-                if (customInfoForm.customMonoCheck1.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 1
-                    customMono1Name = customInfoForm.customMonoNameBox1.Text;
-                    customMono1Mass = decimal.Parse(customInfoForm.customMonoMassBox1.Text);
-                    customMono1CCount = int.Parse(customInfoForm.customMonoCBox1.Text);
-                    customMono1HCount = int.Parse(customInfoForm.customMonoHBox1.Text);
-                    customMono1NCount = int.Parse(customInfoForm.customMonoNBox1.Text);
-                    customMono1OCount = int.Parse(customInfoForm.customMonoOBox1.Text);
-                    customMono1Min = int.Parse(customInfoForm.customMonoMinBox1.Text);
-                    customMono1Max = int.Parse(customInfoForm.customMonoMaxBox1.Text);
-                }
-                if (customInfoForm.customMonoCheck2.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 2
-                    customMono2Name = customInfoForm.customMonoNameBox2.Text;
-                    customMono2Mass = decimal.Parse(customInfoForm.customMonoMassBox2.Text);
-                    customMono2CCount = int.Parse(customInfoForm.customMonoCBox2.Text);
-                    customMono2HCount = int.Parse(customInfoForm.customMonoHBox2.Text);
-                    customMono2NCount = int.Parse(customInfoForm.customMonoNBox2.Text);
-                    customMono2OCount = int.Parse(customInfoForm.customMonoOBox2.Text);
-                    customMono2Max = int.Parse(customInfoForm.customMonoMaxBox2.Text);
-                    customMono2Min = int.Parse(customInfoForm.customMonoMinBox2.Text);
-                }
-                if (customInfoForm.customMonoCheck3.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 3
-                    customMono3Name = customInfoForm.customMonoNameBox3.Text;
-                    customMono3Mass = decimal.Parse(customInfoForm.customMonoMassBox3.Text);
-                    customMono3CCount = int.Parse(customInfoForm.customMonoCBox3.Text);
-                    customMono3HCount = int.Parse(customInfoForm.customMonoHBox3.Text);
-                    customMono3NCount = int.Parse(customInfoForm.customMonoNBox3.Text);
-                    customMono3OCount = int.Parse(customInfoForm.customMonoOBox3.Text);
-                    customMono3Max = int.Parse(customInfoForm.customMonoMaxBox3.Text);
-                    customMono3Min = int.Parse(customInfoForm.customMonoMinBox3.Text);
-                }
-                if (customInfoForm.customMonoCheck4.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 4
-                    customMono4Name = customInfoForm.customMonoNameBox4.Text;
-                    customMono4Mass = decimal.Parse(customInfoForm.customMonoMassBox4.Text);
-                    customMono4CCount = int.Parse(customInfoForm.customMonoCBox4.Text);
-                    customMono4HCount = int.Parse(customInfoForm.customMonoHBox4.Text);
-                    customMono4NCount = int.Parse(customInfoForm.customMonoNBox4.Text);
-                    customMono4OCount = int.Parse(customInfoForm.customMonoOBox4.Text);
-                    customMono4Max = int.Parse(customInfoForm.customMonoMaxBox4.Text);
-                    customMono4Min = int.Parse(customInfoForm.customMonoMinBox4.Text);
-                }
-                if (customInfoForm.customMonoCheck5.IsChecked == true)
-                {
-                    // Extract out all the custom monosaccharide information for 5
-                    customMono5Name = customInfoForm.customMonoNameBox5.Text;
-                    customMono5Mass = decimal.Parse(customInfoForm.customMonoMassBox5.Text);
-                    customMono5CCount = int.Parse(customInfoForm.customMonoCBox5.Text);
-                    customMono5HCount = int.Parse(customInfoForm.customMonoHBox5.Text);
-                    customMono5NCount = int.Parse(customInfoForm.customMonoNBox5.Text);
-                    customMono5OCount = int.Parse(customInfoForm.customMonoOBox5.Text);
-                    customMono5Max = int.Parse(customInfoForm.customMonoMaxBox5.Text);
-                    customMono5Min = int.Parse(customInfoForm.customMonoMinBox5.Text);
-                }
+                customReducingName = customReducingNameBox.Text;
+                customReducedMassOutput = customReducingMassBox.Text;
             }
-
+            // Determine if the customMonoCheckbox is checked for each checkbox
+            if (customMonoCheck1.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 1
+                customMono1Name = customMonoNameBox1.Text;
+                customMono1Mass = decimal.Parse(customMonoMassBox1.Text);
+                customMono1CCount = int.Parse(customMonoCBox1.Text);
+                customMono1HCount = int.Parse(customMonoHBox1.Text);
+                customMono1NCount = int.Parse(customMonoNBox1.Text);
+                customMono1OCount = int.Parse(customMonoOBox1.Text);
+                customMono1Min = int.Parse(customMonoMinBox1.Text);
+                customMono1Max = int.Parse(customMonoMaxBox1.Text);
+            }
+            if (customMonoCheck2.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 2
+                customMono2Name = customMonoNameBox2.Text;
+                customMono2Mass = decimal.Parse(customMonoMassBox2.Text);
+                customMono2CCount = int.Parse(customMonoCBox2.Text);
+                customMono2HCount = int.Parse(customMonoHBox2.Text);
+                customMono2NCount = int.Parse(customMonoNBox2.Text);
+                customMono2OCount = int.Parse(customMonoOBox2.Text);
+                customMono2Max = int.Parse(customMonoMaxBox2.Text);
+                customMono2Min = int.Parse(customMonoMinBox2.Text);
+            }
+            if (customMonoCheck3.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 3
+                customMono3Name = customMonoNameBox3.Text;
+                customMono3Mass = decimal.Parse(customMonoMassBox3.Text);
+                customMono3CCount = int.Parse(customMonoCBox3.Text);
+                customMono3HCount = int.Parse(customMonoHBox3.Text);
+                customMono3NCount = int.Parse(customMonoNBox3.Text);
+                customMono3OCount = int.Parse(customMonoOBox3.Text);
+                customMono3Max = int.Parse(customMonoMaxBox3.Text);
+                customMono3Min = int.Parse(customMonoMinBox3.Text);
+            }
+            if (customMonoCheck4.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 4
+                customMono4Name = customMonoNameBox4.Text;
+                customMono4Mass = decimal.Parse(customMonoMassBox4.Text);
+                customMono4CCount = int.Parse(customMonoCBox4.Text);
+                customMono4HCount = int.Parse(customMonoHBox4.Text);
+                customMono4NCount = int.Parse(customMonoNBox4.Text);
+                customMono4OCount = int.Parse(customMonoOBox4.Text);
+                customMono4Max = int.Parse(customMonoMaxBox4.Text);
+                customMono4Min = int.Parse(customMonoMinBox4.Text);
+            }
+            if (customMonoCheck5.IsChecked == true)
+            {
+                // Extract out all the custom monosaccharide information for 5
+                customMono5Name = customMonoNameBox5.Text;
+                customMono5Mass = decimal.Parse(customMonoMassBox5.Text);
+                customMono5CCount = int.Parse(customMonoCBox5.Text);
+                customMono5HCount = int.Parse(customMonoHBox5.Text);
+                customMono5NCount = int.Parse(customMonoNBox5.Text);
+                customMono5OCount = int.Parse(customMonoOBox5.Text);
+                customMono5Max = int.Parse(customMonoMaxBox5.Text);
+                customMono5Min = int.Parse(customMonoMinBox5.Text);
+            }
             try
             {
                 solutionMultiples = "";
                 resetbutton.IsEnabled = IsEnabled;
                 ProgressBarSubmit.Visibility = Visibility.Visible;
-                // Define the components in the combinatorial analysis, native and permethylated
+                // Define the components in the combinatorial analysis: native, permethylated, peracetylated
                 if (Native.IsChecked == true)
                 {
                     derivatisation = "Native";
@@ -548,170 +1201,163 @@ namespace glycombo
                     eeneugc = 335.1216313m;
                     dneugc = 306.1063155m;
                     amneugc = 334.1376157m;
+                    sulf = 79.956815m; // SO3
                 }
-                else
+                if (Permeth.IsChecked == true)
                 {
                     derivatisation = "Permethylated";
                     // Permethylated
-                    dhex = 174.089210m; // permethylated mass =  chemical formula = C8H14O4
-                    hex = 204.099775m; // permethylated mass =  chemical formula = C9H16O5
-                    hexnac = 245.126324m; // permethylated mass =  chemical formula = C11H19NO5
-                    hexn = 217.131409m; // permethylated mass =  chemical formula = C10H19NO4
-                    hexa = 218.079040m; // permethylated mass =  chemical formula = C9H14O6
-                    dhexnac = 215.115759m; // permethylated mass =  chemical formula = C10H17N1O4
-                    pent = 160.073560m; // permethylated mass =  chemical formula = C7H12O4
-                    kdn = 320.147120m; // permethylated mass =  chemical formula = C14H24O8
-                    neuac = 361.173669m; // permethylated mass =  chemical formula = C16H27NO8
-                    neugc = 391.184234m; // permethylated mass =  chemical formula = C17H29NO9
-                    phos = 93.981983m; // permethylated mass =  chemical formula = CH3O3P
+                    dhex = 174.089210m; // chemical formula = C8H14O4
+                    hex = 204.099775m; //  chemical formula = C9H16O5
+                    hexnac = 245.126324m; //  chemical formula = C11H19NO5
+                    hexn = 203.115758m; //  chemical formula = C9H17NO4
+                    hexa = 218.079040m; //  chemical formula = C9H14O6
+                    dhexnac = 215.115758m; //  chemical formula = C10H17N1O4
+                    pent = 160.073560m; //  chemical formula = C7H12O4
+                    kdn = 320.147120m; // chemical formula = C14H24O8
+                    neuac = 361.173669m; // chemical formula = C16H27NO8
+                    neugc = 391.184234m; // chemical formula = C17H29NO9
+                    phos = 93.981980m; // chemical formula = PO3H3C1
+                    sulf = 65.941165m; // chemical formula = SO3C-1H-2
                 }
-                decimal sulf = 79.956815m; // Nothing changes with permethylation
+                if (Peracetyl.IsChecked == true)
+                {
+                    derivatisation = "Peracetylated";
+                    // Peracetylated
+                    dhex = 230.079038m; // chemical formula = C10H14O6
+                    hex = 288.084517m; // chemical formula = C12H16O8
+                    hexnac = 287.100501m; // chemical formula = C12H17NO7
+                    hexn = 287.100501m; // chemical formula = C12H17NO7
+                    hexa = 260.053217m; // chemical formula = C10H12O8
+                    dhexnac = 247.105587m; // chemical formula = C10H17NO6
+                    pent = 216.063388m; // chemical formula = C9H12O6
+                    kdn = 376.100561m; // chemical formula = C15H20O11
+                    neuac = 417.127110m; // chemical formula = C17H23NO11
+                    neugc = 475.132593m; // chemical formula = C19H25NO13
+                    phos = 37.955765m; // chemical formula = PO2C-2H-1
+                    sulf = 37.946250m; // chemical formula = SO2C-2H-2
+                }
 
                 // Add the components to combinatorial analysis based on which monosaccharides the user chooses to include
                 if (HextoggleSwitch.IsOn == true)
                 {
                     numbers.Add(hex);
-                    monoHex = true;
                 }
 
                 if (HexAtoggleSwitch.IsOn == true)
                 {
                     numbers.Add(hexa);
-                    monoHexA = true;
                 }
                 if (dHextoggleSwitch.IsOn == true)
                 {
                     numbers.Add(dhex);
-                    monodHex = true;
                 }
                 if (HexNActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(hexnac);
-                    monoHexNAc = true;
                 }
                 if (HexNtoggleSwitch.IsOn == true)
                 {
                     numbers.Add(hexn);
-                    monoHexN = true;
                 }
                 if (dHexNActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(dhexnac);
-                    monodHexNAc = true;
                 }
                 if (PenttoggleSwitch.IsOn == true)
                 {
                     numbers.Add(pent);
-                    monoPent = true;
                 }
                 if (KDNtoggleSwitch.IsOn == true)
                 {
                     numbers.Add(kdn);
-                    monoKDN = true;
                 }
                 if (Neu5ActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(neuac);
-                    monoNeu5Ac = true;
                 }
                 if (Neu5GctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(neugc);
-                    monoNeu5Gc = true;
                 }
                 if (PhostoggleSwitch.IsOn == true)
                 {
                     numbers.Add(phos);
-                    monoPhos = true;
                 }
                 if (SulftoggleSwitch.IsOn == true)
                 {
                     numbers.Add(sulf);
-                    monoSulf = true;
                 }
                 if (lNeuActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(lneuac);
-                    monolNeuAc = true;
                 }
                 if (eNeuActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(eeneuac);
-                    monoeeNeuAc = true;
                 }
                 if (dNeuActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(dneuac);
-                    monodNeuAc = true;
                 }
                 if (amNeuActoggleSwitch.IsOn == true)
                 {
                     numbers.Add(amneuac);
-                    monoamNeuAc = true;
                 }
                 if (AcetyltoggleSwitch.IsOn == true)
                 {
                     numbers.Add(acetyl);
-                    monoAcetyl = true;
                 }
                 if (lNeuGctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(lneugc);
-                    monolNeuGc = true;
                 }
                 if (eNeuGctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(eeneugc);
-                    monoeeNeuGc = true;
                 }
                 if (dNeuGctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(dneugc);
-                    monodNeuGc = true;
                 }
                 if (amNeuGctoggleSwitch.IsOn == true)
                 {
                     numbers.Add(amneugc);
-                    monoamNeuGc = true;
                 }
-                if (customInfoForm != null){
-                if (customInfoForm.customMonoCheck1.IsChecked == true)
+                if (customMonoCheck1.IsChecked == true)
                 {
                     numbers.Add(customMono1Mass);
                     monoCustom1 = true;
                 }
-                if (customInfoForm.customMonoCheck2.IsChecked == true)
+                if (customMonoCheck2.IsChecked == true)
                 {
                     numbers.Add(customMono2Mass);
                     monoCustom2 = true;
                 }
-                if (customInfoForm.customMonoCheck3.IsChecked == true)
+                if (customMonoCheck3.IsChecked == true)
                 {
                     numbers.Add(customMono3Mass);
                     monoCustom3 = true;
                 }
-                if (customInfoForm.customMonoCheck4.IsChecked == true)
+                if (customMonoCheck4.IsChecked == true)
                 {
                     numbers.Add(customMono4Mass);
                     monoCustom4 = true;
                 }
-                    if (customInfoForm.customMonoCheck5.IsChecked == true)
-                    {
-                        numbers.Add(customMono5Mass);
-                        monoCustom5 = true;
-                    }
+                if (customMonoCheck5.IsChecked == true)
+                {
+                    numbers.Add(customMono5Mass);
+                    monoCustom5 = true;
                 }
 
                 // Process for multiple targets conditionally based on text box or mzml input
                 if (TextRadioButton.IsChecked == true)
                 {
                     targetString = InputMasses.Text;
-                    inputParameters = "Mass List: " + targetString.Replace("\r\n", ",");
                 }
                 else
                 {
                     targetString = neutralPrecursorListmzml;
-                    inputParameters = "mzML: " + filePath;
                 }
 
                 // Turn that input into a list of masses
@@ -720,23 +1366,236 @@ namespace glycombo
                     StringSplitOptions.RemoveEmptyEntries));
                 targets = targetStrings.ConvertAll(decimal.Parse);
 
+                // Adduct calculation
+                // This can result in huge combinatorial searches but it's there for the user as an option
+                // if mzml input used, force M+H and M-H, then let the user add on other adducts (problem with this is that positive mode will have negative adducts etc)
+               
+                // Only trigger this if something other than M is selected
+                if (negativeMHCheckBox.IsChecked == true ||
+                    negativeMFACheckBox.IsChecked == true ||
+                    negativeMAACheckBox.IsChecked == true ||
+                    negativeMTFACheckBox.IsChecked == true ||
+                    positiveMHCheckBox.IsChecked == true ||
+                    positiveMNaCheckBox.IsChecked == true ||
+                    positiveMKCheckBox.IsChecked == true ||
+                    positiveMNH4CheckBox.IsChecked == true)
+                {
+                    // mzML input has been processed as de / protonated to generate a neutral mass list, so adducts offset is +/- 1 Da for the respective negative/positive adducts
+                    // We also don't bother with doing M, M+H, and M-H because they are all the same after mzML processing (M+H and M-H become M)
+                    if (MzmlRadioButton.IsChecked == true)
+                    {
+                        // Making a separate list to then be used for target building
+                        targetAdductsProcessing = targets;
+                        targetAdducts = new List<decimal>();
 
+                        // Subtracting H- from all targets and saving that as a new list
+                        if (negativeMHCheckBox.IsChecked == true || neutralMCheckBox.IsChecked == true || positiveMHCheckBox.IsChecked == true)
+                        {
+                            searchRepeats += 1;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o]);
+                            }
+                        }
+                        // M+COOH adduct calculation
+                        if (negativeMFACheckBox.IsChecked == true)
+                        {
+                            searchRepeats += 1;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)44.998201 - (decimal)1.007276);
+                            }
+                        }
+                        // M+acetic acid adduct calculation
+                        if (negativeMAACheckBox.IsChecked == true)
+                        {
+                            searchRepeats += 1;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)59.013851 - (decimal)1.007276);
+                            }
+                        }
+                        // M+TFA adduct calculation
+                        if (negativeMTFACheckBox.IsChecked == true)
+                        {
+                            searchRepeats += 1;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)112.985586 - (decimal)1.007276);
+                            }
+                        }
+                        // M+Na adduct calculation
+                        if (positiveMNaCheckBox.IsChecked == true)
+                        {
+                            searchRepeats += 1;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)22.989218 + (decimal)1.007276);
+                            }
+                        }
+                        // M+K adduct calculation
+                        if (positiveMKCheckBox.IsChecked == true)
+                        {
+                            searchRepeats += 1;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)38.963158 + (decimal)1.007276);
+                            }
+                        }
+                        // M+NH4 adduct calculation
+                        if (positiveMNH4CheckBox.IsChecked == true)
+                        {
+                            searchRepeats += 1;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)18.033823 + (decimal)1.007276);
+                            }
+                        }
+                        // Custom adduct calculcation
+                        if (customAdductCheckBox.IsChecked == true)
+                        {
+                            searchRepeats += 1;
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            // Processing of customAdductMassText to account for mzML assuming a protonated/deprotonated precursor
+                            if (customAdductPolarity.SelectedIndex == 0) // Protonated
+                            {
+                                adductCustom = Convert.ToDecimal(customAdductMassText.Text) - (decimal)1.007276;
+                            }
+                            else // Deprotonated
+                            {
+                                adductCustom = Convert.ToDecimal(customAdductMassText.Text) + (decimal)1.007276;
+                            }
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - adductCustom);
+                            }
+                        }
+                        targets = targetAdducts;
+                    }
+                    // Text input is singly charged m/z values that are observed via experiments like MALDI-MS of permethylated glycans so no modification of mass is needed.
+                    if (TextRadioButton.IsChecked == true)
+                    {
+                        // Making a separate list to then be used for target building
+                        targetAdductsProcessing = targets;
+                        targetAdducts = new List<decimal>();
+
+                        // Subtracting H- from all targets and saving that as a new list
+                        if (negativeMHCheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] + (decimal)1.007276);
+                            }
+                        }
+                        // Appending the list with the original text if the user has M selected
+                        if (neutralMCheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o]);
+                            }
+                        }
+                        // M+COOH adduct calculation
+                        if (negativeMFACheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)44.998201);
+                            }
+                        }
+                        // M+acetic acid adduct calculation
+                        if (negativeMAACheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)59.013851);
+                            }
+                        }
+                        // M+TFA adduct calculation
+                        if (negativeMTFACheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)112.985586);
+                            }
+                        }
+                        // M+H adduct calculation
+                        if (positiveMHCheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)1.007276);
+                            }
+                        }
+                        // M+Na adduct calculation
+                        if (positiveMNaCheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)22.989218);
+                            }
+                        }
+                        // M+K adduct calculation
+                        if (positiveMKCheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)38.963158);
+                            }
+                        }
+                        // M+NH4 adduct calculation
+                        if (positiveMNH4CheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - (decimal)18.033823);
+                            }
+                        }
+                        // Custom adduct calculcation
+                        if (customAdductCheckBox.IsChecked == true)
+                        {
+                            targetsToAdd = targetAdductsProcessing.Count;
+                            for (int o = 0; o < targetsToAdd; o++)
+                            {
+                                targetAdducts.Add(targetAdductsProcessing[o] - Convert.ToDecimal(customAdductMassText.Text));
+                            }
+                        }
+                        targets = targetAdducts;
+                    }
+                }
+                
                 // For enabling off-by-one errors. Thermo is pretty good at correcting the selected ion m/z when it picks an isotopic distribution, but might be useful for others
                 if (OffByOne.IsChecked == true)
                 {
+                    searchRepeats += 1;
                     offByOneChecked = true;
                     // For each target in the list, remove one hydrogen to account for the C13 isotope being picked instead of monoisotopic (negative mode only)
                     targetsToAdd = targets.Count;
                     for (int o = 0; o < targetsToAdd; o++)
                     {
-                        targets.Add(targets[o] - (decimal)1.00727);
+                        targets.Add(targets[o] - (decimal)1.007276);
                     }
                 }
 
                 // Early processing of target list, breaking it down so that the reducing ends are removed
                 if (Native.IsChecked == true)
                 {
-                    nativeChecked = true;
                     switch (reducingEndBox.SelectedIndex)
                     {
                         case 0:
@@ -771,21 +1630,52 @@ namespace glycombo
                             reducedEnd = "girP";
                             targets = targets.Select(z => z - (18.010555m + 134.07182m)).ToList();
                             break;
+                        case 8:
+                            reducedEnd = "Custom";
+                            customReducingMass = Convert.ToDecimal(customReducingMassBox.Text);
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox.Text))).ToList();
+                            break;
                         default:
                             break;
                     }
                 }
-                else
+                if (Permeth.IsChecked == true)
                 {
                     switch (reducingEndBox.SelectedIndex)
                     {
                         case 0:
                             reducedEnd = "Free";
-                            targets = targets.Select(z => z - 18.010555m).ToList();
+                            targets = targets.Select(z => z - (18.010555m + 28.031300m)).ToList();
                             break;
                         case 1:
                             reducedEnd = "Reduced";
-                            targets = targets.Select(z => z - 20.026195m).ToList();
+                            targets = targets.Select(z => z - (20.026195m + 42.046950m)).ToList();
+                            break;
+                        case 8:
+                            customReducingMass = Convert.ToDecimal(customReducingMassBox.Text);
+                            reducedEnd = "Custom";
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox.Text))).ToList();
+                            break;
+                        default:
+                            break;
+                    }
+                }                 
+                if (Peracetyl.IsChecked == true)
+                {
+                    switch (reducingEndBox.SelectedIndex)
+                    {
+                        case 0:
+                            reducedEnd = "Free";
+                            targets = targets.Select(z => z - (18.010555m + 84.021129m)).ToList();
+                            break;
+                        case 1:
+                            reducedEnd = "Reduced";
+                            targets = targets.Select(z => z - (20.026195m + 126.031694m)).ToList();
+                            break;
+                        case 8:
+                            customReducingMass = Convert.ToDecimal(customReducingMassBox.Text);
+                            reducedEnd = "Custom";
+                            targets = targets.Select(z => z - (18.010555m + Convert.ToDecimal(customReducingMassBox.Text))).ToList();
                             break;
                         default:
                             break;
@@ -847,7 +1737,13 @@ namespace glycombo
                 dNeuGcMax_int = int.Parse(dNeuGcMax.Text);
                 amNeuGcMin_int = int.Parse(amNeuGcMin.Text);
                 amNeuGcMax_int = int.Parse(amNeuGcMax.Text);
-
+                if (customReducingCheck.IsChecked == true)
+                    {
+                    customReducingCCount = Convert.ToInt16(customReducingCBox.Text);
+                    customReducingHCount = Convert.ToInt16(customReducingHBox.Text);
+                    customReducingNCount = Convert.ToInt16(customReducingNBox.Text);
+                    customReducingOCount = Convert.ToInt16(customReducingOBox.Text);
+                }
                 // Running the mzML formatting in a different thread so we can give a status update
                 await Task.Run(() => glyComboProcess());
             }
@@ -859,13 +1755,10 @@ namespace glycombo
         
         private void glyComboProcess()
         {
-            var watch = Stopwatch.StartNew();
             iterations = 0;
             Sum_up(numbers, targets);
             solutions = "";
             // Pop-up to let the user know the search has finished
-            watch.Stop();
-            ElapsedMSec = watch.ElapsedMilliseconds;
             new Thread(() => { MessageBox.Show("GlyCombo has finished running." + Environment.NewLine + ((solutionMultiples.Length - solutionMultiples.Replace(Environment.NewLine, string.Empty).Length)/2) + " monosaccharide combinations identified over " + iterations + " iterations." + Environment.NewLine + "Total search time: " + ElapsedMSec/1000 + " seconds."); }).Start();
             solutionProcess = "";
         }
@@ -885,6 +1778,8 @@ namespace glycombo
                 MessageBox.Show("Please type in file name for export and click OK");
                 saveFileDialog1.ShowDialog();
             }
+            ElapsedMSec = 0;
+            var watch = Stopwatch.StartNew();
             // Pop-up to let the user know the search is running
             new Thread(() => { MessageBox.Show("Search started." + Environment.NewLine + "Processing " + targets.Count + " precursors." + Environment.NewLine + "Please wait for the search to complete."); }).Start();
 
@@ -895,13 +1790,11 @@ namespace glycombo
                 // Define the upper and lower error tolerances for search
                 if (DaChecked == true)
                 {
-                    errorType = "Da";
                     targetLow = targets[i] - errorTol;
                     targetHigh = targets[i] + errorTol;
                 }
                 else
                 {
-                    errorType = "ppm";
                     targetLow = targets[i] - (targets[i] * (errorTol / 1000000));
                     targetHigh = targets[i] + (targets[i] * (errorTol / 1000000));
                 }
@@ -914,7 +1807,7 @@ namespace glycombo
             string skylineSolutionHeader = "";
             string skylineSolutionMultiplesPreTrim = "";
             string skylineSolutionMultiples = "";
-            if (TextChecked == false)
+            if (inputChecked == "mzML")
             {
                 solutionHeader = "Composition,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC,File Name";
                 skylineSolutionHeader = "Molecule List Name,Molecule Name,Observed mass,Theoretical mass,Molecular Formula,Mass error,Scan number,Precursor Charge,Retention Time,TIC,Note";
@@ -930,162 +1823,54 @@ namespace glycombo
             }
             File.WriteAllText(saveFileDialog1.FileName, solutionHeader + Environment.NewLine + solutionMultiples);
 
-            // Prepare the parameter report for the search used
-            if (monoHex == true)
-            {
-                param_monoHex = Environment.NewLine + "Hex (" + HexMin_int.ToString() + "-" + HexMax_int.ToString() + ")";
-            }
-            if (monoHexA == true)
-            {
-                param_monoHexA = Environment.NewLine + "HexA (" + HexAMin_int.ToString() + "-" + HexAMax_int.ToString() + ")";
-            }
-            if (monodHex == true)
-            {
-                param_monodHex = Environment.NewLine + "dHex (" + dHexMin_int.ToString() + "-" + dHexMax_int.ToString() + ")";
-            }
-            if (monoHexNAc == true)
-            {
-                param_monoHexNAc = Environment.NewLine + "HexNAc (" + HexNAcMin_int.ToString() + "-" + HexNAcMax_int.ToString() + ")";
-            }
-            if (monoHexN == true)
-            {
-                param_monoHexN = Environment.NewLine + "HexN (" + HexNMin_int.ToString() + "-" + HexNMax_int.ToString() + ")";
-            }
-            if (monodHexNAc == true)
-            {
-                param_monodHexNAc = Environment.NewLine + "dHexNAc (" + dHexNAcMin_int.ToString() + "-" + dHexNAcMax_int.ToString() + ")";
-            }
-            if (monoPent == true)
-            {
-                param_monoPent = Environment.NewLine + "Pent (" + PentMin_int.ToString() + "-" + PentMax_int.ToString() + ")";
-            }
-            if (monoKDN == true)
-            {
-                param_monoKDN = Environment.NewLine + "KDN (" + KDNMin_int.ToString() + "-" + KDNMax_int.ToString() + ")";
-            }
-            if (monoNeu5Ac == true)
-            {
-                param_monoNeu5Ac = Environment.NewLine + "Neu5Ac (" + Neu5AcMin_int.ToString() + "-" + Neu5AcMax_int.ToString() + ")";
-            }
-            if (monoNeu5Gc == true)
-            {
-                param_monoNeu5Gc = Environment.NewLine + "Neu5Gc (" + Neu5GcMin_int.ToString() + "-" + Neu5GcMax_int.ToString() + ")";
-            }
-            if (monoPhos == true)
-            {
-                param_monoPhos = Environment.NewLine + "Phos (" + PhosMin_int.ToString() + "-" + PhosMax_int.ToString() + ")";
-            }
-            if (monoSulf == true)
-            {
-                param_monoSulf = Environment.NewLine + "Sulf (" + SulfMin_int.ToString() + "-" + SulfMax_int.ToString() + ")";
-            }
-            if (monolNeuAc == true)
-            {
-                param_monolNeuAc = Environment.NewLine + "lNeuAc (" + lNeuAcMin_int.ToString() + "-" + lNeuAcMax_int.ToString() + ")";
-            }
-            if (monoeeNeuAc == true)
-            {
-                param_monoeeNeuAc = Environment.NewLine + "eNeuAc (" + eeNeuAcMin_int.ToString() + "-" + eeNeuAcMax_int.ToString() + ")";
-            }
-            if (monodNeuAc == true)
-            {
-                param_monodNeuAc = Environment.NewLine + "dNeuAc (" + dNeuAcMin_int.ToString() + "-" + dNeuAcMax_int.ToString() + ")";
-            }
-            if (monoamNeuAc == true)
-            {
-                param_monoamNeuAc = Environment.NewLine + "amNeuAc (" + amNeuAcMin_int.ToString() + "-" + amNeuAcMax_int.ToString() + ")";
-            }
-            if (monoAcetyl == true)
-            {
-                param_monoAcetyl = Environment.NewLine + "Acetyl (" + acetylMin_int.ToString() + "-" + acetylMax_int.ToString() + ")";
-            }
-            if (monolNeuGc == true)
-            {
-                param_monolNeuGc = Environment.NewLine + "lNeuGc (" + lNeuGcMin_int.ToString() + "-" + lNeuGcMax_int.ToString() + ")";
-            }
-            if (monoeeNeuGc == true)
-            {
-                param_monoeeNeuGc = Environment.NewLine + "eNeuGc (" + eeNeuGcMin_int.ToString() + "-" + eeNeuGcMax_int.ToString() + ")";
-            }
-            if (monodNeuGc == true)
-            {
-                param_monodNeuGc = Environment.NewLine + "dNeuGc (" + dNeuGcMin_int.ToString() + "-" + dNeuGcMax_int.ToString() + ")";
-            }
-            if (monoamNeuGc == true)
-            {
-                param_monoamNeuGc = Environment.NewLine + "amNeuGc (" + amNeuGcMin_int.ToString() + "-" + amNeuGcMax_int.ToString() + ")";
-            }
-            if (monoCustom1 == true)
-            {
-                param_monoCustom1 = Environment.NewLine + customMono1Name + " (" + customMono1Min.ToString() + "-" + customMono1Max.ToString() + ")";
-            }
-            if (monoCustom2 == true)
-            {
-                param_monoCustom2 = Environment.NewLine + customMono2Name + " (" + customMono2Min.ToString() + "-" + customMono2Max.ToString() + ")";
-            }
-            if (monoCustom3 == true)
-            {
-                param_monoCustom3 = Environment.NewLine + customMono3Name + " (" + customMono3Min.ToString() + "-" + customMono3Max.ToString() + ")";
-            }
-            if (monoCustom4 == true)
-            {
-                param_monoCustom4 = Environment.NewLine + customMono4Name + " (" + customMono4Min.ToString() + "-" + customMono4Max.ToString() + ")";
-            }
-            if (monoCustom5 == true)
-            {
-                param_monoCustom5 = Environment.NewLine + customMono5Name + " (" + customMono5Min.ToString() + "-" + customMono5Max.ToString() + ")";
-            }
-
             // Converting precursor list to series of strings for subsequent confirmation
             string combinedTargets = string.Join(Environment.NewLine, targets.ToArray());
+            string submitOutput = "## GlyCombo v0.7 search output" + Environment.NewLine;
+            submitOutput += "<Input> " + inputChecked + Environment.NewLine;
+            submitOutput += "<Error tolerance> " + errorTol + "," + massErrorType + Environment.NewLine;
+            submitOutput += "<Reducing end> " + reducedEnd.ToString() + Environment.NewLine;
+            if (reducedEnd.ToString() == "Custom")
+            {
+                submitOutput += "## Custom reducing end: Name, Mass, #C, #H, #N, #O" + Environment.NewLine;
+                submitOutput += "<Custom reducing end> " + customReducingName + "," + customReducedMassOutput + "," + customReducingCCount + "," + customReducingHCount + "," + customReducingOCount + "," + customReducingNCount + Environment.NewLine;
+            }
+            submitOutput += "<Derivatisation> " + derivatisation + Environment.NewLine;
+            submitOutput += "<OffByOne enabled> " + offByOneChecked + Environment.NewLine;
+            submitOutput += "## Monosaccharides: Monosaccharide1(Min-Max), Monosaccharide2(Min-Max)" + Environment.NewLine;
+            submitOutput += currentMonosaccharideSelection + Environment.NewLine;
+            if (monoCustom1 == true || monoCustom2 == true || monoCustom3 == true || monoCustom4 == true || monoCustom5 == true)
+            {
+                submitOutput += "## CustomMono#: Name, Mass, #C, #H, #N, #O, Min., Max." + Environment.NewLine;
+                if (monoCustom1 == true)
+                {
+                    submitOutput += "<CustomMono1> " + customMono1Name + "," + customMono1Mass + "," + customMono1CCount + "," + customMono1HCount + "," + customMono1NCount + "," + customMono1OCount + "," + customMono1Min + "," + customMono1Max + Environment.NewLine;
+                }
+                if (monoCustom2 == true)
+                {
+                    submitOutput += "<CustomMono2> " + customMono2Name + "," + customMono2Mass + "," + customMono2CCount + "," + customMono2HCount + "," + customMono2NCount + "," + customMono2OCount + "," + customMono2Min + "," + customMono2Max + Environment.NewLine;
+                }
+                if (monoCustom3 == true)
+                {
+                    submitOutput += "<CustomMono3> " + customMono3Name + "," + customMono3Mass + "," + customMono3CCount + "," + customMono3HCount + "," + customMono3NCount + "," + customMono3OCount + "," + customMono3Min + "," + customMono3Max + Environment.NewLine;
+                }
+                if (monoCustom4 == true)
+                {
+                    submitOutput += "<CustomMono4> " + customMono4Name + "," + customMono4Mass + "," + customMono4CCount + "," + customMono4HCount + "," + customMono4NCount + "," + customMono4OCount + "," + customMono4Min + "," + customMono4Max + Environment.NewLine;
+                }
+                if (monoCustom5 == true)
+                {
+                    submitOutput += "<CustomMono5> " + customMono5Name + "," + customMono5Mass + "," + customMono5CCount + "," + customMono5HCount + "," + customMono5NCount + "," + customMono5OCount + "," + customMono5Min + "," + customMono5Max + Environment.NewLine;
+                }
+            }
+            submitOutput += "## Adducts: Adduct1, Adduct2" + Environment.NewLine;
+            submitOutput += currentAdductSelection + Environment.NewLine;
             File.WriteAllText(string.Concat(saveFileDialog1.FileName.AsSpan(0, saveFileDialog1.FileName.Length - 4), "_parameters.txt"),
-                "GlyCombo Search Parameters"
+                submitOutput
+                + "<Precursor targets>"
                 + Environment.NewLine
-                + inputParameters
-                + Environment.NewLine
-                + "Error tolerance: "
-                + errorTol + " " + errorType
-                + Environment.NewLine
-                + "Derivatisation: "
-                + derivatisation.ToString()
-                + Environment.NewLine
-                + "Reducing end: "
-                + reducedEnd.ToString()
-                + Environment.NewLine
-                + Environment.NewLine
-                + "Monosaccharide ranges"
-                + Environment.NewLine
-                + param_monoHex
-                + param_monoHexA
-                + param_monodHex
-                + param_monoHexNAc
-                + param_monoHexN
-                + param_monodHexNAc
-                + param_monoPent
-                + param_monoKDN
-                + param_monoNeu5Ac
-                + param_monoNeu5Gc
-                + param_monoPhos
-                + param_monoSulf
-                + param_monolNeuAc
-                + param_monoeeNeuAc
-                + param_monodNeuAc
-                + param_monoamNeuAc
-                + param_monoAcetyl
-                + param_monolNeuGc
-                + param_monoeeNeuGc
-                + param_monodNeuGc
-                + param_monoamNeuGc
-                + param_monoCustom1
-                + param_monoCustom2
-                + param_monoCustom3
-                + param_monoCustom4
-                + param_monoCustom5
-                + Environment.NewLine
-                + Environment.NewLine
-                + "Precursor targets"
-                + Environment.NewLine
-                + neutralPrecursorListmzml);
+                + targetString);
+            watch.Stop();
+            ElapsedMSec = watch.ElapsedMilliseconds;
         }
 
         public void Sum_up_recursive(List<decimal> numbers, decimal target, List<decimal> partial, bool targetFound, int i)
@@ -1102,19 +1887,7 @@ namespace glycombo
             if (s >= targetLow && s <= targetHigh)
             {
                 // Combines each of the solutions for the given mass
-                solutions = string.Join("", partial.ToArray());            
-                
-                // This replaces all the masses with their respective monosaccharide identities
-                if (nativeChecked == true)
-                {
-                    // Native
-                    solutions = solutions.Replace("146.057908", "dHex ").Replace("162.052823", "Hex ").Replace("291.095416", "Neu5Ac ").Replace("307.090331", "Neu5Gc ").Replace("203.079372", "HexNAc ").Replace("79.966331", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("161.068808", "HexN ").Replace("176.032088", "HexA ").Replace("187.084458", "dHexNAc ").Replace("132.042258", "Pent ").Replace("250.068867", "KDN ").Replace("273.0848518", "lneuac ").Replace("319.1267166", "eeneuac ").Replace("318.1427011", "dneuac ").Replace("290.1114009", "amneuac ").Replace("42.010565", "acetyl ").Replace("289.0797664", "lneugc ").Replace("335.1216313", "eeneugc ").Replace("306.1063155", "dneugc ").Replace("334.1376157", "amneugc ").Replace(customMono1Mass.ToString(),customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
-                }
-                else
-                {
-                    // Permethylated
-                    solutions = solutions.Replace("174.089210", "dHex ").Replace("204.099775", "Hex ").Replace("361.173669", "Neu5Ac ").Replace("391.184234", "Neu5Gc ").Replace("245.126324", "HexNAc ").Replace("93.981983", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("217.131409", "HexN ").Replace("218.079040", "HexA ").Replace("215.115759", "dHexNAc ").Replace("160.073560", "Pent ").Replace("320.147120", "KDN ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
-                }
+                solutions = string.Join("", partial.ToArray());
 
                 // This replaces repeated monosaccharide names with 1 monosaccharide name and the number of the occurences
                 string solutionsUpdate = "";
@@ -1128,12 +1901,13 @@ namespace glycombo
                 int HexACount = 0;
                 int HexNCount = 0;
                 int PentCount = 0;
-                int KDNCount= 0;
+                int KDNCount = 0;
                 int hexCount = 0;
                 int neuAcCount = 0;
                 int neuGcCount = 0;
                 int hexNAcCount = 0;
                 int phosCount = 0;
+                int sulfCount = 0;
                 int dhexnacCount = 0;
                 int lNeuAcCount = 0;
                 int eeNeuAcCount = 0;
@@ -1144,17 +1918,20 @@ namespace glycombo
                 int eeNeuGcCount = 0;
                 int dNeuGcCount = 0;
                 int amNeuGcCount = 0;
-                int customMono1Count = 0;
-                int customMono2Count = 0;
-                int customMono3Count = 0;
-                int customMono4Count = 0;
-                int customMono5Count = 0;
+                int customMono1Count;
+                int customMono2Count;
+                int customMono3Count;
+                int customMono4Count;
+                int customMono5Count;
 
-                // Native processing
-                if (nativeChecked == true)
+                // This replaces all the masses with their respective monosaccharide identities
+                switch (derivatisation)
                 {
-                    // Chemical formulae for native
-                    dHexCount = Regex.Matches(solutions, "dHex ").Count;
+                    case "Native":
+                        solutions = solutions.Replace("146.057908", "dHex ").Replace("162.052823", "Hex ").Replace("291.095416", "Neu5Ac ").Replace("307.090331", "Neu5Gc ").Replace("203.079372", "HexNAc ").Replace("79.966331", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("161.068808", "HexN ").Replace("176.032088", "HexA ").Replace("187.084458", "dHexNAc ").Replace("132.042258", "Pent ").Replace("250.068867", "KDN ").Replace("273.0848518", "lneuac ").Replace("319.1267166", "eeneuac ").Replace("318.1427011", "dneuac ").Replace("290.1114009", "amneuac ").Replace("42.010565", "acetyl ").Replace("289.0797664", "lneugc ").Replace("335.1216313", "eeneugc ").Replace("306.1063155", "dneugc ").Replace("334.1376157", "amneugc ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
+
+                        // Chemical formulae for native
+                        dHexCount = Regex.Matches(solutions, "dHex ").Count;
                     if (dHexCount > 0)
                     {
                         chemicalFormulaeC += (dHexCount * 6);
@@ -1374,134 +2151,359 @@ namespace glycombo
                             chemicalFormulaeN += 3;
                             chemicalFormulaeO += 1;
                             break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                // Permethylated processing
-                {
-                    // Chemical formulae for permethylated
-                    dHexCount = Regex.Matches(solutions, "dHex ").Count;
-                    if (dHexCount > 0)
-                    {
-                        chemicalFormulaeC += (dHexCount * 8);
-                        chemicalFormulaeH += (dHexCount * 14);
-                        chemicalFormulaeO += (dHexCount * 4);
-                        solutionsUpdate = solutionsUpdate + "(dHex)" + Convert.ToString(dHexCount) + " ";
-                    }
-                    HexACount = Regex.Matches(solutions, "HexA ").Count;
-                    if (HexACount > 0)
-                    {
-                        chemicalFormulaeC += (HexACount * 9);
-                        chemicalFormulaeH += (HexACount * 14);
-                        chemicalFormulaeO += (HexACount * 6);
-                        solutionsUpdate = solutionsUpdate + "(HexA)" + Convert.ToString(HexACount) + " ";
-                    }
-                    HexNCount = Regex.Matches(solutions, "HexN ").Count;
-                    if (HexNCount > 0)
-                    {
-                        chemicalFormulaeC += (HexNCount * 10);
-                        chemicalFormulaeH += (HexNCount * 19);
-                        chemicalFormulaeO += (HexNCount * 4);
-                        chemicalFormulaeN += (HexNCount);
-                        solutionsUpdate = solutionsUpdate + "(HexN)" + Convert.ToString(HexNCount) + " ";
-                    }
-                    PentCount = Regex.Matches(solutions, "Pent ").Count;
-                    if (PentCount > 0)
-                    {
-                        chemicalFormulaeC += (PentCount * 7);
-                        chemicalFormulaeH += (PentCount * 12);
-                        chemicalFormulaeO += (PentCount * 4);
-                        solutionsUpdate = solutionsUpdate + "(Pent)" + Convert.ToString(PentCount) + " ";
-                    }
-                    KDNCount = Regex.Matches(solutions, "KDN ").Count;
-                    if (KDNCount > 0)
-                    {
-                        chemicalFormulaeC += (KDNCount * 14);
-                        chemicalFormulaeH += (KDNCount * 24);
-                        chemicalFormulaeO += (KDNCount * 8);
-                        solutionsUpdate = solutionsUpdate + "(KDN)" + Convert.ToString(KDNCount) + " ";
-                    }
-                    hexCount = Regex.Matches(solutions, "Hex ").Count - Regex.Matches(solutions, "dHex ").Count;
-                    if (hexCount > 0)
-                    {
-                        chemicalFormulaeC += (hexCount * 9);
-                        chemicalFormulaeH += (hexCount * 16);
-                        chemicalFormulaeO += (hexCount * 5);
-                        solutionsUpdate = solutionsUpdate + "(Hex)" + Convert.ToString(hexCount) + " ";
-                    }
-                    neuAcCount = Regex.Matches(solutions, "Neu5Ac ").Count;
-                    if (neuAcCount > 0)
-                    {
-                        chemicalFormulaeC += (neuAcCount * 16);
-                        chemicalFormulaeH += (neuAcCount * 27);
-                        chemicalFormulaeN += (neuAcCount);
-                        chemicalFormulaeO += (neuAcCount * 8);
-                        solutionsUpdate = solutionsUpdate + "(NeuAc)" + Convert.ToString(neuAcCount) + " ";
-                    }
-                    neuGcCount = Regex.Matches(solutions, "Neu5Gc ").Count;
-                    if (neuGcCount > 0)
-                    {
-                        chemicalFormulaeC += (neuGcCount * 17);
-                        chemicalFormulaeH += (neuGcCount * 29);
-                        chemicalFormulaeN += (neuGcCount);
-                        chemicalFormulaeO += (neuGcCount * 9);
-                        solutionsUpdate = solutionsUpdate + "(NeuGc)" + Convert.ToString(neuGcCount) + " ";
-                    }
-                    hexNAcCount = Regex.Matches(solutions, "HexNAc ").Count - Regex.Matches(solutions, "dHexNAc ").Count;
-                    if (hexNAcCount > 0)
-                    {
-                        chemicalFormulaeC += (hexNAcCount * 11);
-                        chemicalFormulaeH += (hexNAcCount * 19);
-                        chemicalFormulaeN += (hexNAcCount);
-                        chemicalFormulaeO += (hexNAcCount * 5);
-                        solutionsUpdate = solutionsUpdate + "(HexNAc)" + Convert.ToString(hexNAcCount) + " ";
-                    }
-                    phosCount = Regex.Matches(solutions, "Phos ").Count;
-                    if (phosCount > 0)
-                    {
-                        chemicalFormulaeC += (phosCount);
-                        chemicalFormulaeH += (phosCount * 3);
-                        chemicalFormulaeO += (phosCount * 3);
-                        chemicalFormulaeP += (phosCount);
-                        solutionsUpdate = solutionsUpdate + "(Phos)" + Convert.ToString(phosCount) + " ";
-                    }
-                    dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
-                    if (dhexnacCount > 0)
-                    {
-                        chemicalFormulaeC += (dhexnacCount * 10);
-                        chemicalFormulaeH += (dhexnacCount * 17);
-                        chemicalFormulaeN += (dhexnacCount);
-                        chemicalFormulaeO += (dhexnacCount * 4);
-                        solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
-                    }
-
-                    switch (reducingEndBox.SelectedIndex)
-                    {
-                        case 0:
-                            chemicalFormulaeC += 2;
-                            chemicalFormulaeH += 6;
-                            chemicalFormulaeO += 1;
-                            break;
-                        case 1:
-                            chemicalFormulaeC += 3;
-                            chemicalFormulaeH += 10;
-                            chemicalFormulaeO += 1;
+                        case "Custom":
+                            chemicalFormulaeC += customReducingCCount;
+                            chemicalFormulaeH += customReducingHCount;
+                            chemicalFormulaeN += customReducingNCount;
+                            chemicalFormulaeO += customReducingOCount;
                             break;
                         default:
                             break;
                     }
-                }
+                        switch (reducedEnd)
+                        {
+                            case "Free":
+                                observedMass = s + 18.010565m;
+                                theoreticalMass = target + 18.010565m;
+                                break;
+                            case "Reduced":
+                                observedMass = s + 20.026195m;
+                                theoreticalMass = target + 20.026195m;
+                                break;
+                            case "InstantPC":
+                                observedMass = s + 18.010565m + 261.1477m;
+                                theoreticalMass = target + 18.010565m + 261.1477m;
+                                break;
+                            case "Rapifluor-MS":
+                                observedMass = s + 18.010565m + 311.17461m;
+                                theoreticalMass = target + 18.010565m + 311.17461m;
+                                break;
+                            case "2AA":
+                                observedMass = s + 18.010565m + 121.052774m;
+                                theoreticalMass = target + 18.010565m + 121.052774m;
+                                break;
+                            case "2AB":
+                                observedMass = s + 18.010565m + 120.068758m;
+                                theoreticalMass = target + 18.010565m + 120.068758m;
+                                break;
+                            case "Procainamide":
+                                observedMass = s + 18.010565m + 219.1735574m;
+                                theoreticalMass = target + 18.010565m + 219.1735574m;
+                                break;
+                            case "girP":
+                                observedMass = s + 18.010565m + 134.06405m;
+                                theoreticalMass = target + 18.010565m + 134.06405m;
+                                break;
+                            case "Custom":
+                                observedMass = s + 18.010565m + customReducingMass;
+                                theoreticalMass = target + 18.010565m + customReducingMass;
+                                break;
+                            default:
+                                break;
+                            }
+                        break;
 
-                // Sulfate is the same chemical formulae independent of derivatization status, same for the custom monosaccharides
-                int sulfCount = Regex.Matches(solutions, "Sulf ").Count;
-                if (sulfCount > 0)
-                {
-                    chemicalFormulaeO += (sulfCount * 3);
-                    chemicalFormulaeS += (sulfCount);
-                    solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
-                }
+                    case "Permethylated":
+                        solutions = solutions.Replace("174.089210", "dHex ").Replace("204.099775", "Hex ").Replace("361.173669", "Neu5Ac ").Replace("391.184234", "Neu5Gc ").Replace("245.126324", "HexNAc ").Replace("93.981983", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("203.115758", "HexN ").Replace("218.079040", "HexA ").Replace("215.115759", "dHexNAc ").Replace("160.073560", "Pent ").Replace("320.147120", "KDN ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
+
+                        // Chemical formulae for permethylated
+                        dHexCount = Regex.Matches(solutions, "dHex ").Count;
+                        if (dHexCount > 0)
+                        {
+                            chemicalFormulaeC += (dHexCount * 8);
+                            chemicalFormulaeH += (dHexCount * 14);
+                            chemicalFormulaeO += (dHexCount * 4);
+                            solutionsUpdate = solutionsUpdate + "(dHex)" + Convert.ToString(dHexCount) + " ";
+                        }
+                        HexACount = Regex.Matches(solutions, "HexA ").Count;
+                        if (HexACount > 0)
+                        {
+                            chemicalFormulaeC += (HexACount * 9);
+                            chemicalFormulaeH += (HexACount * 14);
+                            chemicalFormulaeO += (HexACount * 6);
+                            solutionsUpdate = solutionsUpdate + "(HexA)" + Convert.ToString(HexACount) + " ";
+                        }
+                        HexNCount = Regex.Matches(solutions, "HexN ").Count;
+                        if (HexNCount > 0)
+                        {
+                            chemicalFormulaeC += (HexNCount * 9);
+                            chemicalFormulaeH += (HexNCount * 17);
+                            chemicalFormulaeO += (HexNCount * 4);
+                            chemicalFormulaeN += (HexNCount);
+                            solutionsUpdate = solutionsUpdate + "(HexN)" + Convert.ToString(HexNCount) + " ";
+                        }
+                        PentCount = Regex.Matches(solutions, "Pent ").Count;
+                        if (PentCount > 0)
+                        {
+                            chemicalFormulaeC += (PentCount * 7);
+                            chemicalFormulaeH += (PentCount * 12);
+                            chemicalFormulaeO += (PentCount * 4);
+                            solutionsUpdate = solutionsUpdate + "(Pent)" + Convert.ToString(PentCount) + " ";
+                        }
+                        KDNCount = Regex.Matches(solutions, "KDN ").Count;
+                        if (KDNCount > 0)
+                        {
+                            chemicalFormulaeC += (KDNCount * 14);
+                            chemicalFormulaeH += (KDNCount * 24);
+                            chemicalFormulaeO += (KDNCount * 8);
+                            solutionsUpdate = solutionsUpdate + "(KDN)" + Convert.ToString(KDNCount) + " ";
+                        }
+                        hexCount = Regex.Matches(solutions, "Hex ").Count - Regex.Matches(solutions, "dHex ").Count;
+                        if (hexCount > 0)
+                        {
+                            chemicalFormulaeC += (hexCount * 9);
+                            chemicalFormulaeH += (hexCount * 16);
+                            chemicalFormulaeO += (hexCount * 5);
+                            solutionsUpdate = solutionsUpdate + "(Hex)" + Convert.ToString(hexCount) + " ";
+                        }
+                        neuAcCount = Regex.Matches(solutions, "Neu5Ac ").Count;
+                        if (neuAcCount > 0)
+                        {
+                            chemicalFormulaeC += (neuAcCount * 16);
+                            chemicalFormulaeH += (neuAcCount * 27);
+                            chemicalFormulaeN += (neuAcCount);
+                            chemicalFormulaeO += (neuAcCount * 8);
+                            solutionsUpdate = solutionsUpdate + "(NeuAc)" + Convert.ToString(neuAcCount) + " ";
+                        }
+                        neuGcCount = Regex.Matches(solutions, "Neu5Gc ").Count;
+                        if (neuGcCount > 0)
+                        {
+                            chemicalFormulaeC += (neuGcCount * 17);
+                            chemicalFormulaeH += (neuGcCount * 29);
+                            chemicalFormulaeN += (neuGcCount);
+                            chemicalFormulaeO += (neuGcCount * 9);
+                            solutionsUpdate = solutionsUpdate + "(NeuGc)" + Convert.ToString(neuGcCount) + " ";
+                        }
+                        hexNAcCount = Regex.Matches(solutions, "HexNAc ").Count - Regex.Matches(solutions, "dHexNAc ").Count;
+                        if (hexNAcCount > 0)
+                        {
+                            chemicalFormulaeC += (hexNAcCount * 11);
+                            chemicalFormulaeH += (hexNAcCount * 19);
+                            chemicalFormulaeN += (hexNAcCount);
+                            chemicalFormulaeO += (hexNAcCount * 5);
+                            solutionsUpdate = solutionsUpdate + "(HexNAc)" + Convert.ToString(hexNAcCount) + " ";
+                        }
+                        phosCount = Regex.Matches(solutions, "Phos ").Count;
+                        if (phosCount > 0)
+                        {
+                            chemicalFormulaeC += (phosCount);
+                            chemicalFormulaeH += (phosCount * 3);
+                            chemicalFormulaeO += (phosCount * 3);
+                            chemicalFormulaeP += (phosCount);
+                            solutionsUpdate = solutionsUpdate + "(Phos)" + Convert.ToString(phosCount) + " ";
+                        }
+                        dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
+                        if (dhexnacCount > 0)
+                        {
+                            chemicalFormulaeC += (dhexnacCount * 10);
+                            chemicalFormulaeH += (dhexnacCount * 17);
+                            chemicalFormulaeN += (dhexnacCount);
+                            chemicalFormulaeO += (dhexnacCount * 4);
+                            solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
+                        }
+                        sulfCount = Regex.Matches(solutions, "Sulf ").Count;
+                        if (sulfCount > 0)
+                        {
+                            chemicalFormulaeC += (sulfCount * -1);
+                            chemicalFormulaeH += (sulfCount * -2);
+                            chemicalFormulaeO += (sulfCount * 3);
+                            chemicalFormulaeS += (sulfCount);
+                            solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
+                        }
+                        switch (reducedEnd)
+                        {
+                            case "Free":
+                                chemicalFormulaeC += 2;
+                                chemicalFormulaeH += 6;
+                                chemicalFormulaeO += 1;
+                                break;
+                            case "Reduced":
+                                chemicalFormulaeC += 3;
+                                chemicalFormulaeH += 10;
+                                chemicalFormulaeO += 1;
+                                break;
+                            case "Custom":
+                                chemicalFormulaeC += customReducingCCount;
+                                chemicalFormulaeH += customReducingHCount;
+                                chemicalFormulaeN += customReducingNCount;
+                                chemicalFormulaeO += customReducingOCount;
+                                break;
+                            default:
+                                break;
+                        }
+                        // Permethylated
+                        switch (reducedEnd)
+                        {
+                            case "Free":
+                                observedMass = s + 18.010565m + 28.031300m;
+                                theoreticalMass = target + 18.010565m + 28.031300m;
+                                break;
+                            case "Reduced":
+                                observedMass = s + 20.026195m + 42.046950m;
+                                theoreticalMass = target + 20.026195m + 42.046950m;
+                                break;
+                            case "Custom":
+                                observedMass = s + 18.010565m + customReducingMass;
+                                theoreticalMass = target + 18.010565m + customReducingMass;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case "Peracetylated":
+                        solutions = solutions.Replace("230.079038", "dHex ").Replace("288.084517", "Hex ").Replace("417.127110", "Neu5Ac ").Replace("475.132593", "Neu5Gc ").Replace("287.100501", "HexNAc ").Replace("93.981983", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("287.100501", "HexN ").Replace("260.053217", "HexA ").Replace("247.105587", "dHexNAc ").Replace("216.063388", "Pent ").Replace("376.100561", "KDN ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
+                        // peracetylated processing
+                        // Chemical formulae for peracetylated
+                        dHexCount = Regex.Matches(solutions, "dHex ").Count;
+                        if (dHexCount > 0)
+                        {
+                            chemicalFormulaeC += (dHexCount * 10);
+                            chemicalFormulaeH += (dHexCount * 14);
+                            chemicalFormulaeO += (dHexCount * 6);
+                            solutionsUpdate = solutionsUpdate + "(dHex)" + Convert.ToString(dHexCount) + " ";
+                        }
+                        HexACount = Regex.Matches(solutions, "HexA ").Count;
+                        if (HexACount > 0)
+                        {
+                            chemicalFormulaeC += (HexACount * 10);
+                            chemicalFormulaeH += (HexACount * 12);
+                            chemicalFormulaeO += (HexACount * 8);
+                            solutionsUpdate = solutionsUpdate + "(HexA)" + Convert.ToString(HexACount) + " ";
+                        }
+                        HexNCount = Regex.Matches(solutions, "HexN ").Count;
+                        if (HexNCount > 0)
+                        {
+                            chemicalFormulaeC += (HexNCount * 12);
+                            chemicalFormulaeH += (HexNCount * 17);
+                            chemicalFormulaeO += (HexNCount * 7);
+                            chemicalFormulaeN += (HexNCount);
+                            solutionsUpdate = solutionsUpdate + "(HexN)" + Convert.ToString(HexNCount) + " ";
+                        }
+                        PentCount = Regex.Matches(solutions, "Pent ").Count;
+                        if (PentCount > 0)
+                        {
+                            chemicalFormulaeC += (PentCount * 9);
+                            chemicalFormulaeH += (PentCount * 12);
+                            chemicalFormulaeO += (PentCount * 6);
+                            solutionsUpdate = solutionsUpdate + "(Pent)" + Convert.ToString(PentCount) + " ";
+                        }
+                        KDNCount = Regex.Matches(solutions, "KDN ").Count;
+                        if (KDNCount > 0)
+                        {
+                            chemicalFormulaeC += (KDNCount * 15);
+                            chemicalFormulaeH += (KDNCount * 28);
+                            chemicalFormulaeO += (KDNCount * 11);
+                            solutionsUpdate = solutionsUpdate + "(KDN)" + Convert.ToString(KDNCount) + " ";
+                        }
+                        hexCount = Regex.Matches(solutions, "Hex ").Count - Regex.Matches(solutions, "dHex ").Count;
+                        if (hexCount > 0)
+                        {
+                            chemicalFormulaeC += (hexCount * 12);
+                            chemicalFormulaeH += (hexCount * 16);
+                            chemicalFormulaeO += (hexCount * 8);
+                            solutionsUpdate = solutionsUpdate + "(Hex)" + Convert.ToString(hexCount) + " ";
+                        }
+                        neuAcCount = Regex.Matches(solutions, "Neu5Ac ").Count;
+                        if (neuAcCount > 0)
+                        {
+                            chemicalFormulaeC += (neuAcCount * 17);
+                            chemicalFormulaeH += (neuAcCount * 23);
+                            chemicalFormulaeN += (neuAcCount);
+                            chemicalFormulaeO += (neuAcCount * 11);
+                            solutionsUpdate = solutionsUpdate + "(NeuAc)" + Convert.ToString(neuAcCount) + " ";
+                        }
+                        neuGcCount = Regex.Matches(solutions, "Neu5Gc ").Count;
+                        if (neuGcCount > 0)
+                        {
+                            chemicalFormulaeC += (neuGcCount * 19);
+                            chemicalFormulaeH += (neuGcCount * 25);
+                            chemicalFormulaeN += (neuGcCount);
+                            chemicalFormulaeO += (neuGcCount * 13);
+                            solutionsUpdate = solutionsUpdate + "(NeuGc)" + Convert.ToString(neuGcCount) + " ";
+                        }
+                        hexNAcCount = Regex.Matches(solutions, "HexNAc ").Count - Regex.Matches(solutions, "dHexNAc ").Count;
+                        if (hexNAcCount > 0)
+                        {
+                            chemicalFormulaeC += (hexNAcCount * 12);
+                            chemicalFormulaeH += (hexNAcCount * 17);
+                            chemicalFormulaeN += (hexNAcCount);
+                            chemicalFormulaeO += (hexNAcCount * 7);
+                            solutionsUpdate = solutionsUpdate + "(HexNAc)" + Convert.ToString(hexNAcCount) + " ";
+                        }
+                        phosCount = Regex.Matches(solutions, "Phos ").Count;
+                        if (phosCount > 0)
+                        {
+                            chemicalFormulaeC += (phosCount * -2);
+                            chemicalFormulaeH += (phosCount * -1);
+                            chemicalFormulaeO += (phosCount * 2);
+                            chemicalFormulaeP += (phosCount);
+                            solutionsUpdate = solutionsUpdate + "(Phos)" + Convert.ToString(phosCount) + " ";
+                        }
+                        dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
+                        if (dhexnacCount > 0)
+                        {
+                            chemicalFormulaeC += (dhexnacCount * 10);
+                            chemicalFormulaeH += (dhexnacCount * 17);
+                            chemicalFormulaeN += (dhexnacCount);
+                            chemicalFormulaeO += (dhexnacCount * 6);
+                            solutionsUpdate = solutionsUpdate + "(dHexNAc)" + Convert.ToString(dhexnacCount) + " ";
+                        }
+                        sulfCount = Regex.Matches(solutions, "Sulf ").Count;
+                        if (sulfCount > 0)
+                        {
+                            chemicalFormulaeC += (sulfCount * -2);
+                            chemicalFormulaeH += (sulfCount * -2);
+                            chemicalFormulaeO += (sulfCount * 2);
+                            chemicalFormulaeS += (sulfCount);
+                            solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
+                        }
+                        switch (reducedEnd)
+                        {
+                            case "Free":
+                                chemicalFormulaeC += 4;
+                                chemicalFormulaeH += 6;
+                                chemicalFormulaeO += 3;
+                                break;
+                            case "Reduced":
+                                chemicalFormulaeC += 6;
+                                chemicalFormulaeH += 10;
+                                chemicalFormulaeO += 4;
+                                break;
+                            case "Custom":
+                                chemicalFormulaeC += customReducingCCount;
+                                chemicalFormulaeH += customReducingHCount;
+                                chemicalFormulaeN += customReducingNCount;
+                                chemicalFormulaeO += customReducingOCount;
+                                break;
+                            default:
+                                break;
+                        }
+                        // Peracetylated
+                        switch (reducedEnd)
+                        {
+                            case "Free":
+                                observedMass = s + 18.010565m + 84.021129m;
+                                theoreticalMass = target + 18.010565m + 84.021129m;
+                                break;
+                            case "Reduced":
+                                observedMass = s + 20.026195m + 126.031694m;
+                                theoreticalMass = target + 20.026195m + 126.031694m;
+                                break;
+                            case "Custom":
+                                observedMass = s + 18.010565m + customReducingMass;
+                                theoreticalMass = target + 18.010565m + customReducingMass;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                // Custom monosaccharides are independent of derivatisation status
                 customMono1Count = Regex.Matches(solutions, customMono1Name + " ").Count;
                 if (customMono1Count > 0)
                 {
@@ -1552,69 +2554,12 @@ namespace glycombo
                 string chemicalFormula = "C" + chemicalFormulaeC + "H" + chemicalFormulaeH + "N" + chemicalFormulaeN + "O" + chemicalFormulaeO + "P" + chemicalFormulaeP + "S" + chemicalFormulaeS;
                 chemicalFormula = chemicalFormula.Replace("N0", "").Replace("P0", "").Replace("S0", "");
 
-                // Reducing end status, native or permethylated
-                if (nativeChecked == true)
-                {
-                    switch (reducedEnd)
-                    {
-                        case "Free":
-                            observedMass = s + 18.010565m;
-                            theoreticalMass = target + 18.010565m;
-                            break;
-                        case "Reduced":
-                            observedMass = s + 20.026195m;
-                            theoreticalMass = target + 20.026195m;
-                            break;
-                        case "InstantPC":
-                            observedMass = s + 18.010565m + 261.1477m;
-                            theoreticalMass = target + 18.010565m + 261.1477m;
-                            break;
-                        case "Rapifluor-MS":
-                            observedMass = s + 18.010565m + 311.17461m;
-                            theoreticalMass = target + 18.010565m + 311.17461m;
-                            break;
-                        case "2AA":
-                            observedMass = s + 18.010565m + 121.052774m;
-                            theoreticalMass = target + 18.010565m + 121.052774m;
-                            break;
-                        case "2AB":
-                            observedMass = s + 18.010565m + 120.068758m;
-                            theoreticalMass = target + 18.010565m + 120.068758m;
-                            break;
-                        case "Procainamide":
-                            observedMass = s + 18.010565m + 219.1735574m;
-                            theoreticalMass = target + 18.010565m + 219.1735574m;
-                            break;
-                        case "girP":
-                            observedMass = s + 18.010565m + 134.06405m;
-                            theoreticalMass = target + 18.010565m + 134.06405m;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                    // Permethylated
-                    switch (reducedEnd)
-                    {
-                        case "Free":
-                            observedMass = s + 18.010565m + 28.031300m;
-                            theoreticalMass = target + 18.010565m + 28.031300m;
-                            break;
-                        case "Reduced":
-                            observedMass = s + 20.026195m + 42.046950m;
-                            theoreticalMass = target + 20.026195m + 42.046950m;
-                            break;
-                    }
-                }
-
-                // Calculation for error
+                // Calculation for mass error
                 error = observedMass - theoreticalMass;
 
                 // Calculation of scan number and charge state to be represented later
                 targetIndex.Add(i);
-                if (TextChecked == false)
+                if (inputChecked == "mzML")
                 {
                     string scanNumberForOutput = "";
                     string chargeForOutput = "";
@@ -1623,34 +2568,29 @@ namespace glycombo
                     string FileForOutput = "";
 
                     // mzml input therefore output needs to be include scan #, charge, RT and TIC values.
-                    // OffByOne error essentially doubles the target list, need to ensure that we can assign metadata to the +1 targets (otherwise it tries to call metadata from a limited list)
-                    if (offByOneChecked == true)
+                    // Adducts multiply the target list, this step ensures that we can assign metadata to all of the targets (otherwise it looks for targets that aren't there)
+                    for (int z = 0; z < searchRepeats; z++)
                     {
-                        if (i < targetsToAdd)
+                        int index = i % scans.Count;
+                        scanNumberForOutput = Convert.ToString(scans.ElementAt(index));
+                        chargeForOutput = Convert.ToString(charges.ElementAt(index));
+                        retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(index));
+                        TICForOutput = Convert.ToString(TICs.ElementAt(index));
+                        FileForOutput = Convert.ToString(files.ElementAt(index));
+
+                        // OffByOne error essentially doubles the target list, need to ensure that we can assign metadata to the +1 targets (otherwise it tries to call metadata from a limited list)
+                        if (offByOneChecked == true)
                         {
-                            scanNumberForOutput = Convert.ToString(scans.ElementAt(i));
-                            chargeForOutput = Convert.ToString(charges.ElementAt(i));
-                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i));
-                            TICForOutput = Convert.ToString(TICs.ElementAt(i));
-                            FileForOutput = Convert.ToString(files.ElementAt(i));
-                        }
-                        else
-                        {
-                            scanNumberForOutput = Convert.ToString(scans.ElementAt(i-targetsToAdd));
-                            chargeForOutput = Convert.ToString(charges.ElementAt(i-targetsToAdd));
-                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i-targetsToAdd));
-                            TICForOutput = Convert.ToString(TICs.ElementAt(i-targetsToAdd));
-                            FileForOutput = Convert.ToString(files.ElementAt(i - targetsToAdd));
+                            // Repeat the logic based on the condition
+                            index = (i + 1) % scans.Count;
+                            scanNumberForOutput = Convert.ToString(scans.ElementAt(index));
+                            chargeForOutput = Convert.ToString(charges.ElementAt(index));
+                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(index));
+                            TICForOutput = Convert.ToString(TICs.ElementAt(index));
+                            FileForOutput = Convert.ToString(files.ElementAt(index));
                         }
                     }
-                    else
-                    {
-                        scanNumberForOutput = Convert.ToString(scans.ElementAt(i));
-                        chargeForOutput = Convert.ToString(charges.ElementAt(i));
-                        retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(i));
-                        TICForOutput = Convert.ToString(TICs.ElementAt(i));
-                        FileForOutput = Convert.ToString(files.ElementAt(i));
-                    }
+
                     // Adding of each string component to output
                     solutionProcess += solutionsUpdate + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + theoreticalMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + observedMass + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chemicalFormula + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + error + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + scanNumberForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + chargeForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + retentionTimeForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + TICForOutput + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + FileForOutput + Environment.NewLine;
                 }
@@ -1826,25 +2766,13 @@ namespace glycombo
             }
         }
 
-        private void Advanced_Button(object sender, RoutedEventArgs e)
-        {
-            if (advanced.Visibility == Visibility.Collapsed)
-            {
-                advanced.Visibility = Visibility.Visible;
-                advanced_text.Text = "Hide Advanced Monosaccharides";
-            }
-            else
-            {
-                advanced.Visibility = Visibility.Collapsed;
-                advanced_text.Text = "Show Advanced Monosaccharides";
-            }
-        }
-
         private void HextoggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Hex_container.Visibility = Visibility.Visible;
@@ -1861,6 +2789,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     HexNAc_container.Visibility = Visibility.Visible;
@@ -1877,6 +2807,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     dHex_container.Visibility = Visibility.Visible;
@@ -1893,6 +2825,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     NeuAc_container.Visibility = Visibility.Visible;
@@ -1909,6 +2843,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     NeuGc_container.Visibility = Visibility.Visible;
@@ -1925,6 +2861,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     HexN_container.Visibility = Visibility.Visible;
@@ -1941,6 +2879,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     HexA_container.Visibility = Visibility.Visible;
@@ -1957,6 +2897,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     dHexNAc_container.Visibility = Visibility.Visible;
@@ -1973,6 +2915,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Pent_container.Visibility = Visibility.Visible;
@@ -1989,6 +2933,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     KDN_container.Visibility = Visibility.Visible;
@@ -2005,6 +2951,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Phos_container.Visibility = Visibility.Visible;
@@ -2021,6 +2969,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Sulf_container.Visibility = Visibility.Visible;
@@ -2038,6 +2988,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     lNeuAc_container.Visibility = Visibility.Visible;
@@ -2054,6 +3006,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     eNeuAc_container.Visibility = Visibility.Visible;
@@ -2071,6 +3025,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     dNeuAc_container.Visibility = Visibility.Visible;
@@ -2088,6 +3044,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     amNeuAc_container.Visibility = Visibility.Visible;
@@ -2104,6 +3062,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     Acetyl_container.Visibility = Visibility.Visible;
@@ -2121,6 +3081,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     lNeuGc_container.Visibility = Visibility.Visible;
@@ -2137,6 +3099,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     eNeuGc_container.Visibility = Visibility.Visible;
@@ -2154,6 +3118,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     dNeuGc_container.Visibility = Visibility.Visible;
@@ -2171,6 +3137,8 @@ namespace glycombo
             ToggleSwitch? toggleSwitch = sender as ToggleSwitch;
             if (toggleSwitch != null)
             {
+                UpdateMonosaccharideTextBox();
+                currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
                 if (toggleSwitch.IsOn == true)
                 {
                     amNeuGc_container.Visibility = Visibility.Visible;
@@ -2191,16 +3159,73 @@ namespace glycombo
             InputMasses.Text = "";
             filePath = "";
             offByOneChecked = false;
-            nativeChecked = false;
+            OffByOne.IsChecked = false;
+            derivatisation = "";
+            inputChecked = "Text";
+            InputMasses.Text = "";
             DaChecked = false;
-            TextChecked = false;
+            Da.IsChecked = true;
+            DaError.Text = "0.6";
+            reducingEndBox.Text = "Free";
+            Native.IsChecked = true;
+            PresetCombo.SelectedIndex = 1;
+            PresetCombo.SelectedIndex = 0;
+            customReducingCheck.IsChecked = false;
+            customAdductCheckBox.IsChecked = false;
             submitbutton.IsEnabled = false;
+            neutralMCheckBox.IsChecked = true;
+            negativeMHCheckBox.IsChecked = false;
+            negativeMFACheckBox.IsChecked = false;
+            negativeMAACheckBox.IsChecked = false;
+            negativeMTFACheckBox.IsChecked = false;
+            positiveMHCheckBox.IsChecked = false;
+            positiveMKCheckBox.IsChecked = false;
+            positiveMNaCheckBox.IsChecked = false;
+            positiveMNH4CheckBox.IsChecked = false;
+            resetbutton.IsEnabled = true;
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            UpdateAdductTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
         }
 
         private void MzmlRadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            submitbutton.IsEnabled = false;
-            TextChecked = false;
+            if (executeExample != null)
+            {
+                executeExample.Visibility = Visibility.Collapsed;
+            }
+            if (customAdductPolarity != null)
+            {
+                customAdductPolarity.IsEnabled = true;
+            }
+            browseButton = (Button)FindName("browseButton");
+            if (browseButton != null)
+            {
+                browseButton.IsEnabled = true;
+                browseButton.Content = "Browse mzML";
+            }
+            else
+            {
+                // Handle the null case
+                Console.WriteLine("browseButton is null");
+            }
+            inputChecked = "mzML";
+            mzMLFileNamesBlock.Visibility = Visibility.Visible;
+            inputOrLabel.Visibility = Visibility.Collapsed;
+            InputMasses.Visibility = Visibility.Collapsed;
+            positiveMHCheckBox.IsEnabled = false;
+            negativeMHCheckBox.IsEnabled = false;
+            positiveMHCheckBox.IsChecked = true;
+            negativeMHCheckBox.IsChecked = true;
+            if (mzMLFileNamesBlock.Text.Contains("mzML") == true)
+            {
+                submitbutton.IsEnabled = true;
+            }
+            else
+            {
+                submitbutton.IsEnabled = false;
+            }
         }
 
         private void PresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2240,8 +3265,11 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Collapsed;
-                    advanced_text.Text = "Show Advanced Monosaccharides";
+                    customMonoCheck1.IsChecked = false;
+                    customMonoCheck2.IsChecked = false;
+                    customMonoCheck3.IsChecked = false;
+                    customMonoCheck4.IsChecked = false;
+                    customMonoCheck5.IsChecked = false;
                     break;
 
                 case 1: // Mammal NG
@@ -2276,8 +3304,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Collapsed;
-                    advanced_text.Text = "Show Advanced Monosaccharides";
                     break;
 
                 case 2: // Mammal OG
@@ -2314,8 +3340,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 case 3: // GSL
@@ -2350,8 +3374,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Collapsed;
-                    advanced_text.Text = "Show Advanced Monosaccharides";
                     break;
 
                 case 4: // Plant N-glycan
@@ -2388,8 +3410,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 case 5: // Plant O-glycan
@@ -2428,8 +3448,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 case 6: // Fungal N-glycan
@@ -2472,8 +3490,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 case 7: // Fungal O-glycan
@@ -2516,8 +3532,6 @@ namespace glycombo
                     eNeuGctoggleSwitch.IsOn = false;
                     dNeuGctoggleSwitch.IsOn = false;
                     amNeuGctoggleSwitch.IsOn = false;
-                    advanced.Visibility = Visibility.Visible;
-                    advanced_text.Text = "Hide Advanced Monosaccharides";
                     break;
 
                 default:
@@ -2528,30 +3542,224 @@ namespace glycombo
 
         private void TextRadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            TextChecked = true;
-            submitbutton = (Button)FindName("submitbutton");
-            if (submitbutton != null)
+            if (mzMLFileNamesBlock != null)
             {
-                submitbutton.IsEnabled = true;
+                mzMLFileNamesBlock.Visibility = Visibility.Collapsed;
             }
-            else
+            if (executeExample != null)
             {
-                // Handle the null case
-                Console.WriteLine("submitbutton is null");
+                executeExample.Visibility = Visibility.Visible;
+            }
+            inputChecked = "Text";
+            if (customAdductPolarity != null)
+            {
+                customAdductPolarity.IsEnabled = false;
+            }
+            browseButton = (Button)FindName("browseButton");
+            if (browseButton != null)
+            {
+                browseButton.IsEnabled = true;
+                browseButton.Content = "Browse txt";
+            }
+            if (inputOrLabel != null && InputMasses != null)
+            {
+                inputOrLabel.Visibility = Visibility.Visible;
+                InputMasses.Visibility = Visibility.Visible;
+            }
+            if (positiveMHCheckBox != null && negativeMHCheckBox != null) {
+                positiveMHCheckBox.IsChecked = false;
+                negativeMHCheckBox.IsChecked = false;
+                positiveMHCheckBox.IsEnabled = true;
+                negativeMHCheckBox.IsEnabled = true;
             }
         }
 
-        private void customMonosaccharides_Click(object sender, RoutedEventArgs e)
+        private void UpdateMonosaccharideTextBox()
         {
-            if (customInfoForm == null || !customInfoForm.IsLoaded) // Create a new instance if it doesn't exist or is disposed
-            {
-                customInfoForm = new CustomForm(ViewModel);
-                customInfoForm.Show();
+            var toggledMonoSwitches = new StringBuilder();
+            toggledMonoSwitches.Append("<Monosaccharides>");
+            // Check the state of each ToggleSwitch and build the string accordingly
+            if (HextoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" Hex(" + HexMin.Text + "-" + HexMax.Text + "),");
+            if (HexNActoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" HexNAc(" + HexNAcMin.Text + "-" + HexNAcMax.Text + "),");
+            if (dHextoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" dHex(" + dHexMin.Text + "-" + dHexMax.Text + "),");
+            if (Neu5ActoggleSwitch.IsOn)
+               toggledMonoSwitches.Append(" NeuAc(" + Neu5AcMin.Text + "-" + Neu5AcMax.Text + "),");
+            if (Neu5GctoggleSwitch.IsOn)
+               toggledMonoSwitches.Append(" NeuGc(" + Neu5GcMin.Text + "-" + Neu5GcMax.Text + "),");
+            if (HexNtoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" HexN(" + HexNMin.Text + "-" + HexNMax.Text + "),");
+            if (HexAtoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" HexA(" + HexAMin.Text + "-" + HexAMax.Text + "),");
+            if (dHexNActoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" dHexNAc(" + dHexNAcMin.Text + "-" + dHexNAcMax.Text + "),");
+            if (PenttoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" Pent(" + PentMin.Text + "-" + PentMax.Text + "),");
+            if (KDNtoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" KDN(" + KDNMin.Text + "-" + KDNMax.Text + "),");
+            if (PhostoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" Phos(" + PhosMin.Text + "-" + PhosMax.Text + "),");
+            if (SulftoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" Sulf(" + SulfMin.Text + "-" + SulfMax.Text + "),");
+            if (lNeuActoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" L(" + lNeuAcMin.Text + "-" + lNeuAcMax.Text + "),");
+            if (eNeuActoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" E(" + eeNeuAcMin.Text + "-" + eeNeuAcMax.Text + "),");
+            if(dNeuActoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" D(" + dNeuAcMin.Text + "-" + dNeuAcMax.Text + "),");
+            if (amNeuActoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" Am(" + amNeuAcMin.Text + "-" + amNeuAcMax.Text + "),");
+            if (AcetyltoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" Acetyl(" + AcetylMin.Text + "-" + AcetylMax.Text + "),");
+            if (lNeuGctoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" LG(" + lNeuGcMin.Text + "-" + lNeuGcMax.Text + "),");
+            if (eNeuGctoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" EG(" + eeNeuGcMin.Text + "-" + eeNeuGcMax.Text + "),");
+            if (dNeuGctoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" DG(" + dNeuGcMin.Text + "-" + dNeuGcMax.Text + "),");
+            if (amNeuGctoggleSwitch.IsOn)
+                toggledMonoSwitches.Append(" AmG(" + amNeuGcMin.Text + "-" + amNeuGcMax.Text + "),");
+            if (customMonoCheck1.IsChecked == true )
+                toggledMonoSwitches.Append(" " + customMonoNameBox1.Text+ "(" + customMonoMinBox1.Text + "-" + customMonoMaxBox1.Text + "),");
+            if (customMonoCheck2.IsChecked == true)
+                toggledMonoSwitches.Append(" " + customMonoNameBox2.Text + "(" + customMonoMinBox2.Text + "-" + customMonoMaxBox2.Text + "),");
+            if (customMonoCheck3.IsChecked == true)
+                toggledMonoSwitches.Append(" " + customMonoNameBox3.Text + "(" + customMonoMinBox3.Text + "-" + customMonoMaxBox3.Text + "),");
+            if (customMonoCheck4.IsChecked == true)
+                toggledMonoSwitches.Append(" " + customMonoNameBox4.Text + "(" + customMonoMinBox4.Text + "-" + customMonoMaxBox4.Text + "),");
+            if (customMonoCheck5.IsChecked == true)
+                toggledMonoSwitches.Append(" " + customMonoNameBox5.Text + "(" + customMonoMinBox5.Text + "-" + customMonoMaxBox5.Text + "),");
+            currentMonosaccharideSelection = toggledMonoSwitches.ToString().TrimEnd(',');
+        }
+
+        private void UpdateAdductTextBox()
+        {
+            var toggledAdducts = new StringBuilder();
+            toggledAdducts.Append("<Adducts>");
+            // Check the state of each Adduct Checkbox and build the string accordingly
+            if (neutralMCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M],");
+            if (negativeMHCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M-H⁻]⁻,");
+            if (positiveMHCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+H]⁺,");
+            if (negativeMFACheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+COO]⁻,");
+            if (positiveMNaCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+Na]⁺,");
+            if (negativeMAACheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+CH₃COO]⁻,");
+            if (positiveMKCheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+K]⁺,");
+            if (negativeMTFACheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+TFA-H]⁻,");
+            if (positiveMNH4CheckBox.IsChecked == true)
+                toggledAdducts.Append(" [M+NH₄]⁺,");
+            if (customAdductCheckBox.IsChecked == true)
+                toggledAdducts.Append(" Custom[M+" + customAdductMassText.Text + "]" + customAdductPolarity.Text + ",");
+            currentAdductSelection = toggledAdducts.ToString().TrimEnd(',');
+        }
+
+        private void customAdductCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (customAdductCheckBox.IsChecked == true) {
+                customAdductMassLabel.Visibility = Visibility.Visible;
+                customAdductMassText.Visibility = Visibility.Visible;
+                customAdductPolarity.Visibility = Visibility.Visible;
+                customAdductPolarityLabel.Visibility = Visibility.Visible;
             }
-            else
+        }
+
+        private void customAdductCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            customAdductMassLabel.Visibility = Visibility.Collapsed;
+            customAdductMassText.Visibility = Visibility.Collapsed;
+            customAdductPolarity.Visibility = Visibility.Collapsed;
+            customAdductPolarityLabel.Visibility = Visibility.Collapsed;
+        }
+
+        private void reducingEndBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (reducingEndBox.SelectedIndex == 8)
             {
-                customInfoForm.Show(); // Bring the existing form to the front if it's already open
+                customReducingCheck.IsChecked = true;
             }
+        }
+
+        private void customReducingCheck_Checked(object sender, RoutedEventArgs e)
+        {
+            reducingEndBox.SelectedIndex = 8;
+            customReducingNameBox.Visibility = Visibility.Visible;
+            customReducingMassBox.Visibility = Visibility.Visible;
+            customReducingCBox.Visibility = Visibility.Visible;
+            customReducingHBox.Visibility = Visibility.Visible;
+            customReducingNBox.Visibility = Visibility.Visible;
+            customReducingOBox.Visibility = Visibility.Visible;
+        }
+
+        private void customReducingCheck_Unchecked(object sender, RoutedEventArgs e)
+        {
+            reducingEndBox.SelectedIndex = -1;
+            customReducingNameBox.Visibility = Visibility.Collapsed;
+            customReducingMassBox.Visibility = Visibility.Collapsed;
+            customReducingCBox.Visibility = Visibility.Collapsed;
+            customReducingHBox.Visibility = Visibility.Collapsed;
+            customReducingNBox.Visibility = Visibility.Collapsed;
+            customReducingOBox.Visibility = Visibility.Collapsed;
+        }
+
+        private void startTab_GotFocus(object sender, RoutedEventArgs e)
+        {
+            UpdateMonosaccharideTextBox();
+            currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection;
+            UpdateAdductTextBox();
+            currentAdductSelectionInfo.Text = currentAdductSelection;
+            if (OffByOne.IsChecked == true) {offByOneChecked = true;}    
+            else {offByOneChecked = false;}
+        }
+
+        private void Da_Checked(object sender, RoutedEventArgs e)
+        {
+            massErrorType = "Da";
+        }
+
+        private void ppm_Checked(object sender, RoutedEventArgs e)
+        {
+            massErrorType = "ppm";
+        }
+
+        private void Native_Checked(object sender, RoutedEventArgs e)
+        {
+            derivatisation = "Native";
+        }
+
+        private void Permeth_Checked(object sender, RoutedEventArgs e)
+        {
+            derivatisation = "Permethylated";
+        }
+
+        private void Peracetyl_Checked(object sender, RoutedEventArgs e)
+        {
+            derivatisation = "Peracetylated";
+        }
+
+        private void InputMasses_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (InputMasses.Text != "" || InputMasses.Text != null)
+            {
+                submitbutton.IsEnabled = true;
+            }    
+        }
+
+        private void executeExample_Click(object sender, RoutedEventArgs e)
+        {
+            Reset_Click(sender, e);
+            InputMasses.Text = "1683.63" + Environment.NewLine + "1318.50" + Environment.NewLine + "1236.4490" + Environment.NewLine + "1642.6078" + Environment.NewLine + "1521.58" + Environment.NewLine + "1845.69" + Environment.NewLine + "1667.64" + Environment.NewLine + "1829.69" + Environment.NewLine + "2282.84" + Environment.NewLine + "1480.55" + Environment.NewLine + "1991.75" + Environment.NewLine + "1933.70" + Environment.NewLine + "1464.56" + Environment.NewLine + "1626.61";
+            PresetCombo.SelectedIndex = 1;
+            reducingEndBox.SelectedIndex = 1;
+            MessageBox.Show("Ready to submit!");
         }
     }
 }
