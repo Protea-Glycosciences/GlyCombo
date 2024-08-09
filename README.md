@@ -19,9 +19,10 @@ This application enables rapid extraction of precursor *m/z* values from mzML fi
 Features
 --------
 - Open-source Windows application created in C#.
-- Extensive monosaccharide and modification options including Hex, HexNAc, dHex, Neu5Ac, Neu5Gc, HexN, HexA, dHexNAc, Pent, KDN, Phosphate and Sulfate.
-- Support for native and permethylated glycan samples.
-- Support for free and reduced glycans.
+- Unlimited monosaccharide and modification options including Hex, HexNAc, dHex, Neu5Ac, Neu5Gc, HexN, HexA, dHexNAc, Pent, KDN, Phosphate, Sulfate, and Custom monosaccharides.
+- Support for native, peracetylated, and permethylated glycan samples.
+- Support for all commonly observed adducts by MS, including custom adducts and the ability to search for multiple adducts in the same search.
+- Support for free, reduced, and tagged glycans.
 - Automatic polarity extraction for mzML input files.
 
 Input and Output Options
