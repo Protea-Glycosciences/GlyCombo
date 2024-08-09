@@ -155,16 +155,16 @@ namespace glycombo
         private string inputChecked = "Text";
         private bool offByOneChecked;
         int customMono = 0;
-        private string customContent = "Monosaccharides: dehydrated monoisotopic mass/chemical formula (e.g. Glc is 162.0528 and C6H10O5)" + Environment.NewLine
-            + "Reducing ends: mass addition to the dehydrated monosaccharides (e.g. Free +18 (H2O), InstantPC +279)" + Environment.NewLine
-            + "Adducts: described as their monoisotopic exact mass (e.g. M+Na+ = 23, M+TFA- = 113, M-H = -1)";
+        private string customContent = "Monosaccharides: dehydrated monoisotopic mass/chemical formula (e.g. Glc is 162.0528 and C₆H₁₀O₅)" + Environment.NewLine
+            + "Reducing ends: mass addition to the dehydrated monosaccharides (e.g. Free +18 (H₂O), InstantPC +279)" + Environment.NewLine
+            + "Adducts: described as their monoisotopic exact mass (e.g. M+Na⁺ = 23, M+TFA⁻ = 113, M-H⁻ = -1)";
         private string docuContent = "     GlyCombo is designed to assign all possible monosaccharide compositions of a glycan to experimentally determined masses. These assignments are based on real-time matched combinations of a monosaccharide list, with monosaccharide counts constrained by user input."
             + Environment.NewLine + Environment.NewLine
             + "     We recommend mzML input to take full advantage of GlyCombo's features which streamline downstream data analysis steps like quantitation (Skyline-compatible output), and MS2 annotation (scan numbers provided for those with matched glycans for GlycoWorkBench). Other metadata are also provided including precursor charge state, retention time, and summed ion intensity for the given MS2 scan.";
         private string docuContent2 = "     As MS can generate varying charge states and adducts, as well as be prepared derivatives (reducing end tags, and derivatisation), we have provided parameters to be completed by the user:"
-    + Environment.NewLine + "     -> Start Tab: Reducing End, Derivatisation"
-    + Environment.NewLine + "     -> Advanced tab: Adducts (intervention not needed unless interested in adducts before M+H/M-H)"
-    + Environment.NewLine + "     -> Custom tab: Custom monosaccharides, reducing end, and adducts.";
+    + Environment.NewLine + "     • Start Tab: Reducing End, Derivatisation"
+    + Environment.NewLine + "     • Advanced tab: Adducts (intervention not needed unless interested in adducts before M+H/M-H)"
+    + Environment.NewLine + "     • Custom tab: Custom monosaccharides, reducing end, and adducts.";
 
 
 
