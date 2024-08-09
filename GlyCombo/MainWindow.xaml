@@ -441,8 +441,8 @@
                         </LinearGradientBrush>
                     </Grid.Background>
                     <TextBlock x:Name="documentationText" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBlock" MaxHeight="400" Height="165" VerticalAlignment="Top"/>
-                    <Image HorizontalAlignment="Right" Height="291" Margin="0,0,10,15" VerticalAlignment="Bottom" Width="493" Source="/AGS_composition_to_MS.tiff" UseLayoutRounding="True"/>
-                    <TextBlock x:Name="documentationText2" Margin="10,206,508,0" TextWrapping="Wrap" Text="TextBlock" MaxHeight="400" Height="230" VerticalAlignment="Top"/>
+                    <Image HorizontalAlignment="Right" Margin="0,0,10,15" VerticalAlignment="Bottom" Width="400" Source="/AGS_composition_to_MS.tiff" UseLayoutRounding="True"/>
+                    <TextBlock x:Name="documentationText2" Margin="10,206,434,0" TextWrapping="Wrap" Text="TextBlock" MaxHeight="400" Height="230" VerticalAlignment="Top"/>
                     <Label Content="User Input" HorizontalAlignment="Left" Margin="10,182,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                 </Grid>
             </TabItem>
