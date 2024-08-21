@@ -116,9 +116,9 @@
                     <Label Grid.Row="0" Margin="694,10,0,425" Style="{StaticResource subheading}" HorizontalAlignment="Left" Width="76" Content="Maximum" FontSize="14" Padding="0,0,0,0"/>
                     <Label Grid.Row="0" Margin="625,10,0,425" HorizontalAlignment="Left" Style="{StaticResource subheading}" Width="67" Content="Minimum" FontSize="14" Padding="0,0,0,0"/>
                     <ui:ToggleSwitch x:Name="HextoggleSwitch" Margin="339,27,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="HextoggleSwitch_Toggled" Width="50" Height="32"/>
-                    <Label Margin="389,33,167,0" Height="20" VerticalAlignment="Top" Content="Hexose (Hex)"/>
+                    <Label Margin="389,33,167,0" Height="20" VerticalAlignment="Top" Content="Hexose (Hex)" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}"/>
                     <ui:ToggleSwitch x:Name="HexNActoggleSwitch" Margin="339,53,0,0" OffContent="" OnContent="" Toggled="HexNActoggleSwitch_Toggled" Width="50" Height="32" VerticalAlignment="Top"/>
-                    <Label Margin="389,60,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-acetyl-hexosamine (HexNAc)"/>
+                    <Label Margin="389,60,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-acetyl-hexosamine (HexNAc)" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}"/>
                     <ui:ToggleSwitch x:Name="dHextoggleSwitch" OffContent="" OnContent="" Toggled="dHextoggleSwitch_Toggled" Width="50" Height="32" Margin="339,79,0,0" VerticalAlignment="Top"/>
                     <Label Margin="389,84,167,0" Height="20" VerticalAlignment="Top" Content="Deoxyhexose (dHex)"/>
                     <ui:ToggleSwitch x:Name="Neu5ActoggleSwitch" OffContent="" OnContent="" Toggled="Neu5ActoggleSwitch_Toggled" Width="50" Height="32" Margin="339,105,0,0" VerticalAlignment="Top"/>
@@ -137,8 +137,8 @@
                         <ComboBoxItem Content="Fungal 𝑂-glycan" FontSize="12"/>
                     </ComboBox>
                     <StackPanel  Margin="137,10,478,368">
-                        <RadioButton GroupName="Upload" x:Name="TextRadioButton" Grid.Row="0" Grid.Column="1" IsChecked="True" Checked="TextRadioButton_Checked" Content="Text"/>
-                        <RadioButton GroupName="Upload" x:Name="MzmlRadioButton" Grid.Row="0" Grid.Column="1" Checked="MzmlRadioButton_Checked" Content="mzML" Width="74"/>
+                        <RadioButton GroupName="Upload" x:Name="TextRadioButton" Grid.Row="0" Grid.Column="1" IsChecked="True" Checked="TextRadioButton_Checked" Content="Text" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}"/>
+                        <RadioButton GroupName="Upload" x:Name="MzmlRadioButton" Grid.Row="0" Grid.Column="1" Checked="MzmlRadioButton_Checked" Content="mzML" Width="74" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}"/>
                         <ui:LayoutPanel x:Name="TextInput" Margin="0,10,0,0" Height="100" >
                             <ui:LayoutPanel.Style>
                                 <Style TargetType="{x:Type ui:LayoutPanel}">

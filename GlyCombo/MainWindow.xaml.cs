@@ -24,6 +24,7 @@ using GlyCombo;
 using System.Reflection.Metadata;
 using System.Collections;
 using System.Security.Policy;
+using System.Runtime.ConstrainedExecution;
 
 namespace glycombo
 {
@@ -222,6 +223,9 @@ namespace glycombo
         public MainWindow()
         {
             InitializeComponent();
+            // Important, detects if the user is running in dark mode. We need to change the UI if that is the case
+            bool isDarkMode = ThemeHelper.IsWindowsInDarkMode();
+            MessageBox.Show($"Windows is in dark mode: {isDarkMode}");
             customText.Text = customContent;
             documentationText.Text = docuContent;
             documentationText2.Text = docuContent2;
@@ -303,6 +307,16 @@ namespace glycombo
             customMono += -1;
         }
 
+
+        public static class ColorUtils
+        {
+            public static bool IsColorLight(Color clr)
+            {
+                // Calculate whether the color is light based on the given formula
+                return ((5 * clr.G) + (2 * clr.R) + clr.B) > (8 * 128);
+            }
+        }
+
         private void customSettingsSave_Click(object sender, RoutedEventArgs e)
         {
             UpdateMonosaccharideTextBox();
@@ -359,6 +373,39 @@ namespace glycombo
             {
                 // Write the content to the selected file
                 File.WriteAllText(saveFileDialog.FileName, saveOutput);
+            }
+        }
+
+        public class ThemeHelper
+        {
+            public static bool IsWindowsInDarkMode()
+            {
+                const string registryPath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+                const string registryValue = "AppsUseLightTheme";
+
+                try
+                {
+                    using (RegistryKey key = Registry.CurrentUser.OpenSubKey(registryPath))
+                    {
+                        if (key != null)
+                        {
+                            object value = key.GetValue(registryValue);
+                            if (value != null && int.TryParse(value.ToString(), out int result))
+                            {
+                                // If the value is 0, it indicates dark mode
+                                return result == 0;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions as needed, for example, log the error
+                    Console.WriteLine($"Error accessing registry: {ex.Message}");
+                }
+
+                // Default to light mode if there's an issue accessing the registry
+                return false;
             }
         }
 
