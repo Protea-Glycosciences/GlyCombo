@@ -1,4 +1,4 @@
-﻿<Window x:Class="glycombo.MainWindow"
+﻿<Window x:Name="glycomboWindow" x:Class="glycombo.MainWindow"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -10,10 +10,10 @@
         Title="GlyCombo 0.7 - Protea Glycosciences" Height="517" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="320" MinWidth="800" Background="#FFE0E0E0" FontFamily="Arial Black" FontSize="20">
 
 
-    <Grid Margin="3,3,7,0" RenderTransformOrigin="0,0" Height="484" VerticalAlignment="Top">
-        <TabControl Height="505" VerticalAlignment="Top" Margin="-3,-9,-7,0" HorizontalContentAlignment="Center" Background="#FFE0E0E0">
+    <Grid x:Name="tabBackground" Margin="3,3,7,0" RenderTransformOrigin="0,0" Height="484" VerticalAlignment="Top">
+        <TabControl x:Name="glycomboTabControl" Height="505" VerticalAlignment="Top" Margin="-3,-9,-7,0" HorizontalContentAlignment="Center" Background="#FFE0E0E0">
             <TabItem Header="Start" GotFocus="startTab_GotFocus">
-                <Grid Height="459" VerticalAlignment="Top">
+                <Grid x:Name="tabStartBackground" Height="459" VerticalAlignment="Top">
                     <Grid.Background>
                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                             <LinearGradientBrush.RelativeTransform>
@@ -35,7 +35,7 @@
             </Hyperlink>
                     </TextBlock>
                     <ProgressBar x:Name="ProgressBarMZML" Visibility="Collapsed" IsIndeterminate="True" HorizontalAlignment="Left" Height="8" Margin="144,73,0,0" Width="175" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top"/>
-                    <Label Style="{StaticResource heading}" HorizontalAlignment="Left" Width="112" Height="80" VerticalAlignment="Top" Margin="10,194,0,0">Mass Error:</Label>
+                    <Label HorizontalAlignment="Left" Width="112" Height="80" VerticalAlignment="Top" Margin="10,194,0,0" FontWeight="Bold">Mass Error:</Label>
                     <StackPanel Margin="137,194,467,0" Height="100" VerticalAlignment="Top">
                         <ui:LayoutPanel>
                             <ui:LayoutPanel.Style>
@@ -66,7 +66,7 @@
                         <RadioButton GroupName="Error" x:Name="Da" Grid.Row="1" Grid.Column="1" IsChecked="True" Content="Da" Checked="Da_Checked" Width="67"/>
                         <RadioButton GroupName="Error" x:Name="ppm" Grid.Row="1" Grid.Column="1" Content="ppm" Checked="ppm_Checked"/>
                     </StackPanel>
-                    <Label Margin="10,298,678,0" Style="{StaticResource heading}" Height="32" VerticalAlignment="Top">Reducing End:</Label>
+                    <Label Margin="10,298,678,0" Height="32" VerticalAlignment="Top" FontWeight="Bold">Reducing End:</Label>
                     <StackPanel  Margin="137,299,467,0" Height="32" VerticalAlignment="Top">
                         <ComboBox x:Name="reducingEndBox" Width="171" SelectedIndex="0" SelectionChanged="reducingEndBox_SelectionChanged">
                             <ComboBoxItem Content="Free"/>
@@ -80,13 +80,13 @@
                             <ComboBoxItem Content="Custom"/>
                         </ComboBox>
                     </StackPanel>
-                    <Label Margin="10,346,678,0" Style="{StaticResource heading}" Height="64" VerticalAlignment="Top">Derivatisation:</Label>
+                    <Label Margin="10,346,678,0"  Height="64" VerticalAlignment="Top" FontWeight="Bold">Derivatisation:</Label>
                     <StackPanel Margin="137,346,488,0" Height="95" VerticalAlignment="Top">
                         <RadioButton GroupName="State" Name="Native" Grid.Row="3" Grid.Column="1" IsChecked="True" Checked="Native_Checked">Native</RadioButton>
                         <RadioButton GroupName="State" Name="Permeth" Grid.Row="3" Grid.Column="1" Checked="Permeth_Checked" >Permethylated</RadioButton>
                         <RadioButton GroupName="State" Name="Peracetyl" Grid.Row="3" Grid.Column="1" Checked="Peracetyl_Checked" >Peracetylated</RadioButton>
                     </StackPanel>
-                    <Label  Style="{StaticResource heading}" Height="34" Content="Settings summary" Margin="339,162,324,0" VerticalAlignment="Top"/>
+                    <Label Height="34" Content="Settings summary" Margin="339,162,324,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Button x:Name="submitbutton" Content="Submit" MinWidth="150" IsEnabled="False" Click="Button1_Click" Margin="628,353,0,0" VerticalAlignment="Top" Height="31" Width="149"/>
                     <ProgressBar x:Name="ProgressBarSubmit" Visibility="Collapsed" IsIndeterminate="True" HorizontalAlignment="Left" Height="13" Margin="628,392,0,0" Width="149" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top"/>
                     <Button x:Name="resetbutton" Content="Reset" MinWidth="150" IsEnabled="False" Click="Reset_Click" Margin="628,407,0,0" Height="32" Width="139" VerticalAlignment="Top"/>
@@ -110,19 +110,19 @@
                         <TextBox x:Name="Neu5GcMin" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" VerticalAlignment="Top" Margin="284,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0" HorizontalAlignment="Left"/>
                         <TextBox x:Name="Neu5GcMax" local:NumericInputBehavior.IsNumericInput="True" Grid.Row="0" Grid.RowSpan="5" Grid.Column="2" Text="0" MaxLength="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="354,0,0,0" Width="50" Height="20" MinHeight="18" Padding="10,0,6,0"></TextBox>
                     </ui:LayoutPanel>
-                    <Label Margin="10,8,688,403" Style="{StaticResource heading}" Content="Input:"/>
+                    <Label Margin="10,8,688,403" Content="Input:" FontWeight="Bold"/>
                     <TextBox x:Name="InputMasses" local:NumericInputBehavior.IsNumericInput="True" Width="175" HorizontalAlignment="Left" ui:ControlHelper.PlaceholderText="Insert list of neutral or singly charged masses" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True" Margin="137,82,0,0" Height="102" VerticalAlignment="Top" TextChanged="InputMasses_TextChanged"/>
-                    <Label Grid.Row="0" Style="{StaticResource subheading}" Margin="330,10,334,425" Content="Monosaccharides" FontSize="14" Padding="5,0,5,0"/>
-                    <Label Grid.Row="0" Margin="694,10,0,425" Style="{StaticResource subheading}" HorizontalAlignment="Left" Width="76" Content="Maximum" FontSize="14" Padding="0,0,0,0"/>
-                    <Label Grid.Row="0" Margin="625,10,0,425" HorizontalAlignment="Left" Style="{StaticResource subheading}" Width="67" Content="Minimum" FontSize="14" Padding="0,0,0,0"/>
+                    <Label Grid.Row="0" Margin="330,10,334,425" Content="Monosaccharides" FontSize="14" Padding="5,0,5,0" FontWeight="Bold"/>
+                    <Label Grid.Row="0" Margin="694,10,0,425" HorizontalAlignment="Left" Width="76" Content="Maximum" FontSize="14" Padding="0,0,0,0" FontWeight="Bold"/>
+                    <Label Grid.Row="0" Margin="625,10,0,425" HorizontalAlignment="Left" Width="67" Content="Minimum" FontSize="14" Padding="0,0,0,0" FontWeight="Bold"/>
                     <ui:ToggleSwitch x:Name="HextoggleSwitch" Margin="339,27,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="HextoggleSwitch_Toggled" Width="50" Height="32"/>
-                    <Label Margin="389,33,167,0" Height="20" VerticalAlignment="Top" Content="Hexose (Hex)" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}"/>
+                    <Label Margin="389,33,167,0" Height="20" VerticalAlignment="Top" Content="Hexose (Hex)"/>
                     <ui:ToggleSwitch x:Name="HexNActoggleSwitch" Margin="339,53,0,0" OffContent="" OnContent="" Toggled="HexNActoggleSwitch_Toggled" Width="50" Height="32" VerticalAlignment="Top"/>
-                    <Label Margin="389,60,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-acetyl-hexosamine (HexNAc)" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}"/>
+                    <Label Margin="389,60,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-acetyl-hexosamine (HexNAc)"/>
                     <ui:ToggleSwitch x:Name="dHextoggleSwitch" OffContent="" OnContent="" Toggled="dHextoggleSwitch_Toggled" Width="50" Height="32" Margin="339,79,0,0" VerticalAlignment="Top"/>
                     <Label Margin="389,84,167,0" Height="20" VerticalAlignment="Top" Content="Deoxyhexose (dHex)"/>
                     <ui:ToggleSwitch x:Name="Neu5ActoggleSwitch" OffContent="" OnContent="" Toggled="Neu5ActoggleSwitch_Toggled" Width="50" Height="32" Margin="339,105,0,0" VerticalAlignment="Top"/>
-                    <Label Margin="389,111,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-acetyl-neuraminic acid (NeuAc)"/>
+                    <Label Margin="389,111,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-acetyl-neuraminic acid (NeuAc)" Background="#00000000"/>
                     <ui:ToggleSwitch x:Name="Neu5GctoggleSwitch" Margin="339,131,0,0" VerticalAlignment="Top" OffContent="" OnContent="" Toggled="Neu5GctoggleSwitch_Toggled" Width="50" Height="32"/>
                     <Label Margin="389,137,167,0" Height="20" VerticalAlignment="Top" Content="𝑁-glycolyl-neuraminic acid (NeuGc)"/>
 
@@ -137,8 +137,8 @@
                         <ComboBoxItem Content="Fungal 𝑂-glycan" FontSize="12"/>
                     </ComboBox>
                     <StackPanel  Margin="137,10,478,368">
-                        <RadioButton GroupName="Upload" x:Name="TextRadioButton" Grid.Row="0" Grid.Column="1" IsChecked="True" Checked="TextRadioButton_Checked" Content="Text" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}"/>
-                        <RadioButton GroupName="Upload" x:Name="MzmlRadioButton" Grid.Row="0" Grid.Column="1" Checked="MzmlRadioButton_Checked" Content="mzML" Width="74" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}"/>
+                        <RadioButton GroupName="Upload" x:Name="TextRadioButton" Grid.Row="0" Grid.Column="1" IsChecked="True" Checked="TextRadioButton_Checked" Content="Text"/>
+                        <RadioButton GroupName="Upload" x:Name="MzmlRadioButton" Grid.Row="0" Grid.Column="1" Checked="MzmlRadioButton_Checked" Content="mzML" Width="74"/>
                         <ui:LayoutPanel x:Name="TextInput" Margin="0,10,0,0" Height="100" >
                             <ui:LayoutPanel.Style>
                                 <Style TargetType="{x:Type ui:LayoutPanel}">
@@ -164,8 +164,8 @@
                             </ui:LayoutPanel.Style>
                         </ui:LayoutPanel>
                     </StackPanel>
-                    <Button x:Name="browseButton" Content="Browse text" Margin="208,26,0,0" Click="UploadButton_Click" Visibility="Visible" VerticalAlignment="Top" Width="104"/>
-                    <Label Name="inputOrLabel" Margin="252,56,0,0" Style="{StaticResource heading}" Content="OR" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Button x:Name="browseButton" Content="Browse text" Margin="208,26,0,0" Click="UploadButton_Click" Visibility="Visible" VerticalAlignment="Top" Width="104" FontWeight="Bold"/>
+                    <Label Name="inputOrLabel" Margin="252,56,0,0" Content="OR" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
                     <Button x:Name="customSettingsSave" Content="Export settings" Margin="348,407,0,0" VerticalAlignment="Top" Click="customSettingsSave_Click" Width="152"/>
                     <Button x:Name="customSettingsLoad" Content="Import settings" Margin="348,353,0,0" VerticalAlignment="Top" Click="customSettingsLoad_Click" Width="152" RenderTransformOrigin="0.449,-0.416"/>
                     <TextBlock x:Name="currentMonosaccharideSelectionInfo" Margin="346,201,0,0" TextWrapping="Wrap" Text="Monosaccharides:" MaxHeight="100" HorizontalAlignment="Left" Width="432" Height="79" VerticalAlignment="Top"/>
@@ -175,7 +175,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Advanced">
-                <Grid VerticalAlignment="Top" Height="457">
+                <Grid x:Name="tabBackgroundAdvanced" VerticalAlignment="Top" Height="457">
                     <Grid.Background>
                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                             <LinearGradientBrush.RelativeTransform>
@@ -324,7 +324,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Custom">
-                <Grid Margin="0,0,0,9">
+                <Grid x:Name="tabBackgroundCustom" Margin="0,0,0,9">
                     <Grid.Background>
                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                             <LinearGradientBrush.RelativeTransform>
@@ -425,7 +425,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Documentation">
-                <Grid Margin="0,0,0,9">
+                <Grid x:Name="tabBackgroundDoc" Margin="0,0,0,9">
                     <Grid.Background>
                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                             <LinearGradientBrush.RelativeTransform>

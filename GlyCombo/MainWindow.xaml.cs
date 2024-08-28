@@ -225,7 +225,15 @@ namespace glycombo
             InitializeComponent();
             // Important, detects if the user is running in dark mode. We need to change the UI if that is the case
             bool isDarkMode = ThemeHelper.IsWindowsInDarkMode();
-            MessageBox.Show($"Windows is in dark mode: {isDarkMode}");
+            if (isDarkMode == true)
+            {
+                tabStartBackground.Background = new SolidColorBrush(Colors.DarkSlateGray);
+                tabBackgroundAdvanced.Background = new SolidColorBrush(Colors.DarkSlateGray);
+                tabBackgroundCustom.Background = new SolidColorBrush(Colors.DarkSlateGray);
+                tabBackgroundDoc.Background = new SolidColorBrush(Colors.DarkSlateGray);
+                glycomboTabControl.Background = new SolidColorBrush(Colors.DarkSlateGray);
+                glycomboWindow.Background = new SolidColorBrush(Colors.DarkSlateGray);
+            }
             customText.Text = customContent;
             documentationText.Text = docuContent;
             documentationText2.Text = docuContent2;
@@ -1975,10 +1983,10 @@ namespace glycombo
                 switch (derivatisation)
                 {
                     case "Native":
-                        solutions = solutions.Replace("146.057908", "dHex ").Replace("162.052823", "Hex ").Replace("291.095416", "Neu5Ac ").Replace("307.090331", "Neu5Gc ").Replace("203.079372", "HexNAc ").Replace("79.966331", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("161.068808", "HexN ").Replace("176.032088", "HexA ").Replace("187.084458", "dHexNAc ").Replace("132.042258", "Pent ").Replace("250.068867", "KDN ").Replace("273.0848518", "lneuac ").Replace("319.1267166", "eeneuac ").Replace("318.1427011", "dneuac ").Replace("290.1114009", "amneuac ").Replace("42.010565", "acetyl ").Replace("289.0797664", "lneugc ").Replace("335.1216313", "eeneugc ").Replace("306.1063155", "dneugc ").Replace("334.1376157", "amneugc ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
+                    solutions = solutions.Replace("146.057908", "dHex ").Replace("162.052823", "Hex ").Replace("291.095416", "Neu5Ac ").Replace("307.090331", "Neu5Gc ").Replace("203.079372", "HexNAc ").Replace("79.966331", "Phos ").Replace("79.956815", "Sulf ").Replace(",", "").Replace("161.068808", "HexN ").Replace("176.032088", "HexA ").Replace("187.084458", "dHexNAc ").Replace("132.042258", "Pent ").Replace("250.068867", "KDN ").Replace("273.0848518", "lneuac ").Replace("319.1267166", "eeneuac ").Replace("318.1427011", "dneuac ").Replace("290.1114009", "amneuac ").Replace("42.010565", "acetyl ").Replace("289.0797664", "lneugc ").Replace("335.1216313", "eeneugc ").Replace("306.1063155", "dneugc ").Replace("334.1376157", "amneugc ").Replace(customMono1Mass.ToString(), customMono1Name + " ").Replace(customMono2Mass.ToString(), customMono2Name + " ").Replace(customMono3Mass.ToString(), customMono3Name + " ").Replace(customMono4Mass.ToString(), customMono4Name + " ").Replace(customMono5Mass.ToString(), customMono5Name + " ");
 
-                        // Chemical formulae for native
-                        dHexCount = Regex.Matches(solutions, "dHex ").Count;
+                    // Chemical formulae for native
+                    dHexCount = Regex.Matches(solutions, "dHex ").Count;
                     if (dHexCount > 0)
                     {
                         chemicalFormulaeC += (dHexCount * 6);
@@ -2062,7 +2070,15 @@ namespace glycombo
                         chemicalFormulaeP += (phosCount);
                         solutionsUpdate = solutionsUpdate + "(Phos)" + Convert.ToString(phosCount) + " ";
                     }
-                    dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
+                    sulfCount = Regex.Matches(solutions, "Sulf ").Count;
+                    if (sulfCount > 0)
+                    {
+                        chemicalFormulaeH += (sulfCount);
+                        chemicalFormulaeO += (sulfCount * 3);
+                        chemicalFormulaeP += (sulfCount);
+                        solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
+                    }
+                        dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
                     if (dhexnacCount > 0)
                     {
                         chemicalFormulaeC += (dhexnacCount * 8);

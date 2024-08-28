@@ -10,17 +10,6 @@
                 <ui:ThemeResources />
                 <ui:XamlControlsResources />
             </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="heading" TargetType="Label">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="FontWeight" Value="bold" />
-            </Style>
-            <Style x:Key="subheading" TargetType="Label">
-                <Setter Property="FontSize" Value="12" />
-                <Setter Property="FontWeight" Value="bold" />
-            </Style>
-			<Style x:Key="monosaccharides" TargetType="Label">
-			<Setter Property="FontSize" Value="10" />
-			</Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
