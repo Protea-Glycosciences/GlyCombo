@@ -321,6 +321,8 @@
                     <CheckBox x:Name="positiveMNH4CheckBox" Content="[M+NH₄]⁺" Margin="693,151,0,0" VerticalAlignment="Top" Width="97" MinWidth="40"/>
                     <Label Content="Advanced searching" HorizontalAlignment="Left" Margin="489,316,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
                     <TextBlock x:Name="advancedSearchingText" Margin="489,335,0,0" TextWrapping="Wrap" Text="Searches the mass list twice: once for the correct monoisotopic mass, and once for the M+1. (e.g. the case of 1x NeuAc vs 2x Fucose). Doubles search time." MaxHeight="100" HorizontalAlignment="Left" Width="293" Height="82" VerticalAlignment="Top"/>
+                    <Label Grid.Row="0" Margin="404,10,0,423" HorizontalAlignment="Left" Width="76" Content="Maximum" FontSize="14" Padding="0,0,0,0" FontWeight="Bold"/>
+                    <Label Grid.Row="0" Margin="335,10,0,423" HorizontalAlignment="Left" Width="67" Content="Minimum" FontSize="14" Padding="0,0,0,0" FontWeight="Bold"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Custom">
