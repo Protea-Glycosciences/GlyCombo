@@ -2640,18 +2640,6 @@ namespace glycombo
                         retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(index));
                         TICForOutput = Convert.ToString(TICs.ElementAt(index));
                         FileForOutput = Convert.ToString(files.ElementAt(index));
-
-                        // OffByOne error essentially doubles the target list, need to ensure that we can assign metadata to the +1 targets (otherwise it tries to call metadata from a limited list)
-                        if (offByOneChecked == true)
-                        {
-                            // Repeat the logic based on the condition
-                            index = (i + 1) % scans.Count;
-                            scanNumberForOutput = Convert.ToString(scans.ElementAt(index));
-                            chargeForOutput = Convert.ToString(charges.ElementAt(index));
-                            retentionTimeForOutput = Convert.ToString(retentionTimes.ElementAt(index));
-                            TICForOutput = Convert.ToString(TICs.ElementAt(index));
-                            FileForOutput = Convert.ToString(files.ElementAt(index));
-                        }
                     }
 
                     // Adding of each string component to output
