@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:glycombo"
         mc:Ignorable="d"
-        Title="GlyCombo 1.0 - Protea Glycosciences" Height="517" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="320" MinWidth="800" Background="#FFE0E0E0" FontFamily="Arial Black" FontSize="20">
+        Title="GlyCombo 1.0 - Protea Glycosciences" Height="517" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="320" MinWidth="800" Background="#FFE0E0E0" FontFamily="Arial Black" FontSize="20" ResizeMode="NoResize">
 
 
     <Grid x:Name="tabBackground" Margin="3,3,7,0" RenderTransformOrigin="0,0" Height="484" VerticalAlignment="Top">
@@ -28,8 +28,8 @@
                             <GradientStop Color="White" Offset="1"/>
                         </LinearGradientBrush>
                     </Grid.Background>
-                    <Image Source="/Final Logo.png" RenderTransformOrigin="1.183,-0.166" HorizontalAlignment="Left" Width="76" Height="78" VerticalAlignment="Top" Margin="526,343,0,0"/>
-                    <TextBlock Margin="534,416,198,0" FontSize="16" FontWeight="Bold" Height="36" VerticalAlignment="Top">
+                    <Image Source="/Final Logo.png" RenderTransformOrigin="1.183,-0.166" HorizontalAlignment="Left" Width="47" Height="46" VerticalAlignment="Top" Margin="537,375,0,0"/>
+                    <TextBlock Margin="531,418,207,0" FontSize="16" FontWeight="Bold" Height="36" VerticalAlignment="Top">
             <Hyperlink NavigateUri="https://github.com/Protea-Glycosciences/GlyCombo" RequestNavigate="Hyperlink_RequestNavigate">
         Support
             </Hyperlink>
@@ -172,6 +172,7 @@
                     <TextBlock x:Name="currentAdductSelectionInfo" Margin="346,285,0,0" TextWrapping="Wrap" Text="Adducts:" MaxHeight="100" HorizontalAlignment="Left" Width="432" Height="52" VerticalAlignment="Top"/>
                     <Button x:Name="executeExample" Content="Example" Margin="15,37,0,0" Visibility="Visible" VerticalAlignment="Top" Click="executeExample_Click" Background="#87bd81"/>
                     <TextBox x:Name="mzMLFileNamesBlock" Margin="15,84,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" Text="" MaxHeight="100" HorizontalAlignment="Left" Width="297" Height="100" VerticalAlignment="Top" Visibility="Collapsed" Background="{x:Null}" BorderBrush="#FFE5E5E5" IsReadOnly="True" FontSize="12"/>
+                    <TextBlock Margin="519,349,195,0" FontSize="16" FontWeight="Bold" Height="36" VerticalAlignment="Top"><Hyperlink NavigateUri="https://doi.org/10.1021/jasms.4c00188" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="Publication"/></Hyperlink></TextBlock>
                 </Grid>
             </TabItem>
             <TabItem Header="Advanced">
@@ -446,6 +447,7 @@
                     <Image HorizontalAlignment="Right" Margin="0,0,10,15" VerticalAlignment="Bottom" Width="400" Source="/Composition_to_MS.tiff" UseLayoutRounding="True"/>
                     <TextBlock x:Name="documentationText2" Margin="15,228,434,0" TextWrapping="Wrap" Text="TextBlock" MaxHeight="400" Height="213" VerticalAlignment="Top"/>
                     <Label Content="User Input" HorizontalAlignment="Left" Margin="15,204,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <TextBlock Margin="544,186,164,0" FontSize="16" FontWeight="Bold" Height="36" VerticalAlignment="Top"><Hyperlink NavigateUri="https://doi.org/10.1021/jasms.4c00188" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="Publication"/></Hyperlink></TextBlock>
                 </Grid>
             </TabItem>
         </TabControl>
