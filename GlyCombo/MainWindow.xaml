@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:glycombo"
         mc:Ignorable="d"
-        Title="GlyCombo 1.0 - Protea Glycosciences" Height="517" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="320" MinWidth="800" Background="#FFE0E0E0" FontFamily="Arial Black" FontSize="20" ResizeMode="NoResize">
+        Title="GlyCombo 1.1 - Protea Glycosciences" Height="517" Width="800" Icon="/GlyCombo_Logo_Final.png" MinHeight="320" MinWidth="800" Background="#FFE0E0E0" FontFamily="Arial Black" FontSize="20" ResizeMode="NoResize">
 
 
     <Grid x:Name="tabBackground" Margin="3,3,7,0" RenderTransformOrigin="0,0" Height="484" VerticalAlignment="Top">

@@ -2126,10 +2126,10 @@ namespace glycombo
                     acetylCount = Regex.Matches(solutions, "acetyl ").Count;
                     if (acetylCount > 0)
                     {
-                        chemicalFormulaeC += (dhexnacCount * 2);
-                        chemicalFormulaeH += (dhexnacCount * 2);
-                        chemicalFormulaeO += (dhexnacCount * 1);
-                        solutionsUpdate = solutionsUpdate + "(acetyl)" + Convert.ToString(acetylCount) + " ";
+                        chemicalFormulaeC += (acetylCount * 2);
+                        chemicalFormulaeH += (acetylCount * 2);
+                        chemicalFormulaeO += (acetylCount * 1);
+                        solutionsUpdate = solutionsUpdate + "(Acetyl)" + Convert.ToString(acetylCount) + " ";
                     }
                     lNeuGcCount = Regex.Matches(solutions, "lneugc ").Count;
                     if (lNeuGcCount > 0)
