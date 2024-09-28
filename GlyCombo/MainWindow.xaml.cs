@@ -1026,7 +1026,7 @@ namespace glycombo
                             retentionTime = decimal.Parse(RTLine[7]) / 60;
                         }
                         else
-                        // whereas Thermo/Sciex records RT by the minute
+                        // whereas Thermo/Sciex/Waters records RT by the minute
                         {
                             // split the line containing this by "
                             RTLine = line.Split("\"");
@@ -1060,10 +1060,18 @@ namespace glycombo
                         // After the 7th ", that's where the charge can be found, so convert it from string array into int
                         charge = int.Parse(chargeLine[7]);
                     }
+                    // Waters lines sometimes contain offsets with scan numbers outside of the spectra sections, so this is to ignore those lines
+                    if (line.Contains("offset idRef="))
+                    {
+                        continue;
+                    }
+
                     // find lines containing the scan number
                     if (line.Contains("scan=")
-                        // To ensure we don't pick up the Thermo spectrum title
-                        && line.Contains("defaultArrayLength"))
+                    // To ensure we don't pick up the Thermo spectrum title
+                        && line.Contains("defaultArrayLength")
+                        // To ensure we don't pick up the Waters ms scans
+                        && !line.Contains("function="))
                     {
                         // split the line containing this by "
                         scanLine = line.Split("\"");
@@ -1078,6 +1086,37 @@ namespace glycombo
                             scanNumber = scanLine[3].Replace("scan=", "");
                         }
                     }
+
+                    // Waters specific scan number interpretation, sometimes merged scans occur so we need to account for those as well
+                    if (line.Contains("function=")
+                        && line.Contains(" process=")
+                        && line.Contains("defaultArrayLength"))
+                    {
+                        //split the line containing scan number by =
+                        scanLine = line.Split("=");
+                        // If we convert without scan summing (e.g. MSConvert), we only have individual "spectrum" lists rather than combined "spectra". This selects for MSConvert output
+                        if (!line.Contains(" spectrum=")
+                            && !line.Contains(" spectra="))
+                        {
+                            // Scan # is after the 5th "="
+                            scanNumber = scanLine[5].Replace("\" defaultArrayLength", "");
+                        }
+                        else
+                        // This is for Waters DataConnect output where spectra can be merged (or unmerged).
+                        {
+                            if (line.Contains("merged"))
+                            {
+                                // Scan # is after the 7th "="
+                                scanNumber = scanLine[7].Replace("\" defaultArrayLength", "");
+                            }
+                            else
+                            {
+                                // Scan # is after the 6th "=" as it is a single spectrum
+                                scanNumber = scanLine[6].Replace("\" defaultArrayLength", "");
+                            }
+                        }
+
+                    }
                     // Sciex specific scan number interpretation
                     if (line.Contains(" cycle=")
                         && line.Contains(" experiment=")
@@ -1090,6 +1129,8 @@ namespace glycombo
                         string experimentScan = scanLine[6].Replace("\" defaultArrayLength", "");
                         scanNumber = cycleScan + experimentScan;
                     }
+
+                    // Wrapping everything together to form a neutral precursor mass, only if requirements are met
                     if (line.Contains("</spectrum>"))
                     {
                         if (precursor != 0 && charge != 0)
