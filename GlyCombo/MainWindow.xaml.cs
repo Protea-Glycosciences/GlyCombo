@@ -2114,9 +2114,8 @@ namespace glycombo
                     sulfCount = Regex.Matches(solutions, "Sulf ").Count;
                     if (sulfCount > 0)
                     {
-                        chemicalFormulaeH += (sulfCount);
                         chemicalFormulaeO += (sulfCount * 3);
-                        chemicalFormulaeP += (sulfCount);
+                        chemicalFormulaeS += (sulfCount);
                         solutionsUpdate = solutionsUpdate + "(Sulf)" + Convert.ToString(sulfCount) + " ";
                     }
                         dhexnacCount = Regex.Matches(solutions, "dHexNAc ").Count;
