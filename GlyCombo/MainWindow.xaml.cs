@@ -1004,7 +1004,7 @@ namespace glycombo
                     // Sciex doesn't use scan #, so we've adapted cycle and experiment number to make (X.Y) representation instead
                     // Code modified to perform this per spectrum, rather than trying to hard code by line positions
 
-                    // find lines containing positive or negative mode
+                    // find lines containing positive or negative mode, all vendors follow this requirement
                     if (line.Contains("MS:1000129"))
                     {
                         polarity = "negative";
@@ -1026,7 +1026,7 @@ namespace glycombo
                             retentionTime = decimal.Parse(RTLine[7]) / 60;
                         }
                         else
-                        // whereas Thermo/Sciex/Waters records RT by the minute
+                        // whereas Thermo/Sciex/Waters/Agilent records RT by the minute
                         {
                             // split the line containing this by "
                             RTLine = line.Split("\"");
@@ -1035,7 +1035,7 @@ namespace glycombo
                         }
                     }
 
-                    // find lines containing total ion chromatogram intensity for that scan, only supported by Thermo and Sciex
+                    // find lines containing total ion chromatogram intensity for that scan, only supported by Agilent, Thermo, Sciex, and Waters
                     if (line.Contains("MS:1000285"))
                     {
                         // split the line containing this by "
@@ -1052,7 +1052,7 @@ namespace glycombo
                         // After the 7th ", that's where the precursor m/z can be found, so convert it from string array into decimal for accuracy
                         precursor = Math.Round(decimal.Parse(precursorLine[7]), 6);
                     }
-                    // find lines containing the charge
+                    // find lines containing the charge. Some vendors need this to be added via MSConvert as they don't automatically provide a charge state
                     if (line.Contains("\"charge state\""))
                     {
                         // split the line containing this by "
@@ -1071,7 +1071,9 @@ namespace glycombo
                     // To ensure we don't pick up the Thermo spectrum title
                         && line.Contains("defaultArrayLength")
                         // To ensure we don't pick up the Waters ms scans
-                        && !line.Contains("function="))
+                        && !line.Contains("function=")
+                        // To ensure we don't pick up the Agilent ms scans
+                        && !line.Contains("id=\"scanId"))
                     {
                         // split the line containing this by "
                         scanLine = line.Split("\"");
@@ -1087,10 +1089,21 @@ namespace glycombo
                         }
                     }
 
+                    // Agilent specific scan number interpreation, since they use structure of: id="scanId=4620"
+                    if (line.Contains("id=\"scanId")
+                    && line.Contains("defaultArrayLength"))
+                    {
+                        //split the line containing scan number by =
+                        scanLine = line.Split("=");
+                        // Scan # is after the 3rd "="
+                        scanNumber = scanLine[3].Replace("\" defaultArrayLength", "");
+                        Debug.WriteLine(scanNumber);
+                    }
+
                     // Waters specific scan number interpretation, sometimes merged scans occur so we need to account for those as well
                     if (line.Contains("function=")
-                        && line.Contains(" process=")
-                        && line.Contains("defaultArrayLength"))
+                    && line.Contains(" process=")
+                    && line.Contains("defaultArrayLength"))
                     {
                         //split the line containing scan number by =
                         scanLine = line.Split("=");
@@ -1117,6 +1130,7 @@ namespace glycombo
                         }
 
                     }
+
                     // Sciex specific scan number interpretation
                     if (line.Contains(" cycle=")
                         && line.Contains(" experiment=")
