@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="GlyCombo.exe" version="1.1.0.1" publicKeyToken="b21c4dcddca0323e" language="neutral" processorArchitecture="msil" type="win32" />
+  <description asmv2:iconFile="GlyCombo_Logo_Final.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="Launcher" version="8.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="Launcher.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the
+          requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+         If you want to utilize File and Registry Virtualization for backward
+         compatibility then delete the requestedExecutionLevel node.
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Launcher.exe" size="17320">
+      <assemblyIdentity name="Launcher" version="8.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>aglAlUY4Qg4cbejKN8rTiPLnHFRavmQ0YnkMDh98YvM=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="GlyCombo.exe" size="32494760">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>qCO2pKXy1Jr9Axpd0xv5/hkSLrx2G7JLhJvbK3Phsyw=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="GlyCombo_Logo_Final.ico" size="170840">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>QcGsgSj2P4BNXo9XZ9hNtVD2W5AnrU28KzIg05bZ/wA=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN=CHRAS\chras" issuerKeyHash="f009ce6fe413f6e072a5a5e8057d5b1461a05df9" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>ME7SR6hbGqvGVoz9H5e0PxBB0O2WirBpko/uwAqSZoE=</DigestValue></Reference></SignedInfo><SignatureValue>lfJCwIkDyLxai3KU7fD5c9+xXhtyhTXlujvap/eWQcukGTyU+vR7Cyb1IqsWrTG0r402GeG59Y7e/O5efF1xRQcsBB/jn8AZ4BYngY43vYw5cWl/sNxDjQBnXfuEDm6UHg4xEttGbwRg3sPeQxI6w1AMwZClOfAiwLHfoTZiDOE=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>wUEG+rH1iiBzyDt6kujTF2Uipf1SyJ0ecLFE0N8SlFwVCQR7+5zw3ZlV23vi09iMOMXqdx7SNLVOKq0dEGh6ZQ7qfDQA++klCXz57bWNcjPJAchnM1wrAL4LP8+lWJmuOGL4lxdt52mcPjoawMNdFeBhncTprXVpd/nJHu4uO6k=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="8166920ac0ee8f9269b08a96edd041103fb4971ffd8c56c6ab1a5ba847d24e30" Description="" Url=""><as:assemblyIdentity name="GlyCombo.exe" version="1.1.0.1" publicKeyToken="b21c4dcddca0323e" language="neutral" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=CHRAS\chras</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>5dNJ3x2MgCM8Mip8xl72LeW5PWwRuf8kzzuK7tlD0qs=</DigestValue></Reference></SignedInfo><SignatureValue>VRK7TT2zbaTIbpBOd/Um6SWO7xEiyRVphNeuiCzjSDVRh/T7wMaFvEHcGJ7XNk0+M0KzG7DXoF6gGtS5qs+u0FxRj17IeOuX1U6daHR+7aC1GeeoGlcY/esj9K60gfLkbk8l3rjOwusJ+C9RBiA9e41n0DdCWn/HQQDv4D8LjmY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>wUEG+rH1iiBzyDt6kujTF2Uipf1SyJ0ecLFE0N8SlFwVCQR7+5zw3ZlV23vi09iMOMXqdx7SNLVOKq0dEGh6ZQ7qfDQA++klCXz57bWNcjPJAchnM1wrAL4LP8+lWJmuOGL4lxdt52mcPjoawMNdFeBhncTprXVpd/nJHu4uO6k=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIBxTCCAS6gAwIBAgIQPxGeM85p+p5Hae56Ig9RajANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDHhYAQwBIAFIAQQBTAFwAYwBoAHIAYQBzMB4XDTI0MDkxNjAyMDUxMVoXDTI1MDkxNjA4MDUxMVowITEfMB0GA1UEAx4WAEMASABSAEEAUwBcAGMAaAByAGEAczCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwUEG+rH1iiBzyDt6kujTF2Uipf1SyJ0ecLFE0N8SlFwVCQR7+5zw3ZlV23vi09iMOMXqdx7SNLVOKq0dEGh6ZQ7qfDQA++klCXz57bWNcjPJAchnM1wrAL4LP8+lWJmuOGL4lxdt52mcPjoawMNdFeBhncTprXVpd/nJHu4uO6kCAwEAATANBgkqhkiG9w0BAQsFAAOBgQAesDuGJ8PX2A3ofaxoVCQsk3reQfSUmcHVCKD1ec9sS3ioc0vlJVTlv92JOB3SDhY4WNU3Vwye2QDNt6PROOKDMEyFiakafCba7zL2SawaZJ21MtqQZKzC5ncqhRMhIE1lQI2XWyAypX7ecM5/74bnCcBHY4gR+xCHIF77+4AQxg==</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>
