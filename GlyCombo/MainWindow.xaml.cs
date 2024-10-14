@@ -331,7 +331,7 @@ namespace glycombo
             currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             UpdateAdductTextBox();
             currentAdductSelectionInfo.Text = currentAdductSelection.Replace("<", "").Replace(">", ":");
-            string saveOutput = "## GlyCombo v0.7 search settings" + Environment.NewLine;
+            string saveOutput = "## GlyCombo v1.1 search settings" + Environment.NewLine;
             saveOutput += "<Input> " + inputChecked + Environment.NewLine;
             saveOutput += "<Error tolerance> " + DaError.Text + "," + massErrorType + Environment.NewLine;
             saveOutput += "<Reducing end> " + reducingEndBox.Text + Environment.NewLine;
@@ -1097,7 +1097,6 @@ namespace glycombo
                         scanLine = line.Split("=");
                         // Scan # is after the 3rd "="
                         scanNumber = scanLine[3].Replace("\" defaultArrayLength", "");
-                        Debug.WriteLine(scanNumber);
                     }
 
                     // Waters specific scan number interpretation, sometimes merged scans occur so we need to account for those as well
@@ -1861,6 +1860,18 @@ namespace glycombo
             {
                 ProgressBarSubmit.Visibility = Visibility.Collapsed;
             }
+            solutionProcess = "";
+            targets.Clear();
+            numbers.Clear();
+            solutions = "";
+            solutionMultiples = "";
+            iterations = 0;
+            InputMasses.Text = "";
+            filePath = "";
+            inputChecked = "Text";
+            InputMasses.Text = "";
+            submitbutton.IsEnabled = false;
+            resetbutton.IsEnabled = true;
         }
         
         private void glyComboProcess()
@@ -1935,7 +1946,7 @@ namespace glycombo
 
             // Converting precursor list to series of strings for subsequent confirmation
             string combinedTargets = string.Join(Environment.NewLine, targets.ToArray());
-            string submitOutput = "## GlyCombo v0.7 search output" + Environment.NewLine;
+            string submitOutput = "## GlyCombo v1.1 search output" + Environment.NewLine;
             submitOutput += "<Input> " + inputChecked + Environment.NewLine;
             submitOutput += "<Error tolerance> " + errorTol + "," + massErrorType + Environment.NewLine;
             submitOutput += "<Reducing end> " + reducedEnd.ToString() + Environment.NewLine;
@@ -3258,6 +3269,8 @@ namespace glycombo
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             solutionProcess = "";
+            targets.Clear();
+            numbers.Clear();
             solutions = "";
             solutionMultiples = "";
             iterations = 0;
