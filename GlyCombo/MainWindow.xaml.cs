@@ -1189,7 +1189,7 @@ namespace glycombo
             }
             if (scans.Count == 0)
             {
-                MessageBox.Show("No MS2 found in the given mzML file. Please confirm the selected file has MS2 scans, or select a different file.");
+                MessageBox.Show("No MS2 found in the given mzML file, or MS2 charge states are missing. Please confirm the selected file has MS2 scans with assigned charge states, or select a different file.");
             }
             else
             {
