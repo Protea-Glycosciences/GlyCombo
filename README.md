@@ -38,7 +38,7 @@ Citation
 --------
 Please cite:
 
-*Kelly MI, Ashwood C. GlyCombo enables rapid, complete glycan composition identification across diverse glycomic sample types. ChemRxiv. 2024; doi:10.26434/chemrxiv-2024-3j008  This content is a preprint and has not been peer-reviewed.*
+*Kelly MI, Ashwood C. GlyCombo enables rapid, complete glycan composition identification across diverse glycomic sample types. J. Am. Soc. Mass Spectrom. 2024; [https://doi.org/10.1021/jasms.4c00188](https://doi.org/10.1021/jasms.4c00188)*
 
 Licence
 -------
