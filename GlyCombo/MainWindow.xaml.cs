@@ -25,6 +25,7 @@ using System.Reflection.Metadata;
 using System.Collections;
 using System.Security.Policy;
 using System.Runtime.ConstrainedExecution;
+using System.Globalization;
 
 namespace glycombo
 {
@@ -331,7 +332,7 @@ namespace glycombo
             currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             UpdateAdductTextBox();
             currentAdductSelectionInfo.Text = currentAdductSelection.Replace("<", "").Replace(">", ":");
-            string saveOutput = "## GlyCombo v1.1 search settings" + Environment.NewLine;
+            string saveOutput = "## GlyCombo v1.2 search settings" + Environment.NewLine;
             saveOutput += "<Input> " + inputChecked + Environment.NewLine;
             saveOutput += "<Error tolerance> " + DaError.Text + "," + massErrorType + Environment.NewLine;
             saveOutput += "<Reducing end> " + reducingEndBox.Text + Environment.NewLine;
@@ -525,7 +526,7 @@ namespace glycombo
                         string result = line.Replace("<CustomMono2> ", string.Empty);
                         string[] MonoSplitLine2 = result.Split(',');
                         customMonoNameBox2.Text = MonoSplitLine2[0];
-                        customMonoMassBox2.Text = MonoSplitLine2[2];
+                        customMonoMassBox2.Text = MonoSplitLine2[1];
                         customMonoCBox2.Text = MonoSplitLine2[2];
                         customMonoHBox2.Text = MonoSplitLine2[3];
                         customMonoNBox2.Text = MonoSplitLine2[4];
@@ -1023,7 +1024,7 @@ namespace glycombo
                             // split the line containing this by "
                             RTLine = line.Split("\"");
                             // After the 7th ", that's where the charge can be found, so convert it from string array into int
-                            retentionTime = decimal.Parse(RTLine[7]) / 60;
+                            retentionTime = decimal.Parse(RTLine[7], new CultureInfo("en-US")) / 60;
                         }
                         else
                         // whereas Thermo/Sciex/Waters/Agilent records RT by the minute
@@ -1031,7 +1032,7 @@ namespace glycombo
                             // split the line containing this by "
                             RTLine = line.Split("\"");
                             // After the 7th ", that's where the charge can be found, so convert it from string array into int
-                            retentionTime = decimal.Parse(RTLine[7]);
+                            retentionTime = decimal.Parse(RTLine[7], new CultureInfo("en-US"));
                         }
                     }
 
@@ -1041,7 +1042,7 @@ namespace glycombo
                         // split the line containing this by "
                         TICLine = line.Split("\"");
                         // After the 7th ", that's where the charge can be found, so convert it from string array into int
-                        TIC = decimal.Parse(TICLine[7], System.Globalization.NumberStyles.AllowExponent | System.Globalization.NumberStyles.AllowDecimalPoint);
+                        TIC = decimal.Parse(TICLine[7], System.Globalization.NumberStyles.AllowExponent | System.Globalization.NumberStyles.AllowDecimalPoint, new CultureInfo("en-US"));
                     }
 
                     // find lines containing the precursor
@@ -1050,7 +1051,7 @@ namespace glycombo
                         // split the line containing this by "
                         precursorLine = line.Split("\"");
                         // After the 7th ", that's where the precursor m/z can be found, so convert it from string array into decimal for accuracy
-                        precursor = Math.Round(decimal.Parse(precursorLine[7]), 6);
+                        precursor = Math.Round(decimal.Parse(precursorLine[7], new CultureInfo("en-US")), 6);
                     }
                     // find lines containing the charge. Some vendors need this to be added via MSConvert as they don't automatically provide a charge state
                     if (line.Contains("\"charge state\""))
@@ -1115,6 +1116,9 @@ namespace glycombo
                         }
                         else
                         // This is for Waters DataConnect output where spectra can be merged (or unmerged).
+                        // New problem, for Waters DataConnect (V2.1) applied to Kolher dataset myself, the scans are described in a completely different way
+                        // E.g. <spectrum index="404" id="merged=404 function=2 process=0 scans=1-2" defaultArrayLength="346">
+                        // This means that the "scans" is not suitable as an identifier since it's not an integer
                         {
                             if (line.Contains("merged"))
                             {
@@ -1162,7 +1166,7 @@ namespace glycombo
                                     break;
                             }
                             // Put the scan value into a list of scan numbers that feature MS2.
-                            scans.Add(decimal.Parse(scanNumber));
+                            scans.Add(decimal.Parse(scanNumber, new CultureInfo("en-US")));
                             // Adds charge to a list for the end report
                             charges.Add(charge);
                             // Add RT to a list for the end report
@@ -1185,7 +1189,7 @@ namespace glycombo
             }
             if (scans.Count == 0)
             {
-                MessageBox.Show("No MS2 found in the given mzML file. Please confirm the selected file has MS2 scans, or select a different file.");
+                MessageBox.Show("No MS2 found in the given mzML file, or MS2 charge states are missing. Please confirm the selected file has MS2 scans with assigned charge states, or select a different file.");
             }
             else
             {
@@ -1224,7 +1228,7 @@ namespace glycombo
             {
                 // Extract out all the custom monosaccharide information for 1
                 customMono1Name = customMonoNameBox1.Text;
-                customMono1Mass = decimal.Parse(customMonoMassBox1.Text);
+                customMono1Mass = decimal.Parse(customMonoMassBox1.Text, new CultureInfo("en-US"));
                 customMono1CCount = int.Parse(customMonoCBox1.Text);
                 customMono1HCount = int.Parse(customMonoHBox1.Text);
                 customMono1NCount = int.Parse(customMonoNBox1.Text);
@@ -1236,7 +1240,7 @@ namespace glycombo
             {
                 // Extract out all the custom monosaccharide information for 2
                 customMono2Name = customMonoNameBox2.Text;
-                customMono2Mass = decimal.Parse(customMonoMassBox2.Text);
+                customMono2Mass = decimal.Parse(customMonoMassBox2.Text, new CultureInfo("en-US"));
                 customMono2CCount = int.Parse(customMonoCBox2.Text);
                 customMono2HCount = int.Parse(customMonoHBox2.Text);
                 customMono2NCount = int.Parse(customMonoNBox2.Text);
@@ -1248,7 +1252,7 @@ namespace glycombo
             {
                 // Extract out all the custom monosaccharide information for 3
                 customMono3Name = customMonoNameBox3.Text;
-                customMono3Mass = decimal.Parse(customMonoMassBox3.Text);
+                customMono3Mass = decimal.Parse(customMonoMassBox3.Text, new CultureInfo("en-US"));
                 customMono3CCount = int.Parse(customMonoCBox3.Text);
                 customMono3HCount = int.Parse(customMonoHBox3.Text);
                 customMono3NCount = int.Parse(customMonoNBox3.Text);
@@ -1260,7 +1264,7 @@ namespace glycombo
             {
                 // Extract out all the custom monosaccharide information for 4
                 customMono4Name = customMonoNameBox4.Text;
-                customMono4Mass = decimal.Parse(customMonoMassBox4.Text);
+                customMono4Mass = decimal.Parse(customMonoMassBox4.Text, new CultureInfo("en-US"));
                 customMono4CCount = int.Parse(customMonoCBox4.Text);
                 customMono4HCount = int.Parse(customMonoHBox4.Text);
                 customMono4NCount = int.Parse(customMonoNBox4.Text);
@@ -1272,7 +1276,7 @@ namespace glycombo
             {
                 // Extract out all the custom monosaccharide information for 5
                 customMono5Name = customMonoNameBox5.Text;
-                customMono5Mass = decimal.Parse(customMonoMassBox5.Text);
+                customMono5Mass = decimal.Parse(customMonoMassBox5.Text, new CultureInfo("en-US"));
                 customMono5CCount = int.Parse(customMonoCBox5.Text);
                 customMono5HCount = int.Parse(customMonoHBox5.Text);
                 customMono5NCount = int.Parse(customMonoNBox5.Text);
@@ -1473,12 +1477,12 @@ namespace glycombo
                 targetStrings = new(
                     targetString.Split(new string[] { "\n" },
                     StringSplitOptions.RemoveEmptyEntries));
-                targets = targetStrings.ConvertAll(decimal.Parse);
+                targets = targetStrings.ConvertAll(s => decimal.Parse(s, new CultureInfo("en-US")));
 
                 // Adduct calculation
                 // This can result in huge combinatorial searches but it's there for the user as an option
                 // if mzml input used, force M+H and M-H, then let the user add on other adducts (problem with this is that positive mode will have negative adducts etc)
-               
+
                 // Only trigger this if something other than M is selected
                 if (negativeMHCheckBox.IsChecked == true ||
                     negativeMFACheckBox.IsChecked == true ||
@@ -1946,7 +1950,7 @@ namespace glycombo
 
             // Converting precursor list to series of strings for subsequent confirmation
             string combinedTargets = string.Join(Environment.NewLine, targets.ToArray());
-            string submitOutput = "## GlyCombo v1.1 search output" + Environment.NewLine;
+            string submitOutput = "## GlyCombo v1.2 search output" + Environment.NewLine;
             submitOutput += "<Input> " + inputChecked + Environment.NewLine;
             submitOutput += "<Error tolerance> " + errorTol + "," + massErrorType + Environment.NewLine;
             submitOutput += "<Reducing end> " + reducedEnd.ToString() + Environment.NewLine;
