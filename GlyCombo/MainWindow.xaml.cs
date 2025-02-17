@@ -332,7 +332,7 @@ namespace glycombo
             currentMonosaccharideSelectionInfo.Text = currentMonosaccharideSelection.Replace("<", "").Replace(">", ":");
             UpdateAdductTextBox();
             currentAdductSelectionInfo.Text = currentAdductSelection.Replace("<", "").Replace(">", ":");
-            string saveOutput = "## GlyCombo v1.1 search settings" + Environment.NewLine;
+            string saveOutput = "## GlyCombo v1.2 search settings" + Environment.NewLine;
             saveOutput += "<Input> " + inputChecked + Environment.NewLine;
             saveOutput += "<Error tolerance> " + DaError.Text + "," + massErrorType + Environment.NewLine;
             saveOutput += "<Reducing end> " + reducingEndBox.Text + Environment.NewLine;
@@ -1950,7 +1950,7 @@ namespace glycombo
 
             // Converting precursor list to series of strings for subsequent confirmation
             string combinedTargets = string.Join(Environment.NewLine, targets.ToArray());
-            string submitOutput = "## GlyCombo v1.1 search output" + Environment.NewLine;
+            string submitOutput = "## GlyCombo v1.2 search output" + Environment.NewLine;
             submitOutput += "<Input> " + inputChecked + Environment.NewLine;
             submitOutput += "<Error tolerance> " + errorTol + "," + massErrorType + Environment.NewLine;
             submitOutput += "<Reducing end> " + reducedEnd.ToString() + Environment.NewLine;
