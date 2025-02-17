@@ -526,7 +526,7 @@ namespace glycombo
                         string result = line.Replace("<CustomMono2> ", string.Empty);
                         string[] MonoSplitLine2 = result.Split(',');
                         customMonoNameBox2.Text = MonoSplitLine2[0];
-                        customMonoMassBox2.Text = MonoSplitLine2[2];
+                        customMonoMassBox2.Text = MonoSplitLine2[1];
                         customMonoCBox2.Text = MonoSplitLine2[2];
                         customMonoHBox2.Text = MonoSplitLine2[3];
                         customMonoNBox2.Text = MonoSplitLine2[4];
